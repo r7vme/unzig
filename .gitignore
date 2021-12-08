@@ -1,6 +1,7 @@
 zig-cache
 unzig
 build
+tmp
 
 # Prerequisites
 *.d
