@@ -5,8 +5,7 @@
 
 enum class TokenId {
   Eof,
-  Float,
-  Integer,
+  Number,
   Identifier,
   Asterisk,
   Colon,
@@ -30,5 +29,7 @@ struct Token {
 
   friend std::ostream &operator<<(std::ostream &os, const Token &o);
 };
+
+bool operator==(const Token& lhs, const Token& rhs);
 
 std::vector<Token> tokenize(const std::string &in);

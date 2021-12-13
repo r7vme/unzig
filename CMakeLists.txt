@@ -1,11 +1,14 @@
 cmake_minimum_required(VERSION 3.10)
 project(unzig)
 
-find_package(LLVM REQUIRED CONFIG)
-find_package(Catch2 2 REQUIRED)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(unzigc src/main.cpp src/tokenizer.cpp)
+find_package(LLVM REQUIRED CONFIG)
+add_subdirectory(third_party/Catch2)
+
+add_library(unzig src/tokenizer.cpp)
+target_include_directories(unzig PUBLIC src)
 
 # tests
-add_executable(tests test/test.cpp)
-target_link_libraries(tests Catch2::Catch2)
+add_executable(tests test/test_tokenizer.cpp)
+target_link_libraries(tests PRIVATE unzig Catch2::Catch2WithMain)

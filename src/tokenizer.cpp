@@ -1,5 +1,6 @@
 #include <cassert>
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <string>
 #include <vector>
@@ -19,12 +20,14 @@
 #define SEMICOLON ';'
 #define SLASH '/'
 
+#define DOT '.'
+
 #define KW_FN "fn"
 #define KW_PUB "pub"
 #define KW_RETURN "return"
 #define KW_VAR "var"
 
-#define SPECIAL_CHARS \
+#define SINGLE_CHAR_TOKENS \
   ASTERISK: \
   case COLON: \
   case EQUAL: \
@@ -113,9 +116,10 @@
   case DIGIT
 
 #define KNOWN_CHARS \
-  SPECIAL_CHARS: \
+  SINGLE_CHAR_TOKENS: \
   case WHITESPACE: \
   case ALPHA: \
+  case DOT: \
   case DIGIT
 // clang-format on
 
@@ -152,8 +156,7 @@ static std::string getTokenIdName(TokenId id) {
   // clang-format off
   switch (id) {
   case TokenId::Eof: return "Eof";
-  case TokenId::Float: return "Float";
-  case TokenId::Integer: return "Integer";
+  case TokenId::Number: return "Number";
   case TokenId::Identifier: return "Identifier";
   case TokenId::Asterisk: return "Asterisk";
   case TokenId::Colon: return "Colon";
@@ -177,6 +180,10 @@ static std::string getTokenIdName(TokenId id) {
 
 std::ostream &operator<<(std::ostream &os, const Token &o) {
   return os << getTokenIdName(o.id);
+}
+
+bool operator==(const Token &lhs, const Token &rhs) {
+  return (lhs.id == rhs.id);
 }
 
 void fatal_error(const std::string &msg) {
@@ -226,8 +233,8 @@ std::vector<Token> tokenize(const std::string &in) {
   std::string identifierStr{};
   TokenizeState state{TokenizeState::Begin};
 
-  for (auto cur = std::begin(in); cur != std::end(in); ++cur) {
-    char c = *cur;
+  for (auto it = std::begin(in); it != std::end(in); ++it) {
+    char c = *it;
 
     if (!isKnownChar(c)) {
       fatal_error(std::string("unknown char ") + c);
@@ -235,16 +242,20 @@ std::vector<Token> tokenize(const std::string &in) {
 
     switch (state) {
     case TokenizeState::Begin:
+      identifierStr.clear();
       switch (c) {
       case WHITESPACE:
         break;
-      case SPECIAL_CHARS:
+      case SINGLE_CHAR_TOKENS:
         tokens.push_back(Token{getSpecialCharTokenId(c)});
         break;
       case ALPHA:
-        identifierStr.clear();
         identifierStr += c;
         state = TokenizeState::Identifier;
+        break;
+      case DIGIT:
+        identifierStr += c;
+        state = TokenizeState::Number;
         break;
       default:;
       }
@@ -254,16 +265,23 @@ std::vector<Token> tokenize(const std::string &in) {
       case ALPHA_DIGIT:
         identifierStr += c;
         break;
-      case WHITESPACE:
+      default:
         tokens.push_back(getKeywordOrIdentifierTokenFromString(identifierStr));
         state = TokenizeState::Begin;
+        std::advance(it, -1);
         break;
-      case SPECIAL_CHARS:
-        tokens.push_back(getKeywordOrIdentifierTokenFromString(identifierStr));
-        tokens.push_back(Token{getSpecialCharTokenId(c)});
+      }
+      break;
+    case TokenizeState::Number:
+      switch (c) {
+      case DOT:
+      case DIGIT:
+        identifierStr += c;
+        break;
+      default:
+        tokens.push_back(Token{TokenId::Number});
         state = TokenizeState::Begin;
-        break;
-      default:;
+        std::advance(it, -1);
       }
       break;
     default:;
