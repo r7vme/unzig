@@ -179,11 +179,11 @@ static std::string getTokenIdName(TokenId id) {
 }
 
 std::ostream &operator<<(std::ostream &os, const Token &o) {
-  return os << getTokenIdName(o.id);
+  return os << "Token ID: " << getTokenIdName(o.id) << ", Token Value: " << o.value;
 }
 
 bool operator==(const Token &lhs, const Token &rhs) {
-  return (lhs.id == rhs.id);
+  return (lhs.id == rhs.id) && (lhs.value == rhs.value);
 }
 
 void fatal_error(const std::string &msg) {
@@ -216,7 +216,7 @@ Token getKeywordOrIdentifierTokenFromString(const std::string &s) {
   if (isKeyword(s)) {
     return Token{getKeywordTokenId(s)};
   }
-  return Token{TokenId::Identifier};
+  return Token{TokenId::Identifier, s};
 }
 
 bool isKnownChar(char c) {
@@ -279,7 +279,7 @@ std::vector<Token> tokenize(const std::string &in) {
         identifierStr += c;
         break;
       default:
-        tokens.push_back(Token{TokenId::Number});
+        tokens.push_back(Token{TokenId::Number, identifierStr});
         state = TokenizeState::Begin;
         std::advance(it, -1);
       }

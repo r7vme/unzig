@@ -26,6 +26,7 @@ enum class TokenId {
 
 struct Token {
   TokenId id;
+  std::string value{};
 
   friend std::ostream &operator<<(std::ostream &os, const Token &o);
 };
