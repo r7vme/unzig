@@ -21,10 +21,10 @@ Statement
 # *** Expression Level ***
 AssignExpr <- Expr (AssignOp Expr)?
 
-Expr <- AdditionExpr
+Expr <- BinOpExpr
 
+BinOpExpr <- AdditionExpr
 AdditionExpr <- MultiplyExpr (AdditionOp MultiplyExpr)*
-
 MultiplyExpr <- PrimaryExpr (MultiplyOp PrimaryExpr)*
 
 PrimaryExpr
