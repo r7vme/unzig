@@ -26,7 +26,7 @@ pub fn main() void {
       Token{TokenId::LBrace},
       // foo block
       Token{TokenId::KwReturn},
-      Token{TokenId::Number, "1"},
+      Token{TokenId::Integer, "1"},
       Token{TokenId::Semicolon},
       // end foo block
       Token{TokenId::RBrace},
@@ -55,14 +55,14 @@ pub fn main() void {
       Token{TokenId::Colon},
       Token{TokenId::Identifier, "u64"},
       Token{TokenId::Equal},
-      Token{TokenId::Number, "123"},
+      Token{TokenId::Integer, "123"},
       Token{TokenId::Semicolon},
       // line 3
       Token{TokenId::Identifier, "y"},
       Token{TokenId::Equal},
-      Token{TokenId::Number, "1"},
+      Token{TokenId::Integer, "1"},
       Token{TokenId::Plus},
-      Token{TokenId::Number, "2"},
+      Token{TokenId::Integer, "2"},
       Token{TokenId::Semicolon},
       // end main block
       Token{TokenId::RBrace},

@@ -156,7 +156,8 @@ static std::string getTokenIdName(TokenId id) {
   // clang-format off
   switch (id) {
   case TokenId::Eof: return "Eof";
-  case TokenId::Number: return "Number";
+  case TokenId::Float: return "Float";
+  case TokenId::Integer: return "Integer";
   case TokenId::Identifier: return "Identifier";
   case TokenId::Asterisk: return "Asterisk";
   case TokenId::Colon: return "Colon";
@@ -179,7 +180,8 @@ static std::string getTokenIdName(TokenId id) {
 }
 
 std::ostream &operator<<(std::ostream &os, const Token &o) {
-  return os << "Token ID: " << getTokenIdName(o.id) << ", Token Value: " << o.value;
+  return os << "Token ID: " << getTokenIdName(o.id)
+            << ", Token Value: " << o.value;
 }
 
 bool operator==(const Token &lhs, const Token &rhs) {
@@ -279,7 +281,12 @@ std::vector<Token> tokenize(const std::string &in) {
         identifierStr += c;
         break;
       default:
-        tokens.push_back(Token{TokenId::Number, identifierStr});
+        bool isFloat = identifierStr.find(DOT) != std::string::npos;
+        if (isFloat) {
+          tokens.push_back(Token{TokenId::Float, identifierStr});
+        } else {
+          tokens.push_back(Token{TokenId::Integer, identifierStr});
+        }
         state = TokenizeState::Begin;
         std::advance(it, -1);
       }

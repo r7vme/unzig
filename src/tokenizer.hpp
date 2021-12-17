@@ -5,7 +5,8 @@
 
 enum class TokenId {
   Eof,
-  Number,
+  Float,
+  Integer,
   Identifier,
   Asterisk,
   Colon,
