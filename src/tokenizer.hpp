@@ -1,12 +1,13 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
 enum class TokenId {
   Eof,
-  Float,
-  Integer,
+  FloatLiteral,
+  IntegerLiteral,
   Identifier,
   Asterisk,
   Colon,
@@ -32,6 +33,9 @@ struct Token {
   friend std::ostream &operator<<(std::ostream &os, const Token &o);
 };
 
-bool operator==(const Token& lhs, const Token& rhs);
+using Tokens = std::vector<Token>;
+using TokenIndex = uint32_t;
 
-std::vector<Token> tokenize(const std::string &in);
+bool operator==(const Token &lhs, const Token &rhs);
+
+Tokens tokenize(const std::string &in);

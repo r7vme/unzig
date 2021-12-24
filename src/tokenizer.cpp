@@ -156,8 +156,8 @@ static std::string getTokenIdName(TokenId id) {
   // clang-format off
   switch (id) {
   case TokenId::Eof: return "Eof";
-  case TokenId::Float: return "Float";
-  case TokenId::Integer: return "Integer";
+  case TokenId::FloatLiteral: return "FloatLiteral";
+  case TokenId::IntegerLiteral: return "IntegerLiteral";
   case TokenId::Identifier: return "Identifier";
   case TokenId::Asterisk: return "Asterisk";
   case TokenId::Colon: return "Colon";
@@ -283,9 +283,9 @@ std::vector<Token> tokenize(const std::string &in) {
       default:
         bool isFloat = identifierStr.find(DOT) != std::string::npos;
         if (isFloat) {
-          tokens.push_back(Token{TokenId::Float, identifierStr});
+          tokens.push_back(Token{TokenId::FloatLiteral, identifierStr});
         } else {
-          tokens.push_back(Token{TokenId::Integer, identifierStr});
+          tokens.push_back(Token{TokenId::IntegerLiteral, identifierStr});
         }
         state = TokenizeState::Begin;
         std::advance(it, -1);
