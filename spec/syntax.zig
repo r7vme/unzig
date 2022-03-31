@@ -4,6 +4,6 @@ fn foo() u64 {
 
 pub fn main() void {
     var x: u64 = foo();
-    var y: u64 = 123 + (1 * 2);
+    var y: u64 = 123 + (1 * x);
     y = 1;
 }

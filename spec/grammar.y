@@ -4,8 +4,8 @@ Root <- skip TopLevelDeclarations eof
 TopLevelDeclarations <- KEYWORD_pub? TopLevelDecl TopLevelDeclarations*
 TopLevelDecl <- FnProto (SEMICOLON / Block)
              / VarDecl
-FnProto <- KEYWORD_fn IDENTIFIER? LPAREN RPAREN Type
-VarDecl <- KEYWORD_var IDENTIFIER COLON Type (EQUAL Expr)? SEMICOLON
+FnProto <- KEYWORD_fn IDENTIFIER? LPAREN RPAREN TypeExpr
+VarDecl <- KEYWORD_var IDENTIFIER COLON TypeExpr (EQUAL Expr)? SEMICOLON
 
 # *** Block Level ***
 Block <- LBRACE Statement* RBRACE
@@ -15,24 +15,21 @@ Statement <- VarDecl
 AssignSt <- Expr (AssignOp Expr)?
 
 # *** Expression Level ***
-Expr <- AdditionExpr
-AdditionExpr <- MultiplyExpr (AdditionOp MultiplyExpr)*
-MultiplyExpr <- PrimaryExpr (MultiplyOp PrimaryExpr)*
+Expr <- PrimaryExpr (BinaryOp PrimaryExpr)*
 PrimaryExpr <- GroupedExpr
-            / FnCall
-            / Var
-            / Number
-Var <- IDENTIFIER
-Number <- FLOAT
-       / INTEGER
-FnCall <- IDENTIFIER LPAREN RPAREN
-Type <- IDENTIFIER
+            / FnCallExpr
+            / VarExpr
+            / NumberExpr
 GroupedExpr <- LPAREN Expr RPAREN
+FnCallExpr <- IDENTIFIER LPAREN RPAREN
+VarExpr <- IDENTIFIER
+NumberExpr <- FLOAT
+           / INTEGER
+TypeExpr <- IDENTIFIER
 
 # Operators
 AssignOp <- EQUAL
-AdditionOp <- PLUS / MINUS
-MultiplyOp <- ASTERISK / SLASH
+BinaryOp <- PLUS / MINUS / ASTERISK / SLASH
 
 # *** Tokens ***
 eof <- !.
