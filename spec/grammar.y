@@ -1,60 +1,38 @@
 Root <- skip TopLevelDeclarations eof
 
 # *** Top level ***
-TopLevelDeclarations
-    <- KEYWORD_pub? TopLevelDecl TopLevelDeclarations
-     /
-
-TopLevelDecl
-    <- FnProto (SEMICOLON / Block)
-     / VarDecl
-
-FnProto <- KEYWORD_fn IDENTIFIER? LPAREN RPAREN TypeExpr
-
-VarDecl <- KEYWORD_var IDENTIFIER (COLON TypeExpr)? (EQUAL Expr)? SEMICOLON
+TopLevelDeclarations <- KEYWORD_pub? TopLevelDecl TopLevelDeclarations*
+TopLevelDecl <- FnProto (SEMICOLON / Block)
+             / VarDecl
+FnProto <- KEYWORD_fn IDENTIFIER? LPAREN RPAREN Type
+VarDecl <- KEYWORD_var IDENTIFIER COLON Type (EQUAL Expr)? SEMICOLON
 
 # *** Block Level ***
-Statement
-    <- VarDecl
-     / AssignExpr SEMICOLON
+Block <- LBRACE Statement* RBRACE
+Statement <- VarDecl
+          / AssignSt SEMICOLON
+          / KEYWORD_return Expr? SEMICOLON
+AssignSt <- Expr (AssignOp Expr)?
 
 # *** Expression Level ***
-AssignExpr <- Expr (AssignOp Expr)?
-
-Expr <- BinOpExpr
-
-BinOpExpr <- AdditionExpr
+Expr <- AdditionExpr
 AdditionExpr <- MultiplyExpr (AdditionOp MultiplyExpr)*
 MultiplyExpr <- PrimaryExpr (MultiplyOp PrimaryExpr)*
-
-PrimaryExpr
-    <- KEYWORD_return Expr?
-     / Block
-     / TypeExpr FnCallArguments*
-
-Block <- LBRACE Statement* RBRACE
-
-TypeExpr
-    <- FLOAT
-     / FnProto
-     / GroupedExpr
-     / IDENTIFIER
-     / INTEGER
-
+PrimaryExpr <- GroupedExpr
+            / FnCall
+            / Var
+            / Number
+Var <- IDENTIFIER
+Number <- FLOAT
+       / INTEGER
+FnCall <- IDENTIFIER LPAREN RPAREN
+Type <- IDENTIFIER
 GroupedExpr <- LPAREN Expr RPAREN
 
 # Operators
 AssignOp <- EQUAL
-
-AdditionOp
-    <- PLUS
-     / MINUS
-
-MultiplyOp
-    <- ASTERISK
-     / SLASH
-
-FnCallArguments <- LPAREN RPAREN
+AdditionOp <- PLUS / MINUS
+MultiplyOp <- ASTERISK / SLASH
 
 # *** Tokens ***
 eof <- !.
