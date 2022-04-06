@@ -1,15 +1,17 @@
+#include "parser.hpp"
 #include "tokenizer.hpp"
 
 #include <iostream>
 
 void processInput(const std::string &input) {
-  // tokenizer
   auto tokens = tokenize(input);
-  for (auto &t : tokens) {
-    std::cout << t << std::endl;
+  auto ast = parse(tokens);
+  // print LLVM IR
+  if (auto *code = ast->codegen()) {
+    std::cout << "==========" << std::endl;
+    code->print(llvm::errs());
+    std::cout << "\n==========" << std::endl;
   }
-
-  // parser
 }
 
 int main() {

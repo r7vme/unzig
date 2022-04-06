@@ -10,13 +10,11 @@ add_definitions(${LLVM_DEFINITIONS})
 
 include_directories(src)
 
-add_library(unzig src/tokenizer.cpp)
+add_library(unzig src/parser.cpp src/tokenizer.cpp)
+target_link_libraries(unzig PRIVATE LLVM)
 
-add_executable(parser src/parser.cpp)
-target_link_libraries(parser PRIVATE LLVM)
-
-add_executable(interpreter src/interpreter.cpp)
-target_link_libraries(interpreter unzig)
+add_executable(cmd src/cmd.cpp)
+target_link_libraries(cmd unzig)
 
 # tests
 add_subdirectory(third_party/Catch2)

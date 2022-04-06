@@ -76,3 +76,8 @@ pub fn main() void {
 
   REQUIRE(actualTokens == expectedTokens);
 }
+
+TEST_CASE("last char is part of identifier or number", "[tokenizer]") {
+  REQUIRE(tokenize("1") == Tokens{Token{TokenId::IntegerLiteral, "1"}});
+  REQUIRE(tokenize("foo") == Tokens{Token{TokenId::Identifier, "foo"}});
+}

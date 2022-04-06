@@ -235,8 +235,16 @@ std::vector<Token> tokenize(const std::string &in) {
   std::string identifierStr{};
   TokenizeState state{TokenizeState::Begin};
 
-  for (auto it = std::begin(in); it != std::end(in); ++it) {
-    char c = *it;
+  for (auto it = std::begin(in); it <= std::end(in); ++it) {
+    char c;
+
+    bool hasEndReached = (it == std::end(in));
+    if (hasEndReached) {
+      c = ' '; // extra whitespace lets wrap a token that can be in
+               // progress
+    } else {
+      c = *it;
+    }
 
     if (!isKnownChar(c)) {
       fatal_error(std::string("unknown char ") + c);
