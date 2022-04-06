@@ -1,81 +1,115 @@
 #include "tokenizer.hpp"
+#include "llvm/ADT/APInt.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Value.h"
+#include <cstdint>
+#include <iostream>
+#include <llvm/IR/Instruction.h>
+#include <llvm/Support/raw_ostream.h>
 #include <memory>
+#include <string>
 
-// Parse 1 + 1
+static std::unique_ptr<llvm::LLVMContext> llvmCxt;
+static std::unique_ptr<llvm::Module> llvmModule;
+static std::unique_ptr<llvm::IRBuilder<>> llvmIRBuilder;
 
-class AstNode {
+class Expr {
 public:
-  virtual ~AstNode() {}
+  virtual ~Expr() = default;
+  virtual llvm::Value *codegen() = 0;
 };
 
-// Emits constant int
-class IntegerNode : public AstNode {
+using ExprPtr = std::shared_ptr<Expr>;
+
+std::shared_ptr<Expr> LogError(const std::string& str) {
+  std::cerr << "error: " << str << std::endl;
+  return nullptr;
+}
+
+llvm::Value *LogErrorV(const std::string& str) {
+  LogError(str);
+  return nullptr;
+}
+
+class VarExpr : public Expr {
+  const std::string name;
+
+public:
+  VarExpr(const std::string &name) : name(name) {}
+
+  llvm::Value *codegen() override {
+    return nullptr;
+  };
+};
+
+class IntegerExpr : public Expr {
   const std::string value;
 
 public:
-  IntegerNode(double val) : val(val) {}
+  IntegerExpr(const std::string &value) : value(value) {}
+
+  llvm::Value *codegen() override {
+    return llvm::ConstantInt::get(*llvmCxt, llvm::APInt(32, value, 10));
+  };
 };
 
-//
-struct ParseContext {
-  std::shared_ptr<Tokens> tokens;
-  Tokens::iterator tokensCursor;
+enum BinaryOpType { ADD, SUB, MUL, DIV };
+
+class BinaryExpr : public Expr {
+  BinaryOpType type;
+  ExprPtr lhs;
+  ExprPtr rhs;
+
+public:
+  BinaryExpr(const BinaryOpType type, const ExprPtr lhs, const ExprPtr rhs)
+      : type(type), lhs(lhs), rhs(rhs) {}
+
+  llvm::Value *codegen() override {
+    auto *l = lhs->codegen();
+    auto *r = rhs->codegen();
+    if (!l || !r) {
+      return nullptr;
+    }
+
+    switch (type) {
+      case BinaryOpType::ADD:
+        return llvmIRBuilder->CreateAdd(l, r);
+      case BinaryOpType::SUB:
+        return llvmIRBuilder->CreateSub(l, r);
+      case BinaryOpType::MUL:
+        return llvmIRBuilder->CreateMul(l, r);
+      case BinaryOpType::DIV:
+        return llvmIRBuilder->CreateSDiv(l, r);
+    }
+
+    return nullptr;
+  };
 };
-
-static std::unique_ptr<AstNode> AstParseRoot(ParseContext &cxt) {
-  std::unique_ptr<AstNode> result{nullptr};
-
-  auto tokenId = (*cxt.tokensCursor).id;
-  auto tokenValue = (*cxt.tokensCursor).value;
-
-  switch (tokenId) {
-  case TokenId::Float:
-    result = std::make_unique<FloatExprAST>(std::stod(tokenValue));
-  case TokenId::Integer:
-    result = std::make_unique<FloatExprAST>(std::stod(tokenValue));
-  default:
-    break;
-  }
-
-  return result;
-}
-
-///// top ::= definition | external | expression | ';'
-//
-// static void MainLoop() {
-//  while (1) {
-//    fprintf(stderr, "ready> ");
-//    switch (CurTok) {
-//    case tok_eof:
-//      return;
-//    case ';': // ignore top-level semicolons.
-//      getNextToken();
-//      break;
-//    case tok_def:
-//      HandleDefinition();
-//      break;
-//    case tok_extern:
-//      HandleExtern();
-//      break;
-//    default:
-//      HandleTopLevelExpression();
-//      break;
-//    }
-//  }
-//}
 
 int main() {
-  auto tokensPtr = std::make_shared<Tokens>(Tokens{
-      Token{TokenId::Integer, "1"},
-      Token{TokenId::Plus},
-      Token{TokenId::Integer, "2"},
-  });
-  auto firstToken = tokensPtr->begin();
+  llvmCxt = std::make_unique<llvm::LLVMContext>();
+  llvmModule = std::make_unique<llvm::Module>("unzig", *llvmCxt);
+  llvmIRBuilder = std::make_unique<llvm::IRBuilder<>>(*llvmCxt);
 
-  ParseContext context;
-  context.tokens = tokensPtr;
-  context.tokensCursor = firstToken;
+  // 123 + (1 * 2);
+  ExprPtr onePlusTwo = std::make_shared<BinaryExpr>(
+    BinaryOpType::MUL,
+    std::make_shared<IntegerExpr>("1"),
+    std::make_shared<IntegerExpr>("2")
+  );
+  ExprPtr expr = std::make_shared<BinaryExpr>(
+    BinaryOpType::ADD,
+    std::make_shared<IntegerExpr>("123"),
+    onePlusTwo
+  );
+
+  if (auto *code = expr->codegen()) {
+    std::cout << "==========" << std::endl;
+    code->print(llvm::errs());
+    std::cout << "\n==========" << std::endl;
+  }
 
   return 0;
-  //
 }

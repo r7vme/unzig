@@ -3,6 +3,8 @@ unzig
 build
 tmp
 .cache
+llvmir/2
+llvmir/2.ll
 
 # Prerequisites
 *.d

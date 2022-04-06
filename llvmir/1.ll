@@ -5,9 +5,21 @@ target triple = "x86_64-pc-linux-gnu"
 
 ; Function Attrs: noinline nounwind optnone sspstrong uwtable
 define dso_local void @foo() #0 {
+  %1 = alloca double, align 8
+  %2 = alloca double, align 8
+  store double 1.000000e+00, double* %1, align 8
+  %3 = load double, double* %1, align 8
+  %4 = fadd double 1.000000e+00, %3
+  store double %4, double* %2, align 8
+  ret void
+}
+
+; Function Attrs: noinline nounwind optnone sspstrong uwtable
+define dso_local i32 @main() #0 {
   %1 = alloca i32, align 4
   store i32 0, i32* %1, align 4
-  ret void
+  call void @foo()
+  ret i32 0
 }
 
 attributes #0 = { noinline nounwind optnone sspstrong uwtable "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
@@ -20,4 +32,4 @@ attributes #0 = { noinline nounwind optnone sspstrong uwtable "frame-pointer"="a
 !2 = !{i32 7, !"PIE Level", i32 2}
 !3 = !{i32 7, !"uwtable", i32 1}
 !4 = !{i32 7, !"frame-pointer", i32 2}
-!5 = !{!"clang version 13.0.0"}
+!5 = !{!"clang version 13.0.1"}
