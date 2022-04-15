@@ -8,9 +8,9 @@ void processInput(const std::string &input) {
   auto ast = parse(tokens);
   // print LLVM IR
   if (auto *code = ast->codegen()) {
-    std::cout << "==========" << std::endl;
+    std::cout << "=== LLVM IR ===" << std::endl;
     code->print(llvm::errs());
-    std::cout << "\n==========" << std::endl;
+    std::cout << "\n=== LLVM IR ===" << std::endl;
   }
 }
 
