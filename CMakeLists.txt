@@ -11,7 +11,7 @@ add_definitions(${LLVM_DEFINITIONS})
 
 include_directories(src)
 
-add_library(unzig src/parser.cpp src/tokenizer.cpp)
+add_library(unzig src/codegen.cpp src/parser.cpp src/tokenizer.cpp)
 target_link_libraries(unzig PRIVATE LLVM)
 
 add_executable(cmd src/cmd.cpp)

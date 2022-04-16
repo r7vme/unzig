@@ -1,3 +1,4 @@
+#include "codegen.hpp"
 #include "parser.hpp"
 #include "tokenizer.hpp"
 
@@ -5,9 +6,10 @@
 
 void processInput(const std::string &input) {
   auto tokens = tokenize(input);
-  auto ast = parse(tokens);
-  // print LLVM IR
-  if (auto *code = ast->codegen()) {
+  auto ast = parse(std::move(tokens));
+
+  CodeGenerator generator;
+  if (auto *code = ast->codegen(&generator)) {
     std::cout << "=== LLVM IR ===" << std::endl;
     code->print(llvm::errs());
     std::cout << "\n=== LLVM IR ===" << std::endl;
