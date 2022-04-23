@@ -8,7 +8,7 @@ llvm::Value *CodeGenerator::generate(IntegerExprNode *astNode) {
   return llvm::ConstantInt::get(llvmCtxt, llvm::APInt(32, astNode->value, 10));
 }
 
-llvm::Value *CodeGenerator::generate(BinaryExprNode *astNode) {
+llvm::Value *CodeGenerator::generate(BinExprNode *astNode) {
   auto *l = astNode->lhs->codegen(this);
   auto *r = astNode->rhs->codegen(this);
   if (!l || !r) {
@@ -16,13 +16,13 @@ llvm::Value *CodeGenerator::generate(BinaryExprNode *astNode) {
   }
 
   switch (astNode->type) {
-  case BinaryOpType::ADD:
+  case BinOpType::ADD:
     return llvmIRBuilder.CreateAdd(l, r);
-  case BinaryOpType::SUB:
+  case BinOpType::SUB:
     return llvmIRBuilder.CreateSub(l, r);
-  case BinaryOpType::MUL:
+  case BinOpType::MUL:
     return llvmIRBuilder.CreateMul(l, r);
-  case BinaryOpType::DIV:
+  case BinOpType::DIV:
     return llvmIRBuilder.CreateSDiv(l, r);
   }
 

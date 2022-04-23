@@ -1,6 +1,7 @@
-#include "parser.hpp"
 #include <iostream>
 #include <optional>
+
+#include "parser.hpp"
 
 std::shared_ptr<AstNode> LogError(const std::string &str) {
   std::cerr << "error: " << str << std::endl;
@@ -9,7 +10,7 @@ std::shared_ptr<AstNode> LogError(const std::string &str) {
 
 // NumberExpr <- FLOAT / INTEGER
 AstNodePtr parseNumberExpr(ParserCtxt &ctxt) {
-  auto token = ctxt.getNextToken();
+  auto token = ctxt.getTokenAndAdvance();
 
   if (token.id == TokenId::IntegerLiteral) {
     return std::make_shared<IntegerExprNode>(token.value);
@@ -26,47 +27,67 @@ AstNodePtr parsePrimaryExpr(ParserCtxt &ctxt) {
   return parseNumberExpr(ctxt);
 }
 
-bool isBinaryOp(const Token &token) {
+bool isBinOp(const Token &token) {
   return (token.id == TokenId::Asterisk) || (token.id == TokenId::Colon) ||
          (token.id == TokenId::Plus) || (token.id == TokenId::Minus);
 }
 
-std::optional<BinaryOpType> mayBeToBinaryOpType(const Token &token) {
+std::optional<BinOpType> mayBeToBinOpType(const Token &token) {
   switch (token.id) {
   case TokenId::Asterisk:
-    return BinaryOpType::MUL;
+    return BinOpType::MUL;
   case TokenId::Slash:
-    return BinaryOpType::DIV;
+    return BinOpType::DIV;
   case TokenId::Plus:
-    return BinaryOpType::ADD;
+    return BinOpType::ADD;
   case TokenId::Minus:
-    return BinaryOpType::SUB;
+    return BinOpType::SUB;
   default:
     return std::nullopt;
   }
 }
 
-// Expr <- PrimaryExpr (BinaryOp PrimaryExpr)*
+std::map<BinOpType, uint32_t> binOpPrec{
+    {BinOpType::ADD, 10},
+    {BinOpType::SUB, 10},
+    {BinOpType::MUL, 20},
+    {BinOpType::DIV, 20},
+};
+
+// BinOpRhsExpr <- (BinOp PrimaryExpr)*
+AstNodePtr parseBinOpRhsExpr(ParserCtxt &ctxt, AstNodePtr lhs) {
+  while (true) {
+    auto binOp = mayBeToBinOpType(ctxt.getTokenAndAdvance());
+    if (!binOp) {
+      return lhs;
+    }
+
+    auto rhs = parsePrimaryExpr(ctxt);
+    if (!rhs) {
+      return nullptr;
+    }
+
+    auto nextBinOp = mayBeToBinOpType(ctxt.getToken());
+    if ((nextBinOp) &&
+        (binOpPrec[nextBinOp.value()] > binOpPrec[binOp.value()])) {
+      rhs = parseBinOpRhsExpr(ctxt, rhs);
+    }
+
+    lhs = std::make_shared<BinExprNode>(binOp.value(), lhs, rhs);
+  }
+}
+
+// Expr <- PrimaryExpr BinOpRhsExpr
 AstNodePtr parseExpr(ParserCtxt &ctxt) {
   auto lhs = parsePrimaryExpr(ctxt);
   if (!lhs) {
     return nullptr;
   }
 
-  auto binaryOp = mayBeToBinaryOpType(ctxt.getNextToken());
-  if (!binaryOp) {
-    return lhs;
-  }
-
-  auto rhs = parsePrimaryExpr(ctxt);
-  if (!rhs) {
-    return nullptr;
-  }
-
-  return std::make_shared<BinaryExprNode>(binaryOp.value(), lhs, rhs);
+  return parseBinOpRhsExpr(ctxt, lhs);
 }
 
 AstNodePtr parse(Tokens &&tokens) {
-  ParserCtxt ctxtt(std::move(tokens));
-  return parseExpr(ctxtt);
+  ParserCtxt ctxt(std::move(tokens));
+  return parseExpr(ctxt);
 }

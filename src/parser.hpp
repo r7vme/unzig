@@ -1,7 +1,8 @@
 #pragma once
+#include <memory>
+
 #include "ast.hpp"
 #include "tokenizer.hpp"
-#include <memory>
 
 class ParserCtxt {
   Tokens tokens;
@@ -9,7 +10,8 @@ class ParserCtxt {
 
 public:
   ParserCtxt(Tokens &&tokens) : tokens(std::move(tokens)){};
-  Token getNextToken() { return tokens[cursor++]; }
+  Token& getTokenAndAdvance() { return tokens[cursor++]; }
+  Token& getToken() { return tokens[cursor]; }
 };
 
 AstNodePtr parse(Tokens &&tokens);

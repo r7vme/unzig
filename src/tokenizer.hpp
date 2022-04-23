@@ -23,7 +23,7 @@ enum class TokenId {
   KwFn,
   KwPub,
   KwReturn,
-  KwVar,
+  KwVar
 };
 
 struct Token {

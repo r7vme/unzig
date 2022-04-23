@@ -303,5 +303,7 @@ std::vector<Token> tokenize(const std::string &in) {
     }
   }
 
+  tokens.push_back(Token{TokenId::Eof});
+
   return tokens;
 }

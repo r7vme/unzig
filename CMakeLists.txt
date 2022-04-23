@@ -3,6 +3,7 @@ project(unzig)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 # LLVM
 find_package(LLVM REQUIRED CONFIG)
@@ -11,7 +12,12 @@ add_definitions(${LLVM_DEFINITIONS})
 
 include_directories(src)
 
-add_library(unzig src/codegen.cpp src/parser.cpp src/tokenizer.cpp)
+add_library(unzig
+  src/ast_equality_comparator.cpp
+  src/codegen.cpp
+  src/parser.cpp
+  src/tokenizer.cpp
+)
 target_link_libraries(unzig PRIVATE LLVM)
 
 add_executable(cmd src/cmd.cpp)
@@ -19,5 +25,8 @@ target_link_libraries(cmd unzig)
 
 # tests
 add_subdirectory(third_party/Catch2)
-add_executable(tests test/test_tokenizer.cpp)
+add_executable(tests
+  test/test_tokenizer.cpp
+  test/test_parser.cpp
+)
 target_link_libraries(tests PRIVATE unzig Catch2::Catch2WithMain)

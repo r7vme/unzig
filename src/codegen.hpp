@@ -7,7 +7,7 @@
 using Code = llvm::Value;
 
 class IntegerExprNode;
-class BinaryExprNode;
+class BinExprNode;
 
 class CodeGenerator {
   llvm::LLVMContext llvmCtxt;
@@ -19,5 +19,5 @@ public:
       : llvmCtxt(), llvmModule("unzig", llvmCtxt), llvmIRBuilder(llvmCtxt) {}
 
   Code *generate(IntegerExprNode *astNode);
-  Code *generate(BinaryExprNode *astNode);
+  Code *generate(BinExprNode *astNode);
 };

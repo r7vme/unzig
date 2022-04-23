@@ -65,19 +65,22 @@ pub fn main() void {
       Token{TokenId::Semicolon},
       // end main block
       Token{TokenId::RBrace},
+      Token{TokenId::Eof},
   };
 
   auto actualTokens = tokenize(s);
 
   // debug
-  for (auto &token : actualTokens) {
-    std::cout << token << std::endl;
-  }
+  // for (auto &token : actualTokens) {
+  //   std::cout << token << std::endl;
+  // }
 
   REQUIRE(actualTokens == expectedTokens);
 }
 
 TEST_CASE("last char is part of identifier or number", "[tokenizer]") {
-  REQUIRE(tokenize("1") == Tokens{Token{TokenId::IntegerLiteral, "1"}});
-  REQUIRE(tokenize("foo") == Tokens{Token{TokenId::Identifier, "foo"}});
+  REQUIRE(tokenize("1") ==
+          Tokens{Token{TokenId::IntegerLiteral, "1"}, Token{TokenId::Eof}});
+  REQUIRE(tokenize("foo") ==
+          Tokens{Token{TokenId::Identifier, "foo"}, Token{TokenId::Eof}});
 }

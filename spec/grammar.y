@@ -15,7 +15,8 @@ Statement <- VarDecl
 AssignSt <- Expr (AssignOp Expr)?
 
 # *** Expression Level ***
-Expr <- PrimaryExpr (BinaryOp PrimaryExpr)*
+Expr <- PrimaryExpr BinOpAndRhsExpr
+BinOpRhsExpr <- (BinOp PrimaryExpr)*
 PrimaryExpr <- GroupedExpr
             / FnCallExpr
             / VarExpr
@@ -29,7 +30,7 @@ TypeExpr <- IDENTIFIER
 
 # Operators
 AssignOp <- EQUAL
-BinaryOp <- PLUS / MINUS / ASTERISK / SLASH
+BinOp <- PLUS / MINUS / ASTERISK / SLASH
 
 # *** Tokens ***
 eof <- !.
