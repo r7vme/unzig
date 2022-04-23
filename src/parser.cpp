@@ -3,6 +3,13 @@
 
 #include "parser.hpp"
 
+static const std::map<BinOpType, uint32_t> binOpPrec{
+    {BinOpType::ADD, 10},
+    {BinOpType::SUB, 10},
+    {BinOpType::MUL, 20},
+    {BinOpType::DIV, 20},
+};
+
 std::shared_ptr<AstNode> LogError(const std::string &str) {
   std::cerr << "error: " << str << std::endl;
   return nullptr;
@@ -47,13 +54,6 @@ std::optional<BinOpType> mayBeToBinOpType(const Token &token) {
   }
 }
 
-std::map<BinOpType, uint32_t> binOpPrec{
-    {BinOpType::ADD, 10},
-    {BinOpType::SUB, 10},
-    {BinOpType::MUL, 20},
-    {BinOpType::DIV, 20},
-};
-
 // BinOpRhsExpr <- (BinOp PrimaryExpr)*
 AstNodePtr parseBinOpRhsExpr(ParserCtxt &ctxt, AstNodePtr lhs) {
   while (true) {
@@ -69,7 +69,7 @@ AstNodePtr parseBinOpRhsExpr(ParserCtxt &ctxt, AstNodePtr lhs) {
 
     auto nextBinOp = mayBeToBinOpType(ctxt.getToken());
     if ((nextBinOp) &&
-        (binOpPrec[nextBinOp.value()] > binOpPrec[binOp.value()])) {
+        (binOpPrec.at(nextBinOp.value()) > binOpPrec.at(binOp.value()))) {
       rhs = parseBinOpRhsExpr(ctxt, rhs);
     }
 
