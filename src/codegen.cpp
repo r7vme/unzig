@@ -1,11 +1,20 @@
 #include "codegen.hpp"
 #include "ast.hpp"
+#include <cstdint>
+#include <llvm/ADT/APFloat.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Value.h>
 
+llvm::Value *CodeGenerator::generate(FloatExprNode *astNode) {
+  return llvm::ConstantFP::get(llvm::Type::getFloatTy(llvmCtxt),
+                               astNode->value);
+}
+
 llvm::Value *CodeGenerator::generate(IntegerExprNode *astNode) {
-  return llvm::ConstantInt::get(llvmCtxt, llvm::APInt(32, astNode->value, 10));
+  const int32_t decimal = 10;
+  return llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvmCtxt),
+                                astNode->value, decimal);
 }
 
 llvm::Value *CodeGenerator::generate(BinExprNode *astNode) {

@@ -10,8 +10,19 @@ class ParserCtxt {
 
 public:
   ParserCtxt(Tokens &&tokens) : tokens(std::move(tokens)){};
-  Token& getTokenAndAdvance() { return tokens[cursor++]; }
-  Token& getToken() { return tokens[cursor]; }
+
+  Token &getToken() { return tokens[cursor]; }
+
+  void skipToken() {
+    assert(tokens.size() > cursor);
+    cursor++;
+  }
+
+  Token &getTokenAndAdvance() {
+    Token &t = getToken();
+    skipToken();
+    return t;
+  }
 };
 
 AstNodePtr parse(Tokens &&tokens);

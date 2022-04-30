@@ -84,3 +84,7 @@ TEST_CASE("last char is part of identifier or number", "[tokenizer]") {
   REQUIRE(tokenize("foo") ==
           Tokens{Token{TokenId::Identifier, "foo"}, Token{TokenId::Eof}});
 }
+
+TEST_CASE("empty string", "[tokenizer]") {
+  REQUIRE(tokenize("") == Tokens{Token{TokenId::Eof}});
+}

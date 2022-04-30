@@ -6,6 +6,7 @@
 
 using Code = llvm::Value;
 
+class FloatExprNode;
 class IntegerExprNode;
 class BinExprNode;
 
@@ -18,6 +19,7 @@ public:
   CodeGenerator()
       : llvmCtxt(), llvmModule("unzig", llvmCtxt), llvmIRBuilder(llvmCtxt) {}
 
+  Code *generate(FloatExprNode *astNode);
   Code *generate(IntegerExprNode *astNode);
   Code *generate(BinExprNode *astNode);
 };

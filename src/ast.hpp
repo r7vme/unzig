@@ -25,6 +25,14 @@ public:
   virtual bool isEqual(AstEqualityComparator *c, const AstNode &other) const = 0;
 };
 
+class FloatExprNode : public AstNode {
+public:
+  FloatExprNode(const std::string &value) : value(value){};
+  const std::string value;
+
+  EXTRA_METHODS(FloatExprNode)
+};
+
 class IntegerExprNode : public AstNode {
 public:
   IntegerExprNode(const std::string &value) : value(value){};
