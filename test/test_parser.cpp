@@ -2,6 +2,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "ast.hpp"
 #include "ast_equality_comparator.hpp"
 #include "parser.hpp"
 
@@ -83,4 +84,28 @@ TEST_CASE("GroupedExpr - 3 * (2 + 1)", "[parser]") {
   auto AST = parse(std::move(inputTokens));
   AstEqualityComparator c;
   REQUIRE(AST->isEqual(&c, *expectedAST));
+}
+
+TEST_CASE("floating point numbers", "[parser]") {
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::FloatLiteral, "1.0"},
+    Token{TokenId::Asterisk},
+    Token{TokenId::FloatLiteral, "2.0"},
+    Token{TokenId::Eof}
+  };
+
+  AstNodePtr expectedAST = std::make_shared<BinExprNode>(
+    BinOpType::MUL,
+    std::make_shared<FloatExprNode>("1.0"),
+    std::make_shared<FloatExprNode>("2.0")
+  );
+  // clang-format on
+  auto AST = parse(std::move(inputTokens));
+  AstEqualityComparator c;
+  REQUIRE(AST->isEqual(&c, *expectedAST));
+}
+
+TEST_CASE("var y: i32 = 123", "[parser]") {
+  REQUIRE(false);
 }
