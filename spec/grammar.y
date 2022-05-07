@@ -15,7 +15,7 @@ Statement <- VarDecl
 AssignSt <- Expr (AssignOp Expr)?
 
 # *** Expression Level ***
-Expr <- PrimaryExpr BinOpAndRhsExpr
+Expr <- PrimaryExpr BinOpRhsExpr
 BinOpRhsExpr <- (BinOp PrimaryExpr)*
 PrimaryExpr <- GroupedExpr
             / FnCallExpr
