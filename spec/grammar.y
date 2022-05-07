@@ -4,7 +4,7 @@ Root <- skip TopLevelDeclarations eof
 TopLevelDeclarations <- KEYWORD_pub? TopLevelDecl TopLevelDeclarations*
 TopLevelDecl <- FnProto (SEMICOLON / Block)
              / VarDecl
-FnProto <- KEYWORD_fn IDENTIFIER? LPAREN RPAREN TypeExpr
+FnProto <- KEYWORD_fn IDENTIFIER LPAREN RPAREN TypeExpr
 VarDecl <- KEYWORD_var IDENTIFIER COLON TypeExpr (EQUAL Expr)? SEMICOLON
 
 # *** Block Level ***
