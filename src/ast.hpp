@@ -7,13 +7,13 @@
 
 #define EXTRA_METHODS(CLASS)                                                   \
   Code *codegen(CodeGenerator *g) override { return g->generate(this); };      \
-  bool isEqual(AstEqualityComparator *c, const AstNode &other) const override {   \
+  bool isEqual(AstEqualityComparator *c, const AstNode &other)                 \
+      const override {                                                         \
     return (typeid(*this) == typeid(other)) &&                                 \
            c->compare(*this, static_cast<const CLASS &>(other));               \
   };
 
 class AstNode;
-
 using AstNodePtr = std::shared_ptr<AstNode>;
 
 enum BinOpType { ADD, SUB, MUL, DIV };
@@ -22,7 +22,8 @@ class AstNode {
 public:
   virtual ~AstNode() = default;
   virtual Code *codegen(CodeGenerator *g) = 0;
-  virtual bool isEqual(AstEqualityComparator *c, const AstNode &other) const = 0;
+  virtual bool isEqual(AstEqualityComparator *c,
+                       const AstNode &other) const = 0;
 };
 
 class FloatExprNode : public AstNode {
@@ -50,4 +51,19 @@ public:
   AstNodePtr rhs;
 
   EXTRA_METHODS(BinExprNode)
+};
+
+class FnProtoNode : public AstNode {
+public:
+  FnProtoNode(const std::string &name) : name(name){};
+  const std::string name;
+};
+
+class FnDefNode : public AstNode {
+public:
+  FnDefNode(const std::shared_ptr<FnProtoNode> proto, const AstNodePtr body)
+      : proto(proto), body(body){};
+
+  std::shared_ptr<FnProtoNode> proto;
+  AstNodePtr body;
 };
