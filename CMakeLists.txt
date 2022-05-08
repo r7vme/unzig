@@ -24,7 +24,7 @@ add_executable(cmd src/cmd.cpp)
 target_link_libraries(cmd unzig_lib edit)
 
 add_executable(unzig src/compiler.cpp)
-target_link_libraries(unzig PRIVATE LLVM)
+target_link_libraries(unzig unzig_lib)
 
 # tests
 add_subdirectory(third_party/Catch2)
