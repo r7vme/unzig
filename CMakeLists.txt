@@ -12,16 +12,19 @@ add_definitions(${LLVM_DEFINITIONS})
 
 include_directories(src)
 
-add_library(unzig
+add_library(unzig_lib
   src/ast_equality_comparator.cpp
   src/codegen.cpp
   src/parser.cpp
   src/tokenizer.cpp
 )
-target_link_libraries(unzig PRIVATE LLVM)
+target_link_libraries(unzig_lib PRIVATE LLVM)
 
 add_executable(cmd src/cmd.cpp)
-target_link_libraries(cmd unzig edit)
+target_link_libraries(cmd unzig_lib edit)
+
+add_executable(unzig src/compiler.cpp)
+target_link_libraries(unzig PRIVATE LLVM)
 
 # tests
 add_subdirectory(third_party/Catch2)
@@ -29,4 +32,4 @@ add_executable(tests
   test/test_tokenizer.cpp
   test/test_parser.cpp
 )
-target_link_libraries(tests PRIVATE unzig Catch2::Catch2WithMain)
+target_link_libraries(tests PRIVATE unzig_lib Catch2::Catch2WithMain)
