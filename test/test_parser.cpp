@@ -1,3 +1,4 @@
+#include <iostream>
 #include <memory>
 
 #include <catch2/catch_test_macros.hpp>
@@ -5,6 +6,7 @@
 #include "ast.hpp"
 #include "ast_equality_comparator.hpp"
 #include "parser.hpp"
+#include "tokenizer.hpp"
 
 TEST_CASE("BinOpRhsExpr inverted operation priority - 1 + 2 * 3", "[parser]") {
   // clang-format off
@@ -107,5 +109,45 @@ TEST_CASE("floating point numbers", "[parser]") {
 }
 
 TEST_CASE("var y: i32 = 123", "[parser]") {
-  REQUIRE(false);
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::KwVar},
+    Token{TokenId::Identifier, "y"},
+    Token{TokenId::Colon},
+    Token{TokenId::Identifier, "i32"},
+    Token{TokenId::Equal},
+    Token{TokenId::IntegerLiteral, "123"},
+    Token{TokenId::Eof}
+  };
+
+  AstNodePtr expectedAST = std::make_shared<VarDeclNode>(
+    "y",
+    Type{TypeId::Int},
+    std::make_shared<IntegerExprNode>("123")
+  );
+  // clang-format on
+  auto AST = parse(std::move(inputTokens));
+  AstEqualityComparator c;
+  REQUIRE(AST->isEqual(&c, *expectedAST));
 }
+
+//TEST_CASE("function", "[parser]") {
+//  Tokens inputTokens = {
+//    Token{TokenId::KwFn},
+//    Token{TokenId::Identifier, "f"},
+//    Token{TokenId::LParen},
+//    Token{TokenId::RParen},
+//    Token{TokenId::Identifier, "void"},
+//    Token{TokenId::LBrace},
+//    Token{TokenId::RBrace},
+//    Token{TokenId::Eof}
+//  };
+//
+//  AstNodePtr expectedAST = std::make_shared<BinExprNode>(
+//    BinOpType::MUL,
+//    std::make_shared<FloatExprNode>("1.0"),
+//    std::make_shared<FloatExprNode>("2.0")
+//  );
+//
+//  REQUIRE(false);
+//}

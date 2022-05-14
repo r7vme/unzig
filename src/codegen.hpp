@@ -9,6 +9,7 @@ using Code = llvm::Value;
 class FloatExprNode;
 class IntegerExprNode;
 class BinExprNode;
+class VarDeclNode;
 
 class CodeGenerator {
   llvm::LLVMContext llvmCtxt;
@@ -22,4 +23,5 @@ public:
   Code *generate(FloatExprNode *astNode);
   Code *generate(IntegerExprNode *astNode);
   Code *generate(BinExprNode *astNode);
+  Code *generate(VarDeclNode *astNode);
 };

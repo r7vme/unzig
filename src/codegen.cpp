@@ -37,3 +37,7 @@ llvm::Value *CodeGenerator::generate(BinExprNode *astNode) {
 
   return nullptr;
 };
+
+llvm::Value *CodeGenerator::generate(VarDeclNode *astNode) {
+  return nullptr;
+}
