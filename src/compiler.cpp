@@ -47,28 +47,39 @@ int main(int argc, char **argv) {
   }
   std::string inputCode = readFileIntoString(inputFilePath);
 
-  std::string llFileName = inputFilePath.filename().replace_extension("ll");
-  std::string objFileName = inputFilePath.filename().replace_extension(".o");
-  std::string outputFile = inputFilePath.filename().replace_extension();
+  std::string llFileName = inputFilePath.replace_extension("ll");
+  std::string objFileName = inputFilePath.replace_extension("o");
+  std::string outputFile = inputFilePath.replace_extension();
 
   // prepare .ll file
   std::error_code OutErrorInfo;
   std::error_code ok;
   llvm::raw_fd_ostream llFile(llFileName, OutErrorInfo, llvm::sys::fs::OF_None);
-
   if (OutErrorInfo != ok) {
     std::cerr << "Unable to create .ll file" << std::endl;
     std::exit(1);
   }
 
-  auto tokens = tokenize(inputCode);
-  auto ast = parse(std::move(tokens));
-  if (ast) {
-    CodeGenerator generator;
-    if (auto *code = ast->codegen(&generator)) {
-      code->print(llFile);
-    }
-  }
+  // mock main
+  llvm::LLVMContext llvmCtxt;
+  llvm::Module llvmModule("foo", llvmCtxt);
+  llvm::IRBuilder<> llvmIRBuilder(llvmCtxt);
+  auto *funcType = llvm::FunctionType::get(llvmIRBuilder.getInt32Ty(), false);
+  auto *mainFunc = llvm::Function::Create(
+      funcType, llvm::Function::ExternalLinkage, "main", llvmModule);
+  auto *entry = llvm::BasicBlock::Create(llvmCtxt, "entrypoint", mainFunc);
+  llvmIRBuilder.SetInsertPoint(entry);
+  llvmIRBuilder.CreateRet(llvmIRBuilder.getInt32(0));
+  llvmModule.print(llFile, nullptr);
+
+  //  auto tokens = tokenize(inputCode);
+  //  auto ast = parse(std::move(tokens));
+  //  if (ast) {
+  //    CodeGenerator generator;
+  //    if (auto *code = ast->codegen(&generator)) {
+  //      code->print(llFile);
+  //    }
+  //  }
   // compile to object file
   auto llcCmd = std::string("llc -filetype=obj ") + llFileName;
   (void)std::system(llcCmd.c_str());
@@ -76,6 +87,7 @@ int main(int argc, char **argv) {
   // linker
   std::string linkerCmd =
       std::string("ld -o ") + outputFile +
-      " -dynamic-linker /lib64/ld-linux-x86-64.so.2 /usr/lib/crt1.o -lc " + objFileName;
+      " -dynamic-linker /lib64/ld-linux-x86-64.so.2 /usr/lib/crt1.o -lc " +
+      objFileName;
   return std::system(linkerCmd.c_str());
 }
