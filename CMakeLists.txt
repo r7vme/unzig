@@ -17,6 +17,7 @@ add_library(unzig_lib
   src/codegen.cpp
   src/parser.cpp
   src/tokenizer.cpp
+  src/types.cpp
 )
 target_link_libraries(unzig_lib PRIVATE LLVM)
 

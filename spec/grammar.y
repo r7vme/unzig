@@ -2,10 +2,12 @@ Root <- skip TopLevelDeclarations eof
 
 # *** Top level ***
 TopLevelDeclarations <- KEYWORD_pub? TopLevelDecl TopLevelDeclarations*
-TopLevelDecl <- FnProto (SEMICOLON / Block)
+TopLevelDecl <- FnDef
              / VarDecl
-FnProto <- KEYWORD_fn IDENTIFIER LPAREN RPAREN TypeExpr
-VarDecl <- KEYWORD_var IDENTIFIER COLON TypeExpr (EQUAL Expr)? SEMICOLON
+
+FnDef <- KEYWORD_fn IDENTIFIER LPAREN RPAREN TypeExpr Block
+
+VarDecl <- KEYWORD_var IDENTIFIER COLON TypeExpr (AssignOp Expr)? SEMICOLON
 
 # *** Block Level ***
 Block <- LBRACE Statement* RBRACE

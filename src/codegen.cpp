@@ -41,3 +41,11 @@ llvm::Value *CodeGenerator::generate(BinExprNode *astNode) {
 llvm::Value *CodeGenerator::generate(VarDeclNode *astNode) {
   return nullptr;
 }
+
+llvm::Value *CodeGenerator::generate(FnDefNode *astNode) {
+  return nullptr;
+}
+
+llvm::Value *CodeGenerator::generate(BlockNode *astNode) {
+  return nullptr;
+}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 
 #include "ast_equality_comparator.hpp"
@@ -47,23 +48,26 @@ struct BinExprNode : public AstNode {
   EXTRA_METHODS(BinExprNode)
 };
 
-struct FnProtoNode : public AstNode {
-  FnProtoNode(const std::string &name) : name(name){};
-  const std::string name;
+struct BlockNode : public AstNode {
+  EXTRA_METHODS(BlockNode)
 };
 
 struct FnDefNode : public AstNode {
-  FnDefNode(const std::shared_ptr<FnProtoNode> proto, const AstNodePtr body)
-      : proto(proto), body(body){};
-  std::shared_ptr<FnProtoNode> proto;
+  FnDefNode(const std::string &name, const UzType &returnType,
+            const AstNodePtr body)
+      : name(name), returnType(returnType), body(body){};
+  const std::string name;
+  const UzType returnType;
   AstNodePtr body;
+  EXTRA_METHODS(FnDefNode)
 };
 
 struct VarDeclNode : public AstNode {
-  VarDeclNode(const std::string &name, const Type &type, const AstNodePtr expr)
-      : name(name), type(type), expr(expr){};
+  VarDeclNode(const std::string &name, const UzType &type,
+              const AstNodePtr initExpr)
+      : name(name), type(type), initExpr(initExpr){};
   const std::string name;
-  const Type type;
-  AstNodePtr expr;
+  const UzType type;
+  AstNodePtr initExpr;
   EXTRA_METHODS(VarDeclNode)
 };

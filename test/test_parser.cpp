@@ -7,6 +7,11 @@
 #include "ast_equality_comparator.hpp"
 #include "parser.hpp"
 #include "tokenizer.hpp"
+#include "types.hpp"
+
+AstNodePtr parseExpr(ParserCtxt &ctxt);
+AstNodePtr parseVarDecl(ParserCtxt &ctxt);
+AstNodePtr parseFnDef(ParserCtxt &ctxt);
 
 TEST_CASE("BinOpRhsExpr inverted operation priority - 1 + 2 * 3", "[parser]") {
   // clang-format off
@@ -29,7 +34,10 @@ TEST_CASE("BinOpRhsExpr inverted operation priority - 1 + 2 * 3", "[parser]") {
     )
   );
   // clang-format on
-  auto AST = parse(std::move(inputTokens));
+  ParserCtxt ctxt(std::move(inputTokens));
+  auto AST = parseExpr(ctxt);
+  REQUIRE(AST);
+
   AstEqualityComparator c;
   REQUIRE(AST->isEqual(&c, *expectedAST));
 }
@@ -55,7 +63,10 @@ TEST_CASE("BinOpRhsExpr - 1 * 2 + 3", "[parser]") {
     std::make_shared<IntegerExprNode>("3")
   );
   // clang-format on
-  auto AST = parse(std::move(inputTokens));
+  ParserCtxt ctxt(std::move(inputTokens));
+  auto AST = parseExpr(ctxt);
+  REQUIRE(AST);
+
   AstEqualityComparator c;
   REQUIRE(AST->isEqual(&c, *expectedAST));
 }
@@ -88,7 +99,7 @@ TEST_CASE("GroupedExpr - 3 * (2 + 1)", "[parser]") {
   REQUIRE(AST->isEqual(&c, *expectedAST));
 }
 
-TEST_CASE("floating point numbers", "[parser]") {
+TEST_CASE("floating point numbers expr", "[parser]") {
   // clang-format off
   Tokens inputTokens = {
     Token{TokenId::FloatLiteral, "1.0"},
@@ -103,12 +114,15 @@ TEST_CASE("floating point numbers", "[parser]") {
     std::make_shared<FloatExprNode>("2.0")
   );
   // clang-format on
-  auto AST = parse(std::move(inputTokens));
+  ParserCtxt ctxt(std::move(inputTokens));
+  auto AST = parseExpr(ctxt);
+  REQUIRE(AST);
+
   AstEqualityComparator c;
   REQUIRE(AST->isEqual(&c, *expectedAST));
 }
 
-TEST_CASE("var y: i32 = 123", "[parser]") {
+TEST_CASE("VarDecl 'var y: i32 = 123;'", "[parser]") {
   // clang-format off
   Tokens inputTokens = {
     Token{TokenId::KwVar},
@@ -117,37 +131,46 @@ TEST_CASE("var y: i32 = 123", "[parser]") {
     Token{TokenId::Identifier, "i32"},
     Token{TokenId::Equal},
     Token{TokenId::IntegerLiteral, "123"},
+    Token{TokenId::Semicolon},
     Token{TokenId::Eof}
   };
 
   AstNodePtr expectedAST = std::make_shared<VarDeclNode>(
     "y",
-    Type{TypeId::Int},
+    UzType{UzTypeId::Int32},
     std::make_shared<IntegerExprNode>("123")
   );
   // clang-format on
-  auto AST = parse(std::move(inputTokens));
+
+  ParserCtxt ctxt(std::move(inputTokens));
+  auto AST = parseVarDecl(ctxt);
+  REQUIRE(AST);
+
   AstEqualityComparator c;
   REQUIRE(AST->isEqual(&c, *expectedAST));
 }
 
-//TEST_CASE("function", "[parser]") {
-//  Tokens inputTokens = {
-//    Token{TokenId::KwFn},
-//    Token{TokenId::Identifier, "f"},
-//    Token{TokenId::LParen},
-//    Token{TokenId::RParen},
-//    Token{TokenId::Identifier, "void"},
-//    Token{TokenId::LBrace},
-//    Token{TokenId::RBrace},
-//    Token{TokenId::Eof}
-//  };
-//
-//  AstNodePtr expectedAST = std::make_shared<BinExprNode>(
-//    BinOpType::MUL,
-//    std::make_shared<FloatExprNode>("1.0"),
-//    std::make_shared<FloatExprNode>("2.0")
-//  );
-//
-//  REQUIRE(false);
-//}
+TEST_CASE("FnDecl 'fn f() void {};'", "[parser]") {
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::KwFn},
+    Token{TokenId::Identifier, "f"},
+    Token{TokenId::LParen},
+    Token{TokenId::RParen},
+    Token{TokenId::Identifier, "void"},
+    Token{TokenId::LBrace},
+    Token{TokenId::RBrace},
+    Token{TokenId::Eof}
+  };
+  // clang-format on
+
+  AstNodePtr expectedAST =
+      std::make_shared<FnDefNode>("f", UzType{UzTypeId::Void}, nullptr);
+
+  ParserCtxt ctxt(std::move(inputTokens));
+  auto AST = parseFnDef(ctxt);
+  REQUIRE(AST);
+
+  AstEqualityComparator c;
+  REQUIRE(AST->isEqual(&c, *expectedAST));
+}

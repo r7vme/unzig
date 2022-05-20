@@ -13,3 +13,15 @@ bool AstEqualityComparator::compare(const VarDeclNode &lhs,
   // TODO: not all fields checked
   return lhs.name == rhs.name;
 }
+
+bool AstEqualityComparator::compare(const FnDefNode &lhs,
+                                    const FnDefNode &rhs) {
+  // TODO: not all fields checked
+  return lhs.name == rhs.name;
+}
+
+bool AstEqualityComparator::compare(const BlockNode &lhs,
+                                    const BlockNode &rhs) {
+  // TODO: not all fields checked
+  return true;
+}

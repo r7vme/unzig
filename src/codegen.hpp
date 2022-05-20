@@ -10,6 +10,8 @@ class FloatExprNode;
 class IntegerExprNode;
 class BinExprNode;
 class VarDeclNode;
+class FnDefNode;
+class BlockNode;
 
 class CodeGenerator {
   llvm::LLVMContext llvmCtxt;
@@ -24,4 +26,6 @@ public:
   Code *generate(IntegerExprNode *astNode);
   Code *generate(BinExprNode *astNode);
   Code *generate(VarDeclNode *astNode);
+  Code *generate(FnDefNode *astNode);
+  Code *generate(BlockNode *astNode);
 };

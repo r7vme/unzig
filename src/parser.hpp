@@ -23,6 +23,12 @@ public:
     skipToken();
     return t;
   }
+
+  size_t getCursor() const { return cursor; }
+  void resetCursor(const size_t newCursor) {
+    assert(tokens.size() > newCursor);
+    cursor = newCursor;
+  }
 };
 
 AstNodePtr parse(Tokens &&tokens);

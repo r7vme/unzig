@@ -1,7 +1,12 @@
 #pragma once
 
-enum class TypeId { Void, Int, Float };
+#include <optional>
+#include <string>
 
-struct Type {
-  TypeId id;
+enum class UzTypeId { Void, Int32, Float32, SIZE };
+
+struct UzType {
+  UzTypeId id;
 };
+
+std::optional<UzType> toUzType(const std::string &input);
