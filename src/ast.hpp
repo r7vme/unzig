@@ -71,3 +71,8 @@ struct VarDeclNode : public AstNode {
   AstNodePtr initExpr;
   EXTRA_METHODS(VarDeclNode)
 };
+
+struct RootNode : public AstNode {
+  std::vector<AstNodePtr> declarations;
+  EXTRA_METHODS(RootNode)
+};

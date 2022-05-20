@@ -25,3 +25,9 @@ bool AstEqualityComparator::compare(const BlockNode &lhs,
   // TODO: not all fields checked
   return true;
 }
+
+bool AstEqualityComparator::compare(const RootNode &lhs,
+                                    const RootNode &rhs) {
+  // TODO: not all fields checked
+  return true;
+}

@@ -49,3 +49,7 @@ llvm::Value *CodeGenerator::generate(FnDefNode *astNode) {
 llvm::Value *CodeGenerator::generate(BlockNode *astNode) {
   return nullptr;
 }
+
+llvm::Value *CodeGenerator::generate(RootNode *astNode) {
+  return nullptr;
+}

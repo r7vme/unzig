@@ -1,7 +1,7 @@
 Root <- skip TopLevelDeclarations eof
 
 # *** Top level ***
-TopLevelDeclarations <- KEYWORD_pub? TopLevelDecl TopLevelDeclarations*
+TopLevelDeclarations <- TopLevelDecl TopLevelDeclarations*
 TopLevelDecl <- FnDef
              / VarDecl
 

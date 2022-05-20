@@ -133,43 +133,55 @@ AstNodePtr parseVarDecl(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
   auto kwVarToken = ctxt.getTokenAndAdvance();
-  auto varIdentifierToken = ctxt.getTokenAndAdvance();
-  auto colonToken = ctxt.getTokenAndAdvance();
-  auto typeExprToken = ctxt.getTokenAndAdvance();
-  if ((kwVarToken.id == TokenId::KwVar) &&
-      (varIdentifierToken.id == TokenId::Identifier) &&
-      (colonToken.id == TokenId::Colon) &&
-      (typeExprToken.id == TokenId::Identifier)) {
-    auto varName = varIdentifierToken.value;
-    auto varType = toUzType(typeExprToken.value);
-    if (!varType) {
-      ctxt.resetCursor(mark);
-      return LogError("unknown type");
-    }
-
-    // optional
-    AstNodePtr initExpr = nullptr;
-    auto equalToken = ctxt.getToken();
-    if (equalToken.id == TokenId::Equal) {
-      ctxt.skipToken();
-      initExpr = parseExpr(ctxt);
-      if (!initExpr) {
-        ctxt.resetCursor(mark);
-        return LogError("unable parse expression");
-      }
-    }
-
-    auto semicolonToken = ctxt.getTokenAndAdvance();
-    if (semicolonToken.id != TokenId::Semicolon) {
-      ctxt.resetCursor(mark);
-      return LogError("missing semicolon");
-    }
-
-    return std::make_shared<VarDeclNode>(varName, varType.value(), initExpr);
+  if (kwVarToken.id != TokenId::KwVar) {
+    ctxt.resetCursor(mark);
+    return nullptr;
   }
 
-  ctxt.resetCursor(mark);
-  return LogError("unable to parse VarDecl");
+  auto varIdentifierToken = ctxt.getTokenAndAdvance();
+  if (varIdentifierToken.id != TokenId::Identifier) {
+    ctxt.resetCursor(mark);
+    return nullptr;
+  }
+
+  auto colonToken = ctxt.getTokenAndAdvance();
+  if (colonToken.id != TokenId::Colon) {
+    ctxt.resetCursor(mark);
+    return nullptr;
+  }
+
+  auto typeExprToken = ctxt.getTokenAndAdvance();
+  if (typeExprToken.id != TokenId::Identifier) {
+    ctxt.resetCursor(mark);
+    return nullptr;
+  }
+
+  auto varName = varIdentifierToken.value;
+  auto varType = toUzType(typeExprToken.value);
+  if (!varType) {
+    ctxt.resetCursor(mark);
+    return LogError("unknown type");
+  }
+
+  // optional
+  AstNodePtr initExpr = nullptr;
+  auto equalToken = ctxt.getToken();
+  if (equalToken.id == TokenId::Equal) {
+    ctxt.skipToken();
+    initExpr = parseExpr(ctxt);
+    if (!initExpr) {
+      ctxt.resetCursor(mark);
+      return LogError("unable parse expression");
+    }
+  }
+
+  auto semicolonToken = ctxt.getTokenAndAdvance();
+  if (semicolonToken.id != TokenId::Semicolon) {
+    ctxt.resetCursor(mark);
+    return LogError("missing semicolon");
+  }
+
+  return std::make_shared<VarDeclNode>(varName, varType.value(), initExpr);
 }
 
 AstNodePtr parseBlock(ParserCtxt &ctxt) {
@@ -194,32 +206,81 @@ AstNodePtr parseFnDef(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
   auto kwFnToken = ctxt.getTokenAndAdvance();
-  auto fnIdentifierToken = ctxt.getTokenAndAdvance();
-  auto lParenToken = ctxt.getTokenAndAdvance();
-  auto rParenToken = ctxt.getTokenAndAdvance();
-  auto typeExprToken = ctxt.getTokenAndAdvance();
-  if ((kwFnToken.id == TokenId::KwFn) &&
-      (fnIdentifierToken.id == TokenId::Identifier) &&
-      (lParenToken.id == TokenId::LParen) &&
-      (rParenToken.id == TokenId::RParen) &&
-      (typeExprToken.id == TokenId::Identifier)) {
-    auto fnBody = parseBlock(ctxt);
-    if (!fnBody) {
-      ctxt.resetCursor(mark);
-      return LogError("unable to parse function body");
-    }
-
-    auto fnName = fnIdentifierToken.value;
-    auto fnReturnType = toUzType(typeExprToken.value);
-    return std::make_shared<FnDefNode>(fnName, fnReturnType.value(), fnBody);
+  if (kwFnToken.id != TokenId::KwFn) {
+    ctxt.resetCursor(mark);
+    return nullptr;
   }
 
-  ctxt.resetCursor(mark);
-  return LogError("unable to parse FnDef");
+  auto fnIdentifierToken = ctxt.getTokenAndAdvance();
+  if (fnIdentifierToken.id != TokenId::Identifier) {
+    ctxt.resetCursor(mark);
+    return nullptr;
+  }
+
+  auto lParenToken = ctxt.getTokenAndAdvance();
+  if (lParenToken.id != TokenId::LParen) {
+    ctxt.resetCursor(mark);
+    return nullptr;
+  }
+
+  auto rParenToken = ctxt.getTokenAndAdvance();
+  if (rParenToken.id != TokenId::RParen) {
+    ctxt.resetCursor(mark);
+    return nullptr;
+  }
+
+  auto typeExprToken = ctxt.getTokenAndAdvance();
+  if (typeExprToken.id != TokenId::Identifier) {
+    ctxt.resetCursor(mark);
+    return nullptr;
+  }
+
+  auto fnBody = parseBlock(ctxt);
+  if (!fnBody) {
+    ctxt.resetCursor(mark);
+    return LogError("unable to parse function body");
+  }
+
+  auto fnName = fnIdentifierToken.value;
+  auto fnReturnType = toUzType(typeExprToken.value);
+  return std::make_shared<FnDefNode>(fnName, fnReturnType.value(), fnBody);
 }
 
-// entrypoint
+AstNodePtr parseTopLevelDecl(ParserCtxt &ctxt) {
+  auto fnDef = parseFnDef(ctxt);
+  if (fnDef) {
+    return fnDef;
+  }
+
+  auto varDecl = parseVarDecl(ctxt);
+  if (varDecl) {
+    return varDecl;
+  }
+
+  return nullptr;
+}
+
+AstNodePtr parseRoot(ParserCtxt &ctxt) {
+  auto topLevelDecl = parseTopLevelDecl(ctxt);
+  if (!topLevelDecl) {
+    return nullptr;
+  }
+
+  auto root = std::make_shared<RootNode>();
+  root->declarations.push_back(topLevelDecl);
+
+  while (true) {
+    auto node = parseTopLevelDecl(ctxt);
+    if (!node) {
+      break;
+    }
+    root->declarations.push_back(node);
+  }
+
+  return root;
+}
+
 AstNodePtr parse(Tokens &&tokens) {
   ParserCtxt ctxt(std::move(tokens));
-  return parseExpr(ctxt);
+  return parseRoot(ctxt);
 }

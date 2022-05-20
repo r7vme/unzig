@@ -94,7 +94,10 @@ TEST_CASE("GroupedExpr - 3 * (2 + 1)", "[parser]") {
     )
   );
   // clang-format on
-  auto AST = parse(std::move(inputTokens));
+  ParserCtxt ctxt(std::move(inputTokens));
+  auto AST = parseExpr(ctxt);
+  REQUIRE(AST);
+
   AstEqualityComparator c;
   REQUIRE(AST->isEqual(&c, *expectedAST));
 }
@@ -150,11 +153,11 @@ TEST_CASE("VarDecl 'var y: i32 = 123;'", "[parser]") {
   REQUIRE(AST->isEqual(&c, *expectedAST));
 }
 
-TEST_CASE("FnDecl 'fn f() void {};'", "[parser]") {
+TEST_CASE("FnDef 'fn main() void {};'", "[parser]") {
   // clang-format off
   Tokens inputTokens = {
     Token{TokenId::KwFn},
-    Token{TokenId::Identifier, "f"},
+    Token{TokenId::Identifier, "main"},
     Token{TokenId::LParen},
     Token{TokenId::RParen},
     Token{TokenId::Identifier, "void"},
@@ -164,11 +167,12 @@ TEST_CASE("FnDecl 'fn f() void {};'", "[parser]") {
   };
   // clang-format on
 
-  AstNodePtr expectedAST =
-      std::make_shared<FnDefNode>("f", UzType{UzTypeId::Void}, nullptr);
+  AstNodePtr fnDef =
+      std::make_shared<FnDefNode>("main", UzType{UzTypeId::Void}, nullptr);
+  auto expectedAST = std::make_shared<RootNode>();
+  expectedAST->declarations.push_back(fnDef);
 
-  ParserCtxt ctxt(std::move(inputTokens));
-  auto AST = parseFnDef(ctxt);
+  auto AST = parse(std::move(inputTokens));
   REQUIRE(AST);
 
   AstEqualityComparator c;

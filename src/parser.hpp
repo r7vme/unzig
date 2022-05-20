@@ -11,12 +11,12 @@ class ParserCtxt {
 public:
   ParserCtxt(Tokens &&tokens) : tokens(std::move(tokens)){};
 
-  Token &getToken() { return tokens[cursor]; }
-
-  void skipToken() {
+  Token &getToken() {
     assert(tokens.size() > cursor);
-    cursor++;
+    return tokens[cursor];
   }
+
+  void skipToken() { cursor++; }
 
   Token &getTokenAndAdvance() {
     Token &t = getToken();

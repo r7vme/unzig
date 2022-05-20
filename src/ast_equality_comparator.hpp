@@ -7,6 +7,7 @@ class BinExprNode;
 class VarDeclNode;
 class FnDefNode;
 class BlockNode;
+class RootNode;
 
 class AstEqualityComparator {
 public:
@@ -14,9 +15,9 @@ public:
   bool compare(const VarDeclNode &lhs, const VarDeclNode &rhs);
   bool compare(const FnDefNode &lhs, const FnDefNode &rhs);
   bool compare(const BlockNode &lhs, const BlockNode &rhs);
+  bool compare(const RootNode &lhs, const RootNode &rhs);
 
-  template <typename T>
-  bool compare(const T &lhs, const T &rhs) {
+  template <typename T> bool compare(const T &lhs, const T &rhs) {
     return lhs.value == rhs.value;
   }
 };
