@@ -167,10 +167,10 @@ TEST_CASE("FnDef 'fn main() void {};'", "[parser]") {
   };
   // clang-format on
 
-  AstNodePtr fnDef =
-      std::make_shared<FnDefNode>("main", UzType{UzTypeId::Void}, nullptr);
-  auto expectedAST = std::make_shared<RootNode>();
-  expectedAST->declarations.push_back(fnDef);
+  std::vector<AstNodePtr> declarations;
+  declarations.push_back(
+      std::make_shared<FnDefNode>("main", UzType{UzTypeId::Void}, nullptr));
+  auto expectedAST = std::make_shared<RootNode>(declarations);
 
   auto AST = parse(std::move(inputTokens));
   REQUIRE(AST);

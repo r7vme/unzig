@@ -12,9 +12,10 @@ VarDecl <- KEYWORD_var IDENTIFIER COLON TypeExpr (AssignOp Expr)? SEMICOLON
 # *** Block Level ***
 Block <- LBRACE Statement* RBRACE
 Statement <- VarDecl
-          / AssignSt SEMICOLON
-          / KEYWORD_return Expr? SEMICOLON
-AssignSt <- Expr (AssignOp Expr)?
+          / AssignSt
+          / ReturnSt
+AssignSt <- Expr AssignOp Expr SEMICOLON
+ReturnSt <- KEYWORD_return Expr? SEMICOLON
 
 # *** Expression Level ***
 Expr <- PrimaryExpr BinOpRhsExpr

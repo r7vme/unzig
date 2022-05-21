@@ -1,5 +1,6 @@
 #include <iostream>
 #include <optional>
+#include <vector>
 
 #include "ast.hpp"
 #include "parser.hpp"
@@ -13,7 +14,6 @@ AstNodePtr parseNumberExpr(ParserCtxt &ctxt);
 AstNodePtr parseExpr(ParserCtxt &ctxt);
 AstNodePtr parseVarDecl(ParserCtxt &ctxt);
 AstNodePtr LogError(const std::string &str);
-bool isBinOp(const Token &token);
 std::optional<BinOpType> mayBeToBinOpType(const Token &token);
 
 AstNodePtr LogError(const std::string &str) {
@@ -27,11 +27,6 @@ static const std::map<BinOpType, uint32_t> binOpPrec{
     {BinOpType::MUL, 20},
     {BinOpType::DIV, 20},
 };
-
-bool isBinOp(const Token &token) {
-  return (token.id == TokenId::Asterisk) || (token.id == TokenId::Colon) ||
-         (token.id == TokenId::Plus) || (token.id == TokenId::Minus);
-}
 
 std::optional<BinOpType> mayBeToBinOpType(const Token &token) {
   switch (token.id) {
@@ -121,12 +116,10 @@ AstNodePtr parseBinOpRhsExpr(ParserCtxt &ctxt, AstNodePtr lhs) {
 
 // Expr <- PrimaryExpr BinOpRhsExpr
 AstNodePtr parseExpr(ParserCtxt &ctxt) {
-  auto lhs = parsePrimaryExpr(ctxt);
-  if (!lhs) {
-    return nullptr;
+  if (auto lhs = parsePrimaryExpr(ctxt)) {
+    return parseBinOpRhsExpr(ctxt, lhs);
   }
-
-  return parseBinOpRhsExpr(ctxt, lhs);
+  return nullptr;
 }
 
 AstNodePtr parseVarDecl(ParserCtxt &ctxt) {
@@ -184,8 +177,60 @@ AstNodePtr parseVarDecl(ParserCtxt &ctxt) {
   return std::make_shared<VarDeclNode>(varName, varType.value(), initExpr);
 }
 
+AstNodePtr parseReturnSt(ParserCtxt &ctxt) {
+  const auto mark = ctxt.getCursor();
+
+  if (ctxt.getTokenAndAdvance().id != TokenId::KwReturn) {
+    ctxt.resetCursor(mark);
+    return nullptr;
+  }
+
+  auto mayBeExpr = parseExpr(ctxt);
+
+  if (ctxt.getTokenAndAdvance().id != TokenId::Semicolon) {
+    ctxt.resetCursor(mark);
+    return nullptr;
+  }
+
+  return std::make_shared<ReturnStNode>(mayBeExpr);
+}
+
+AstNodePtr parseAssignSt(ParserCtxt &ctxt) {
+  const auto mark = ctxt.getCursor();
+
+  auto lhs = parseExpr(ctxt);
+  if (!lhs) {
+    ctxt.resetCursor(mark);
+    return nullptr;
+  }
+
+  if (ctxt.getTokenAndAdvance().id != TokenId::Equal) {
+    ctxt.resetCursor(mark);
+    return nullptr;
+  }
+
+  auto rhs = parseExpr(ctxt);
+  if (!rhs) {
+    ctxt.resetCursor(mark);
+    return nullptr;
+  }
+
+  if (ctxt.getTokenAndAdvance().id != TokenId::Semicolon) {
+    ctxt.resetCursor(mark);
+    return nullptr;
+  }
+
+  return std::make_shared<AssignStNode>(lhs, rhs);
+}
+
 AstNodePtr parseStatement(ParserCtxt &ctxt) {
-  // implement here
+  if (auto varDecl = parseVarDecl(ctxt))
+    return varDecl;
+  if (auto assighSt = parseAssignSt(ctxt))
+    return assighSt;
+  if (auto returnSt = parseReturnSt(ctxt))
+    return returnSt;
+  return nullptr;
 }
 
 AstNodePtr parseBlock(ParserCtxt &ctxt) {
@@ -196,14 +241,21 @@ AstNodePtr parseBlock(ParserCtxt &ctxt) {
     return LogError("unable to parse Block");
   }
 
-  // parseStatement
+  std::vector<AstNodePtr> mayBeStatements;
+  while (true) {
+    if (auto statement = parseStatement(ctxt)) {
+      mayBeStatements.push_back(statement);
+    } else {
+      break;
+    }
+  }
 
   if (ctxt.getTokenAndAdvance().id != TokenId::RBrace) {
     ctxt.resetCursor(mark);
     return LogError("unable to parse Block");
   }
 
-  return std::make_shared<BlockNode>();
+  return std::make_shared<BlockNode>(mayBeStatements);
 }
 
 AstNodePtr parseFnDef(ParserCtxt &ctxt) {
@@ -251,16 +303,10 @@ AstNodePtr parseFnDef(ParserCtxt &ctxt) {
 }
 
 AstNodePtr parseTopLevelDecl(ParserCtxt &ctxt) {
-  auto fnDef = parseFnDef(ctxt);
-  if (fnDef) {
+  if (auto fnDef = parseFnDef(ctxt))
     return fnDef;
-  }
-
-  auto varDecl = parseVarDecl(ctxt);
-  if (varDecl) {
+  if (auto varDecl = parseVarDecl(ctxt))
     return varDecl;
-  }
-
   return nullptr;
 }
 
@@ -270,18 +316,17 @@ AstNodePtr parseRoot(ParserCtxt &ctxt) {
     return nullptr;
   }
 
-  auto root = std::make_shared<RootNode>();
-  root->declarations.push_back(topLevelDecl);
-
+  std::vector<AstNodePtr> declarations;
+  declarations.push_back(topLevelDecl);
   while (true) {
-    auto node = parseTopLevelDecl(ctxt);
-    if (!node) {
+    if (auto declaration = parseTopLevelDecl(ctxt)) {
+      declarations.push_back(declaration);
+    } else {
       break;
     }
-    root->declarations.push_back(node);
   }
 
-  return root;
+  return std::make_shared<RootNode>(declarations);
 }
 
 AstNodePtr parse(Tokens &&tokens) {

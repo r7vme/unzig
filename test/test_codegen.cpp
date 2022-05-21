@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
+#include <vector>
 
 #include "ast.hpp"
 #include "codegen.hpp"
@@ -21,11 +22,12 @@ entry:
 }
 )";
 
-  auto root = std::make_shared<RootNode>();
-  root->declarations.push_back(
+  std::vector<AstNodePtr> declarations;
+  declarations.push_back(
       std::make_shared<FnDefNode>("main", UzType{UzTypeId::Void}, nullptr));
-  root->declarations.push_back(
+  declarations.push_back(
       std::make_shared<FnDefNode>("f", UzType{UzTypeId::Void}, nullptr));
+  auto root = std::make_shared<RootNode>(declarations);
   CodeGenerator c;
   REQUIRE(root->codegen(&c));
 

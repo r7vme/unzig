@@ -18,7 +18,10 @@
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
+#include <memory>
+#include <vector>
 
+#include "ast.hpp"
 #include "codegen.hpp"
 #include "parser.hpp"
 #include "tokenizer.hpp"
@@ -61,23 +64,23 @@ int main(int argc, char **argv) {
   }
 
   // stub main
-  //llvm::LLVMContext llvmCtxt;
-  //llvm::Module llvmModule("foo", llvmCtxt);
-  //llvm::IRBuilder<> llvmIRBuilder(llvmCtxt);
-  //auto *funcType = llvm::FunctionType::get(llvmIRBuilder.getInt32Ty(), false);
-  //auto *mainFunc = llvm::Function::Create(
+  // llvm::LLVMContext llvmCtxt;
+  // llvm::Module llvmModule("foo", llvmCtxt);
+  // llvm::IRBuilder<> llvmIRBuilder(llvmCtxt);
+  // auto *funcType = llvm::FunctionType::get(llvmIRBuilder.getInt32Ty(),
+  // false); auto *mainFunc = llvm::Function::Create(
   //    funcType, llvm::Function::ExternalLinkage, "main", llvmModule);
-  //auto *entry = llvm::BasicBlock::Create(llvmCtxt, "entrypoint", mainFunc);
-  //llvmIRBuilder.SetInsertPoint(entry);
-  //llvmIRBuilder.CreateRet(llvmIRBuilder.getInt32(0));
-  //llvmModule.print(llFile, nullptr);
+  // auto *entry = llvm::BasicBlock::Create(llvmCtxt, "entrypoint", mainFunc);
+  // llvmIRBuilder.SetInsertPoint(entry);
+  // llvmIRBuilder.CreateRet(llvmIRBuilder.getInt32(0));
+  // llvmModule.print(llFile, nullptr);
 
-  auto root = std::make_shared<RootNode>();
-  root->declarations.push_back(
+  std::vector<AstNodePtr> declarations;
+  declarations.push_back(
       std::make_shared<FnDefNode>("main", UzType{UzTypeId::Void}, nullptr));
+  auto root = std::make_shared<RootNode>(declarations);
   CodeGenerator c;
-  if (!root->codegen(&c))
-  {
+  if (!root->codegen(&c)) {
     std::exit(1);
   }
   c.getLLVMModule().print(llFile, nullptr);

@@ -45,19 +45,26 @@ struct BinExprNode : public AstNode {
   BinExprNode(const BinOpType type, const AstNodePtr lhs, const AstNodePtr rhs)
       : type(type), lhs(lhs), rhs(rhs) {}
   BinOpType type;
-  AstNodePtr lhs;
-  AstNodePtr rhs;
+  AstNodePtr lhs, rhs;
   EXTRA_METHODS(BinExprNode)
 };
 
 struct AssignStNode : public AstNode {
+  AssignStNode(const AstNodePtr lhs, const AstNodePtr rhs)
+      : lhs(lhs), rhs(rhs) {}
+  AstNodePtr lhs, rhs;
   EXTRA_METHODS(AssignStNode)
 };
 
 struct ReturnStNode : public AstNode {
+  ReturnStNode(const AstNodePtr expr) : expr(expr) {}
+  AstNodePtr expr;
   EXTRA_METHODS(ReturnStNode)
 };
+
 struct BlockNode : public AstNode {
+  BlockNode(const std::vector<AstNodePtr> statements)
+      : statements(statements) {}
   std::vector<AstNodePtr> statements;
   EXTRA_METHODS(BlockNode)
 };
@@ -83,6 +90,8 @@ struct VarDeclNode : public AstNode {
 };
 
 struct RootNode : public AstNode {
+  RootNode(const std::vector<AstNodePtr> declarations)
+      : declarations(declarations) {}
   std::vector<AstNodePtr> declarations;
   EXTRA_METHODS(RootNode)
 };
