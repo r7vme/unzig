@@ -45,6 +45,8 @@ std::optional<BinOpType> mayBeToBinOpType(const Token &token) {
 
 // NumberExpr <- FLOAT / INTEGER
 AstNodePtr parseNumberExpr(ParserCtxt &ctxt) {
+  const auto mark = ctxt.getCursor();
+
   auto token = ctxt.getTokenAndAdvance();
   switch (token.id) {
   case (TokenId::IntegerLiteral):
@@ -52,6 +54,7 @@ AstNodePtr parseNumberExpr(ParserCtxt &ctxt) {
   case (TokenId::FloatLiteral):
     return std::make_shared<FloatExprNode>(token.value);
   default:
+    ctxt.resetCursor(mark);
     return nullptr;
   }
   assert(false);
@@ -59,17 +62,22 @@ AstNodePtr parseNumberExpr(ParserCtxt &ctxt) {
 
 // GroupedExpr <- LPAREN Expr RPAREN
 AstNodePtr parseGroupedExpr(ParserCtxt &ctxt) {
+  const auto mark = ctxt.getCursor();
+
   if (ctxt.getTokenAndAdvance().id != TokenId::LParen) {
-    LogError("expected left parenthesis");
+    ctxt.resetCursor(mark);
+    return nullptr;
   }
 
   auto expr = parseExpr(ctxt);
   if (!expr) {
+    ctxt.resetCursor(mark);
     return nullptr;
   }
 
   if (ctxt.getTokenAndAdvance().id != TokenId::RParen) {
-    return LogError("expected right parenthesis");
+    ctxt.resetCursor(mark);
+    return nullptr;
   }
 
   return expr;
@@ -81,13 +89,14 @@ AstNodePtr parseGroupedExpr(ParserCtxt &ctxt) {
 //             / NumberExpr
 AstNodePtr parsePrimaryExpr(ParserCtxt &ctxt) {
   // TODO: FnCallExpr / VarExpr
-  switch (ctxt.getToken().id) {
-  case TokenId::LParen:
-    return parseGroupedExpr(ctxt);
-  default:
-    return parseNumberExpr(ctxt);
+  if (auto expr = parseGroupedExpr(ctxt)) {
+    return expr;
   }
-  assert(false);
+  if (auto expr = parseNumberExpr(ctxt)) {
+    return expr;
+  }
+
+  return nullptr;
 }
 
 // BinOpRhsExpr <- (BinOp PrimaryExpr)*
@@ -122,6 +131,7 @@ AstNodePtr parseExpr(ParserCtxt &ctxt) {
   return nullptr;
 }
 
+// VarDecl <- KEYWORD_var IDENTIFIER COLON TypeExpr (AssignOp Expr)? SEMICOLON
 AstNodePtr parseVarDecl(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
@@ -177,6 +187,7 @@ AstNodePtr parseVarDecl(ParserCtxt &ctxt) {
   return std::make_shared<VarDeclNode>(varName, varType.value(), initExpr);
 }
 
+// ReturnSt <- KEYWORD_return Expr? SEMICOLON
 AstNodePtr parseReturnSt(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
@@ -195,6 +206,7 @@ AstNodePtr parseReturnSt(ParserCtxt &ctxt) {
   return std::make_shared<ReturnStNode>(mayBeExpr);
 }
 
+// AssignSt <- Expr AssignOp Expr SEMICOLON
 AstNodePtr parseAssignSt(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
@@ -223,6 +235,9 @@ AstNodePtr parseAssignSt(ParserCtxt &ctxt) {
   return std::make_shared<AssignStNode>(lhs, rhs);
 }
 
+// Statement <- VarDecl
+//           / AssignSt
+//           / ReturnSt
 AstNodePtr parseStatement(ParserCtxt &ctxt) {
   if (auto varDecl = parseVarDecl(ctxt))
     return varDecl;
@@ -233,6 +248,7 @@ AstNodePtr parseStatement(ParserCtxt &ctxt) {
   return nullptr;
 }
 
+// Block <- LBRACE Statement* RBRACE
 AstNodePtr parseBlock(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
@@ -258,6 +274,7 @@ AstNodePtr parseBlock(ParserCtxt &ctxt) {
   return std::make_shared<BlockNode>(mayBeStatements);
 }
 
+// FnDef <- KEYWORD_fn IDENTIFIER LPAREN RPAREN TypeExpr Block
 AstNodePtr parseFnDef(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
@@ -302,6 +319,8 @@ AstNodePtr parseFnDef(ParserCtxt &ctxt) {
   return std::make_shared<FnDefNode>(fnName, fnReturnType.value(), fnBody);
 }
 
+// TopLevelDecl <- FnDef
+//              / VarDecl
 AstNodePtr parseTopLevelDecl(ParserCtxt &ctxt) {
   if (auto fnDef = parseFnDef(ctxt))
     return fnDef;
@@ -310,7 +329,8 @@ AstNodePtr parseTopLevelDecl(ParserCtxt &ctxt) {
   return nullptr;
 }
 
-AstNodePtr parseRoot(ParserCtxt &ctxt) {
+// TopLevelDeclarations <- TopLevelDecl TopLevelDeclarations*
+AstNodePtr parseTopLevelDeclarations(ParserCtxt &ctxt) {
   auto topLevelDecl = parseTopLevelDecl(ctxt);
   if (!topLevelDecl) {
     return nullptr;
@@ -327,6 +347,11 @@ AstNodePtr parseRoot(ParserCtxt &ctxt) {
   }
 
   return std::make_shared<RootNode>(declarations);
+}
+
+// Root <- skip TopLevelDeclarations eof
+AstNodePtr parseRoot(ParserCtxt &ctxt) {
+  return parseTopLevelDeclarations(ctxt);
 }
 
 AstNodePtr parse(Tokens &&tokens) {
