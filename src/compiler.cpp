@@ -60,17 +60,27 @@ int main(int argc, char **argv) {
     std::exit(1);
   }
 
-  // mock main
-  llvm::LLVMContext llvmCtxt;
-  llvm::Module llvmModule("foo", llvmCtxt);
-  llvm::IRBuilder<> llvmIRBuilder(llvmCtxt);
-  auto *funcType = llvm::FunctionType::get(llvmIRBuilder.getInt32Ty(), false);
-  auto *mainFunc = llvm::Function::Create(
-      funcType, llvm::Function::ExternalLinkage, "main", llvmModule);
-  auto *entry = llvm::BasicBlock::Create(llvmCtxt, "entrypoint", mainFunc);
-  llvmIRBuilder.SetInsertPoint(entry);
-  llvmIRBuilder.CreateRet(llvmIRBuilder.getInt32(0));
-  llvmModule.print(llFile, nullptr);
+  // stub main
+  //llvm::LLVMContext llvmCtxt;
+  //llvm::Module llvmModule("foo", llvmCtxt);
+  //llvm::IRBuilder<> llvmIRBuilder(llvmCtxt);
+  //auto *funcType = llvm::FunctionType::get(llvmIRBuilder.getInt32Ty(), false);
+  //auto *mainFunc = llvm::Function::Create(
+  //    funcType, llvm::Function::ExternalLinkage, "main", llvmModule);
+  //auto *entry = llvm::BasicBlock::Create(llvmCtxt, "entrypoint", mainFunc);
+  //llvmIRBuilder.SetInsertPoint(entry);
+  //llvmIRBuilder.CreateRet(llvmIRBuilder.getInt32(0));
+  //llvmModule.print(llFile, nullptr);
+
+  AstNodePtr fnDef =
+      std::make_shared<FnDefNode>("main", UzType{UzTypeId::Void}, nullptr);
+  CodeGenerator c;
+  auto *code = fnDef->codegen(&c);
+  if (!code)
+  {
+    std::exit(1);
+  }
+  code->print(llFile);
 
   //  auto tokens = tokenize(inputCode);
   //  auto ast = parse(std::move(tokens));

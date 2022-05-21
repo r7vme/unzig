@@ -4,8 +4,6 @@
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
 
-using Code = llvm::Value;
-
 class FloatExprNode;
 class IntegerExprNode;
 class BinExprNode;
@@ -23,11 +21,11 @@ public:
   CodeGenerator()
       : llvmCtxt(), llvmModule("unzig", llvmCtxt), llvmIRBuilder(llvmCtxt) {}
 
-  Code *generate(FloatExprNode *astNode);
-  Code *generate(IntegerExprNode *astNode);
-  Code *generate(BinExprNode *astNode);
-  Code *generate(VarDeclNode *astNode);
-  Code *generate(FnDefNode *astNode);
-  Code *generate(BlockNode *astNode);
-  Code *generate(RootNode *astNode);
+  llvm::Value *generate(FloatExprNode *astNode);
+  llvm::Value *generate(IntegerExprNode *astNode);
+  llvm::Value *generate(BinExprNode *astNode);
+  llvm::Value *generate(VarDeclNode *astNode);
+  llvm::Value *generate(FnDefNode *astNode);
+  llvm::Value *generate(BlockNode *astNode);
+  llvm::Value *generate(RootNode *astNode);
 };

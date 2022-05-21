@@ -1,23 +1,50 @@
 #include "codegen.hpp"
 #include "ast.hpp"
+#include "types.hpp"
 #include <cstdint>
 #include <llvm/ADT/APFloat.h>
+#include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Constants.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Function.h>
 #include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Value.h>
 
-llvm::Value *CodeGenerator::generate(FloatExprNode *astNode) {
-  return llvm::ConstantFP::get(llvm::Type::getFloatTy(llvmCtxt),
-                               astNode->value);
+using llvm::BasicBlock;
+using llvm::ConstantFP;
+using llvm::ConstantInt;
+using llvm::Function;
+using llvm::FunctionType;
+using llvm::LLVMContext;
+using llvm::Type;
+using llvm::Value;
+
+Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
+  switch (uzType.id) {
+  case UzTypeId::Void:
+    return Type::getVoidTy(ctxt);
+  case UzTypeId::Int32:
+    return Type::getInt32Ty(ctxt);
+  case UzTypeId::Float32:
+    return Type::getFloatTy(ctxt);
+  default:
+    assert(false);
+  }
+  assert(false);
+  return nullptr;
 }
 
-llvm::Value *CodeGenerator::generate(IntegerExprNode *astNode) {
+Value *CodeGenerator::generate(FloatExprNode *astNode) {
+  return ConstantFP::get(Type::getFloatTy(llvmCtxt), astNode->value);
+}
+
+Value *CodeGenerator::generate(IntegerExprNode *astNode) {
   const int32_t decimal = 10;
-  return llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvmCtxt),
-                                astNode->value, decimal);
+  return ConstantInt::get(Type::getInt32Ty(llvmCtxt), astNode->value, decimal);
 }
 
-llvm::Value *CodeGenerator::generate(BinExprNode *astNode) {
+Value *CodeGenerator::generate(BinExprNode *astNode) {
   auto *l = astNode->lhs->codegen(this);
   auto *r = astNode->rhs->codegen(this);
   if (!l || !r) {
@@ -38,18 +65,29 @@ llvm::Value *CodeGenerator::generate(BinExprNode *astNode) {
   return nullptr;
 };
 
-llvm::Value *CodeGenerator::generate(VarDeclNode *astNode) {
-  return nullptr;
+Value *CodeGenerator::generate(VarDeclNode *astNode) { return nullptr; }
+
+Value *CodeGenerator::generate(FnDefNode *astNode) {
+  auto funcName = astNode->name;
+  auto *funcReturnType = toLLVMType(astNode->returnType, llvmCtxt);
+  auto *funcType = FunctionType::get(funcReturnType, false);
+  auto *func = Function::Create(funcType, Function::ExternalLinkage, funcName,
+                                llvmModule);
+
+  BasicBlock *entryBlock = BasicBlock::Create(llvmCtxt, "entry", func);
+  llvmIRBuilder.SetInsertPoint(entryBlock);
+  llvmIRBuilder.CreateRet(nullptr);
+
+  // if (Value *RetVal = astNode->body->codegen()) {
+  //   llvmIRBuilder.CreateRet(RetVal);
+  // }
+  // else {
+  // func->eraseFromParent();
+  // return nullptr;
+  // }
+
+  return func;
 }
 
-llvm::Value *CodeGenerator::generate(FnDefNode *astNode) {
-  return nullptr;
-}
-
-llvm::Value *CodeGenerator::generate(BlockNode *astNode) {
-  return nullptr;
-}
-
-llvm::Value *CodeGenerator::generate(RootNode *astNode) {
-  return nullptr;
-}
+Value *CodeGenerator::generate(BlockNode *astNode) { return nullptr; }
+Value *CodeGenerator::generate(RootNode *astNode) { return nullptr; }

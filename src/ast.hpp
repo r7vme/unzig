@@ -8,7 +8,9 @@
 #include "types.hpp"
 
 #define EXTRA_METHODS(CLASS)                                                   \
-  Code *codegen(CodeGenerator *g) override { return g->generate(this); };      \
+  llvm::Value *codegen(CodeGenerator *g) override {                            \
+    return g->generate(this);                                                  \
+  };                                                                           \
   bool isEqual(AstEqualityComparator *c, const AstNode &other)                 \
       const override {                                                         \
     return (typeid(*this) == typeid(other)) &&                                 \
@@ -22,7 +24,7 @@ enum BinOpType { ADD, SUB, MUL, DIV };
 
 struct AstNode {
   virtual ~AstNode() = default;
-  virtual Code *codegen(CodeGenerator *g) = 0;
+  virtual llvm::Value *codegen(CodeGenerator *g) = 0;
   virtual bool isEqual(AstEqualityComparator *c,
                        const AstNode &other) const = 0;
 };

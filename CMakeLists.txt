@@ -32,5 +32,6 @@ add_subdirectory(third_party/Catch2)
 add_executable(tests
   test/test_tokenizer.cpp
   test/test_parser.cpp
+  test/test_codegen.cpp
 )
 target_link_libraries(tests PRIVATE unzig_lib Catch2::Catch2WithMain)
