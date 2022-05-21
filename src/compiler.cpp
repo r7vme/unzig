@@ -72,15 +72,15 @@ int main(int argc, char **argv) {
   //llvmIRBuilder.CreateRet(llvmIRBuilder.getInt32(0));
   //llvmModule.print(llFile, nullptr);
 
-  AstNodePtr fnDef =
-      std::make_shared<FnDefNode>("main", UzType{UzTypeId::Void}, nullptr);
+  auto root = std::make_shared<RootNode>();
+  root->declarations.push_back(
+      std::make_shared<FnDefNode>("main", UzType{UzTypeId::Void}, nullptr));
   CodeGenerator c;
-  auto *code = fnDef->codegen(&c);
-  if (!code)
+  if (!root->codegen(&c))
   {
     std::exit(1);
   }
-  code->print(llFile);
+  c.getLLVMModule().print(llFile, nullptr);
 
   //  auto tokens = tokenize(inputCode);
   //  auto ast = parse(std::move(tokens));

@@ -78,6 +78,7 @@ Value *CodeGenerator::generate(FnDefNode *astNode) {
   llvmIRBuilder.SetInsertPoint(entryBlock);
   llvmIRBuilder.CreateRet(nullptr);
 
+  // TODO block codegen
   // if (Value *RetVal = astNode->body->codegen()) {
   //   llvmIRBuilder.CreateRet(RetVal);
   // }
@@ -90,4 +91,14 @@ Value *CodeGenerator::generate(FnDefNode *astNode) {
 }
 
 Value *CodeGenerator::generate(BlockNode *astNode) { return nullptr; }
-Value *CodeGenerator::generate(RootNode *astNode) { return nullptr; }
+
+Value *CodeGenerator::generate(RootNode *astNode) {
+  for (auto &decl : astNode->declarations) {
+    if (!(decl && decl->codegen(this))) {
+      return nullptr;
+    }
+  }
+
+  // return a pointer to required main function
+  return llvmModule.getFunction("main");
+}

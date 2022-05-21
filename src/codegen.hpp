@@ -20,6 +20,7 @@ class CodeGenerator {
 public:
   CodeGenerator()
       : llvmCtxt(), llvmModule("unzig", llvmCtxt), llvmIRBuilder(llvmCtxt) {}
+  const llvm::Module &getLLVMModule() const { return llvmModule; };
 
   llvm::Value *generate(FloatExprNode *astNode);
   llvm::Value *generate(IntegerExprNode *astNode);

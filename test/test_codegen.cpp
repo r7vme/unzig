@@ -7,20 +7,30 @@
 using Catch::Matchers::Equals;
 
 TEST_CASE("", "[codegen]") {
-  std::string expected = R"(define void @main() {
+  std::string expected = R"(; ModuleID = 'unzig'
+source_filename = "unzig"
+
+define void @main() {
+entry:
+  ret void
+}
+
+define void @f() {
 entry:
   ret void
 }
 )";
 
-  AstNodePtr fnDef =
-      std::make_shared<FnDefNode>("main", UzType{UzTypeId::Void}, nullptr);
+  auto root = std::make_shared<RootNode>();
+  root->declarations.push_back(
+      std::make_shared<FnDefNode>("main", UzType{UzTypeId::Void}, nullptr));
+  root->declarations.push_back(
+      std::make_shared<FnDefNode>("f", UzType{UzTypeId::Void}, nullptr));
   CodeGenerator c;
-  auto *code = fnDef->codegen(&c);
-  REQUIRE(code);
+  REQUIRE(root->codegen(&c));
 
   std::string output;
   llvm::raw_string_ostream rso(output);
-  code->print(rso);
+  c.getLLVMModule().print(rso, nullptr);
   REQUIRE_THAT(output, Equals(expected));
 }
