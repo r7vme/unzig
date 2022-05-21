@@ -185,11 +185,19 @@ TEST_CASE("FnDef 'fn main() void {};'", "[parser]") {
 TEST_CASE("block of statements", "[parser]") {
   //
   // {
+  //   var x: i32 = 1;
   //   return 1;
   // }
   // clang-format off
   Tokens inputTokens = {
     Token{TokenId::LBrace},
+    Token{TokenId::KwVar},
+    Token{TokenId::Identifier, "x"},
+    Token{TokenId::Colon},
+    Token{TokenId::Identifier, "i32"},
+    Token{TokenId::Equal},
+    Token{TokenId::IntegerLiteral, "1"},
+    Token{TokenId::Semicolon},
     Token{TokenId::KwReturn},
     Token{TokenId::IntegerLiteral, "1"},
     Token{TokenId::Semicolon},
@@ -198,9 +206,12 @@ TEST_CASE("block of statements", "[parser]") {
   };
   // clang-format on
 
-  std::vector<AstNodePtr> statements;
-  statements.push_back(
-      std::make_shared<ReturnStNode>(std::make_shared<IntegerExprNode>("1")));
+  auto varDecl = std::make_shared<VarDeclNode>(
+      "x", UzType{UzTypeId::Int32}, std::make_shared<IntegerExprNode>("1"));
+  std::vector<AstNodePtr> statements{
+      varDecl,
+      std::make_shared<ReturnStNode>(std::make_shared<IntegerExprNode>("1")),
+  };
   auto expected = std::make_shared<BlockNode>(statements);
 
   ParserCtxt ctxt(std::move(inputTokens));
