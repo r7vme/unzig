@@ -52,7 +52,7 @@ AstNodePtr parseNumberExpr(ParserCtxt &ctxt) {
   case (TokenId::FloatLiteral):
     return std::make_shared<FloatExprNode>(token.value);
   default:
-    return LogError(std::string(__func__) + "unknown token");
+    return nullptr;
   }
   assert(false);
 }
@@ -238,7 +238,7 @@ AstNodePtr parseBlock(ParserCtxt &ctxt) {
 
   if (ctxt.getTokenAndAdvance().id != TokenId::LBrace) {
     ctxt.resetCursor(mark);
-    return LogError("unable to parse Block");
+    return nullptr;
   }
 
   std::vector<AstNodePtr> mayBeStatements;
@@ -252,7 +252,7 @@ AstNodePtr parseBlock(ParserCtxt &ctxt) {
 
   if (ctxt.getTokenAndAdvance().id != TokenId::RBrace) {
     ctxt.resetCursor(mark);
-    return LogError("unable to parse Block");
+    return nullptr;
   }
 
   return std::make_shared<BlockNode>(mayBeStatements);

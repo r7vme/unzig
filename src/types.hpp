@@ -9,4 +9,6 @@ struct UzType {
   UzTypeId id;
 };
 
+bool operator==(const UzType &lhs, const UzType &rhs);
+
 std::optional<UzType> toUzType(const std::string &input);

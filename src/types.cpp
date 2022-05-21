@@ -3,6 +3,10 @@
 #include <array>
 #include <utility>
 
+bool operator==(const UzType &lhs, const UzType &rhs) {
+  return lhs.id == rhs.id;
+}
+
 std::optional<UzType> toUzType(const std::string &input) {
   using UzTypeName = std::pair<std::string, UzTypeId>;
   using UzTypeNames =

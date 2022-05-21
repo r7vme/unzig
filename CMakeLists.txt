@@ -3,7 +3,7 @@ project(unzig)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_BUILD_TYPE RelWithDebInfo)
+set(CMAKE_BUILD_TYPE Debug)
 
 # LLVM
 find_package(LLVM REQUIRED CONFIG)

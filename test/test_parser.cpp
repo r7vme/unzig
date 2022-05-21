@@ -2,6 +2,7 @@
 #include <memory>
 
 #include <catch2/catch_test_macros.hpp>
+#include <vector>
 
 #include "ast.hpp"
 #include "ast_equality_comparator.hpp"
@@ -12,6 +13,7 @@
 AstNodePtr parseExpr(ParserCtxt &ctxt);
 AstNodePtr parseVarDecl(ParserCtxt &ctxt);
 AstNodePtr parseFnDef(ParserCtxt &ctxt);
+AstNodePtr parseBlock(ParserCtxt &ctxt);
 
 TEST_CASE("BinOpRhsExpr inverted operation priority - 1 + 2 * 3", "[parser]") {
   // clang-format off
@@ -166,10 +168,11 @@ TEST_CASE("FnDef 'fn main() void {};'", "[parser]") {
     Token{TokenId::Eof}
   };
   // clang-format on
-
+  //
   std::vector<AstNodePtr> declarations;
-  declarations.push_back(
-      std::make_shared<FnDefNode>("main", UzType{UzTypeId::Void}, nullptr));
+  declarations.push_back(std::make_shared<FnDefNode>(
+      "main", UzType{UzTypeId::Void},
+      std::make_shared<BlockNode>(std::vector<AstNodePtr>())));
   auto expectedAST = std::make_shared<RootNode>(declarations);
 
   auto AST = parse(std::move(inputTokens));
@@ -177,4 +180,33 @@ TEST_CASE("FnDef 'fn main() void {};'", "[parser]") {
 
   AstEqualityComparator c;
   REQUIRE(AST->isEqual(&c, *expectedAST));
+}
+
+TEST_CASE("block of statements", "[parser]") {
+  //
+  // {
+  //   return 1;
+  // }
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::LBrace},
+    Token{TokenId::KwReturn},
+    Token{TokenId::IntegerLiteral, "1"},
+    Token{TokenId::Semicolon},
+    Token{TokenId::RBrace},
+    Token{TokenId::Eof}
+  };
+  // clang-format on
+
+  std::vector<AstNodePtr> statements;
+  statements.push_back(
+      std::make_shared<ReturnStNode>(std::make_shared<IntegerExprNode>("1")));
+  auto expected = std::make_shared<BlockNode>(statements);
+
+  ParserCtxt ctxt(std::move(inputTokens));
+  auto AST = parseBlock(ctxt);
+  REQUIRE(AST);
+
+  AstEqualityComparator c;
+  REQUIRE(AST->isEqual(&c, *expected));
 }

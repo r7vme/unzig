@@ -3,6 +3,7 @@ unzig
 build
 tmp
 .cache
+.gdb_history
 
 # Prerequisites
 *.d
