@@ -221,3 +221,51 @@ TEST_CASE("block of statements", "[parser]") {
   AstEqualityComparator c;
   REQUIRE(AST->isEqual(&c, *expected));
 }
+
+TEST_CASE("VarExpr 'x + 2'", "[parser]") {
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::Identifier, "x"},
+    Token{TokenId::Plus},
+    Token{TokenId::IntegerLiteral, "2"},
+    Token{TokenId::Eof}
+  };
+
+  AstNodePtr expectedAST = std::make_shared<BinExprNode>(
+    BinOpType::ADD,
+    std::make_shared<VarExprNode>("x"),
+    std::make_shared<IntegerExprNode>("2")
+    );
+  // clang-format on
+  ParserCtxt ctxt(std::move(inputTokens));
+  auto AST = parseExpr(ctxt);
+  REQUIRE(AST);
+
+  AstEqualityComparator c;
+  REQUIRE(AST->isEqual(&c, *expectedAST));
+}
+
+TEST_CASE("FnCallExpr 'f() + 2'", "[parser]") {
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::Identifier, "f"},
+    Token{TokenId::LParen},
+    Token{TokenId::RParen},
+    Token{TokenId::Plus},
+    Token{TokenId::IntegerLiteral, "2"},
+    Token{TokenId::Eof}
+  };
+
+  AstNodePtr expectedAST = std::make_shared<BinExprNode>(
+    BinOpType::ADD,
+    std::make_shared<FnCallExprNode>("f"),
+    std::make_shared<IntegerExprNode>("2")
+    );
+  // clang-format on
+  ParserCtxt ctxt(std::move(inputTokens));
+  auto AST = parseExpr(ctxt);
+  REQUIRE(AST);
+
+  AstEqualityComparator c;
+  REQUIRE(AST->isEqual(&c, *expectedAST));
+}
