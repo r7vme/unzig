@@ -1,5 +1,6 @@
 #include "codegen.hpp"
 #include "ast.hpp"
+#include "ast_equality_comparator.hpp"
 #include "types.hpp"
 #include <cstdint>
 #include <llvm/ADT/APFloat.h>
@@ -66,6 +67,8 @@ Value *CodeGenerator::generate(BinExprNode *astNode) {
 };
 
 Value *CodeGenerator::generate(VarDeclNode *astNode) { return nullptr; }
+Value *CodeGenerator::generate(VarExprNode *astNode) { return nullptr; }
+Value *CodeGenerator::generate(FnCallExprNode *astNode) { return nullptr; }
 
 Value *CodeGenerator::generate(FnDefNode *astNode) {
   auto funcName = astNode->name;

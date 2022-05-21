@@ -2,6 +2,16 @@
 #include "ast.hpp"
 #include <cstddef>
 
+bool AstEqualityComparator::compare(const FnCallExprNode &lhs,
+                                    const FnCallExprNode &rhs) {
+  return lhs.callee == rhs.callee;
+}
+
+bool AstEqualityComparator::compare(const VarExprNode &lhs,
+                                    const VarExprNode &rhs) {
+  return lhs.name == rhs.name;
+}
+
 bool AstEqualityComparator::compare(const BinExprNode &lhs,
                                     const BinExprNode &rhs) {
   bool isLhsMemberEqual = lhs.lhs->isEqual(this, *(rhs.lhs));

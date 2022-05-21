@@ -13,6 +13,8 @@ class BlockNode;
 class RootNode;
 class AssignStNode;
 class ReturnStNode;
+class VarExprNode;
+class FnCallExprNode;
 
 class CodeGenerator {
   llvm::LLVMContext llvmCtxt;
@@ -33,4 +35,6 @@ public:
   llvm::Value *generate(RootNode *astNode);
   llvm::Value *generate(AssignStNode *astNode);
   llvm::Value *generate(ReturnStNode *astNode);
+  llvm::Value *generate(VarExprNode *astNode);
+  llvm::Value *generate(FnCallExprNode *astNode);
 };

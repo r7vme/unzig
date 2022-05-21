@@ -11,6 +11,8 @@ class BlockNode;
 class RootNode;
 class AssignStNode;
 class ReturnStNode;
+class VarExprNode;
+class FnCallExprNode;
 
 class AstEqualityComparator {
 public:
@@ -21,6 +23,8 @@ public:
   bool compare(const RootNode &lhs, const RootNode &rhs);
   bool compare(const AssignStNode &lhs, const AssignStNode &rhs);
   bool compare(const ReturnStNode &lhs, const ReturnStNode &rhs);
+  bool compare(const VarExprNode &lhs, const VarExprNode &rhs);
+  bool compare(const FnCallExprNode &lhs, const FnCallExprNode &rhs);
 
   template <typename T> bool compare(const T &lhs, const T &rhs) {
     return lhs.value == rhs.value;

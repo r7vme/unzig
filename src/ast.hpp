@@ -29,6 +29,18 @@ struct AstNode {
                        const AstNode &other) const = 0;
 };
 
+struct FnCallExprNode : public AstNode {
+  FnCallExprNode(const std::string &callee) : callee(callee){};
+  const std::string callee;
+  EXTRA_METHODS(FnCallExprNode)
+};
+
+struct VarExprNode : public AstNode {
+  VarExprNode(const std::string &name) : name(name){};
+  const std::string name;
+  EXTRA_METHODS(VarExprNode)
+};
+
 struct FloatExprNode : public AstNode {
   FloatExprNode(const std::string &value) : value(value){};
   const std::string value;

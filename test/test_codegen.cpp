@@ -7,7 +7,7 @@
 
 using Catch::Matchers::Equals;
 
-TEST_CASE("", "[codegen]") {
+TEST_CASE("functions", "[codegen]") {
   std::string expected = R"(; ModuleID = 'unzig'
 source_filename = "unzig"
 
