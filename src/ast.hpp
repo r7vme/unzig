@@ -50,7 +50,15 @@ struct BinExprNode : public AstNode {
   EXTRA_METHODS(BinExprNode)
 };
 
+struct AssignStNode : public AstNode {
+  EXTRA_METHODS(AssignStNode)
+};
+
+struct ReturnStNode : public AstNode {
+  EXTRA_METHODS(ReturnStNode)
+};
 struct BlockNode : public AstNode {
+  std::vector<AstNodePtr> statements;
   EXTRA_METHODS(BlockNode)
 };
 

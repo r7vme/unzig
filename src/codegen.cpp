@@ -91,6 +91,8 @@ Value *CodeGenerator::generate(FnDefNode *astNode) {
 }
 
 Value *CodeGenerator::generate(BlockNode *astNode) { return nullptr; }
+Value *CodeGenerator::generate(AssignStNode *astNode) { return nullptr; }
+Value *CodeGenerator::generate(ReturnStNode *astNode) { return nullptr; }
 
 Value *CodeGenerator::generate(RootNode *astNode) {
   for (auto &decl : astNode->declarations) {
@@ -98,7 +100,6 @@ Value *CodeGenerator::generate(RootNode *astNode) {
       return nullptr;
     }
   }
-
   // return a pointer to required main function
   return llvmModule.getFunction("main");
 }

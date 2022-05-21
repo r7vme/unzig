@@ -184,6 +184,10 @@ AstNodePtr parseVarDecl(ParserCtxt &ctxt) {
   return std::make_shared<VarDeclNode>(varName, varType.value(), initExpr);
 }
 
+AstNodePtr parseStatement(ParserCtxt &ctxt) {
+  // implement here
+}
+
 AstNodePtr parseBlock(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 

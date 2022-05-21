@@ -31,3 +31,15 @@ bool AstEqualityComparator::compare(const RootNode &lhs,
   // TODO: not all fields checked
   return true;
 }
+
+bool AstEqualityComparator::compare(const ReturnStNode &lhs,
+                                    const ReturnStNode &rhs) {
+  // TODO: not all fields checked
+  return true;
+}
+
+bool AstEqualityComparator::compare(const AssignStNode &lhs,
+                                    const AssignStNode &rhs) {
+  // TODO: not all fields checked
+  return true;
+}
