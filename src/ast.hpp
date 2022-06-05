@@ -5,11 +5,15 @@
 
 #include "ast_equality_comparator.hpp"
 #include "codegen.hpp"
+#include "dotgen.hpp"
 #include "types.hpp"
 
 #define EXTRA_METHODS(CLASS)                                                   \
   llvm::Value *codegen(CodeGenerator *g) override {                            \
     return g->generate(this);                                                  \
+  };                                                                           \
+  void dotgen(DotGenerator *g, std::string& output) override {                            \
+    return g->generate(this, output);                                                  \
   };                                                                           \
   bool isEqual(AstEqualityComparator *c, const AstNode &other)                 \
       const override {                                                         \
@@ -25,6 +29,7 @@ enum BinOpType { ADD, SUB, MUL, DIV };
 struct AstNode {
   virtual ~AstNode() = default;
   virtual llvm::Value *codegen(CodeGenerator *g) = 0;
+  virtual void dotgen(DotGenerator *g, std::string& output) = 0;
   virtual bool isEqual(AstEqualityComparator *c,
                        const AstNode &other) const = 0;
 };

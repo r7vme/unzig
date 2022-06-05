@@ -15,6 +15,7 @@ include_directories(src)
 add_library(unzig_lib
   src/ast_equality_comparator.cpp
   src/codegen.cpp
+  src/dotgen.cpp
   src/parser.cpp
   src/tokenizer.cpp
   src/types.cpp
@@ -33,5 +34,6 @@ add_executable(tests
   test/test_tokenizer.cpp
   test/test_parser.cpp
   test/test_codegen.cpp
+  test/test_dotgen.cpp
 )
 target_link_libraries(tests PRIVATE unzig_lib Catch2::Catch2WithMain)

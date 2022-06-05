@@ -1,7 +1,6 @@
 zig-cache
 unzig
 build
-tmp
 .cache
 .gdb_history
 
