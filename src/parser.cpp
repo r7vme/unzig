@@ -325,6 +325,11 @@ AstNodePtr parseFnDef(ParserCtxt &ctxt) {
 
   auto fnName = fnIdentifierToken.value;
   auto fnReturnType = toUzType(typeExprToken.value);
+  if (!fnReturnType)
+  {
+    return parseErr(ctxt, mark);
+  }
+
   return std::make_shared<FnDefNode>(fnName, fnReturnType.value(), fnBody);
 }
 
