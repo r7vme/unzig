@@ -28,6 +28,9 @@ target_link_libraries(cmd unzig_lib edit)
 add_executable(unzig src/compiler.cpp)
 target_link_libraries(unzig unzig_lib)
 
+add_executable(unzig_dotgen src/dotgen_cmd.cpp)
+target_link_libraries(unzig_dotgen unzig_lib)
+
 # tests
 add_subdirectory(third_party/Catch2)
 add_executable(tests
