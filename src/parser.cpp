@@ -43,7 +43,8 @@ std::string getHighlightedSourceCode(const std::string &input,
 
 void printSyntaxError(ParserCtxt &ctxt, const std::string &msg) {
   const auto token = ctxt.getToken();
-  auto hightlightedLine = getHighlightedSourceCode(ctxt.getSource(), token.position);
+  auto hightlightedLine =
+      getHighlightedSourceCode(ctxt.getSource(), token.position);
   std::cerr << "Syntax error: " << msg << '\n' << hightlightedLine << std::endl;
 }
 
@@ -328,45 +329,40 @@ AstNodePtr parseBlock(ParserCtxt &ctxt) {
 
 // FnDef <- KEYWORD_fn IDENTIFIER LPAREN RPAREN TypeExpr Block
 AstNodePtr parseFnDef(ParserCtxt &ctxt) {
+  const std::string errorMsg = "unable to parse function definition";
   const auto mark = ctxt.getCursor();
 
   auto kwFnToken = ctxt.getTokenAndAdvance();
-  if (kwFnToken.id != TokenId::KwFn) {
+  if (kwFnToken.id != TokenId::KwFn)
     return resetToken(ctxt, mark);
-  }
 
   auto fnIdentifierToken = ctxt.getTokenAndAdvance();
-  if (fnIdentifierToken.id != TokenId::Identifier) {
-    return resetToken(ctxt, mark);
-  }
+  if (fnIdentifierToken.id != TokenId::Identifier)
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(), errorMsg);
 
   auto lParenToken = ctxt.getTokenAndAdvance();
-  if (lParenToken.id != TokenId::LParen) {
-    return resetToken(ctxt, mark);
-  }
+  if (lParenToken.id != TokenId::LParen)
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(), errorMsg);
 
   auto rParenToken = ctxt.getTokenAndAdvance();
-  if (rParenToken.id != TokenId::RParen) {
-    return resetToken(ctxt, mark);
-  }
+  if (rParenToken.id != TokenId::RParen)
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(), errorMsg);
 
   auto typeExprToken = ctxt.getTokenAndAdvance();
-  if (typeExprToken.id != TokenId::Identifier) {
-    return resetToken(ctxt, mark);
-  }
+  if (typeExprToken.id != TokenId::Identifier)
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(), errorMsg);
+
+  auto fnReturnType = toUzType(typeExprToken.value);
+  if (!fnReturnType)
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(),
+                     std::string("unknown type ") + typeExprToken.value);
 
   auto fnBody = parseBlock(ctxt);
-  if (!fnBody) {
-    return resetToken(ctxt, mark);
-  }
+  if (!fnBody)
+    fatalSyntaxError(ctxt, ctxt.getCursor(), errorMsg);
 
-  auto fnName = fnIdentifierToken.value;
-  auto fnReturnType = toUzType(typeExprToken.value);
-  if (!fnReturnType) {
-    return resetToken(ctxt, mark);
-  }
-
-  return std::make_shared<FnDefNode>(fnName, fnReturnType.value(), fnBody);
+  return std::make_shared<FnDefNode>(fnIdentifierToken.value,
+                                     fnReturnType.value(), fnBody);
 }
 
 // TopLevelDecl <- FnDef
@@ -387,14 +383,9 @@ AstNodePtr parseTopLevelDeclarations(ParserCtxt &ctxt) {
 
   std::vector<AstNodePtr> declarations;
   declarations.push_back(topLevelDecl);
-  while (true) {
-    if (auto declaration = parseTopLevelDecl(ctxt)) {
-      declarations.push_back(declaration);
-    } else {
-      break;
-    }
+  while (auto declaration = parseTopLevelDecl(ctxt)) {
+    declarations.push_back(declaration);
   }
-
   return std::make_shared<RootNode>(declarations);
 }
 

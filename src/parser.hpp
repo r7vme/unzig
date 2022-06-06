@@ -19,9 +19,7 @@ public:
     return tokens[cursor];
   }
 
-  const std::string &getSource() const {
-    return source;
-  }
+  const std::string &getSource() const { return source; }
 
   void skipToken() { cursor++; }
 
@@ -32,6 +30,7 @@ public:
   }
 
   size_t getCursor() const { return cursor; }
+  size_t getPrevCursor() const { return (cursor == 0) ? cursor : cursor - 1; }
   void resetCursor(const size_t newCursor) {
     assert(tokens.size() > newCursor);
     cursor = newCursor;
