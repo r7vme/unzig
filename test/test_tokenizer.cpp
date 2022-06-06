@@ -16,55 +16,55 @@ pub fn main() void {
 )";
   Tokens expectedTokens = {
       // fn foo
-      Token{TokenId::KwFn},
-      Token{TokenId::Identifier, "foo"},
-      Token{TokenId::LParen},
-      Token{TokenId::RParen},
-      Token{TokenId::Identifier, "u64"},
-      Token{TokenId::LBrace},
+      Token{TokenId::KwFn, "", 0},
+      Token{TokenId::Identifier, "foo", 0},
+      Token{TokenId::LParen, "", 0},
+      Token{TokenId::RParen, "", 0},
+      Token{TokenId::Identifier, "u64", 0},
+      Token{TokenId::LBrace, "", 0},
       // foo block
-      Token{TokenId::KwReturn},
-      Token{TokenId::IntegerLiteral, "1"},
-      Token{TokenId::Semicolon},
+      Token{TokenId::KwReturn, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::Semicolon, "", 0},
       // end foo block
-      Token{TokenId::RBrace},
+      Token{TokenId::RBrace, "", 0},
       // fn main
-      Token{TokenId::KwPub},
-      Token{TokenId::KwFn},
-      Token{TokenId::Identifier, "main"},
-      Token{TokenId::LParen},
-      Token{TokenId::RParen},
-      Token{TokenId::Identifier, "void"},
-      Token{TokenId::LBrace},
+      Token{TokenId::KwPub, "", 0},
+      Token{TokenId::KwFn, "", 0},
+      Token{TokenId::Identifier, "main", 0},
+      Token{TokenId::LParen, "", 0},
+      Token{TokenId::RParen, "", 0},
+      Token{TokenId::Identifier, "void", 0},
+      Token{TokenId::LBrace, "", 0},
       // main block
       // line 1
-      Token{TokenId::KwVar},
-      Token{TokenId::Identifier, "x"},
-      Token{TokenId::Colon},
-      Token{TokenId::Identifier, "u64"},
-      Token{TokenId::Equal},
-      Token{TokenId::Identifier, "foo"},
-      Token{TokenId::LParen},
-      Token{TokenId::RParen},
-      Token{TokenId::Semicolon},
+      Token{TokenId::KwVar, "", 0},
+      Token{TokenId::Identifier, "x", 0},
+      Token{TokenId::Colon, "", 0},
+      Token{TokenId::Identifier, "u64", 0},
+      Token{TokenId::Equal, "", 0},
+      Token{TokenId::Identifier, "foo", 0},
+      Token{TokenId::LParen, "", 0},
+      Token{TokenId::RParen, "", 0},
+      Token{TokenId::Semicolon, "", 0},
       // line 2
-      Token{TokenId::KwVar},
-      Token{TokenId::Identifier, "y"},
-      Token{TokenId::Colon},
-      Token{TokenId::Identifier, "u64"},
-      Token{TokenId::Equal},
-      Token{TokenId::IntegerLiteral, "123"},
-      Token{TokenId::Semicolon},
+      Token{TokenId::KwVar, "", 0},
+      Token{TokenId::Identifier, "y", 0},
+      Token{TokenId::Colon, "", 0},
+      Token{TokenId::Identifier, "u64", 0},
+      Token{TokenId::Equal, "", 0},
+      Token{TokenId::IntegerLiteral, "123", 0},
+      Token{TokenId::Semicolon, "", 0},
       // line 3
-      Token{TokenId::Identifier, "y"},
-      Token{TokenId::Equal},
-      Token{TokenId::IntegerLiteral, "1"},
-      Token{TokenId::Plus},
-      Token{TokenId::IntegerLiteral, "2"},
-      Token{TokenId::Semicolon},
+      Token{TokenId::Identifier, "y", 0},
+      Token{TokenId::Equal, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::Plus, "", 0},
+      Token{TokenId::IntegerLiteral, "2", 0},
+      Token{TokenId::Semicolon, "", 0},
       // end main block
-      Token{TokenId::RBrace},
-      Token{TokenId::Eof},
+      Token{TokenId::RBrace, "", 0},
+      Token{TokenId::Eof, "", 0},
   };
 
   auto actualTokens = tokenize(s);
@@ -79,11 +79,11 @@ pub fn main() void {
 
 TEST_CASE("last char is part of identifier or number", "[tokenizer]") {
   REQUIRE(tokenize("1") ==
-          Tokens{Token{TokenId::IntegerLiteral, "1"}, Token{TokenId::Eof}});
+          Tokens{Token{TokenId::IntegerLiteral, "1", 0}, Token{TokenId::Eof, "", 0}});
   REQUIRE(tokenize("foo") ==
-          Tokens{Token{TokenId::Identifier, "foo"}, Token{TokenId::Eof}});
+          Tokens{Token{TokenId::Identifier, "foo", 0}, Token{TokenId::Eof, "", 0}});
 }
 
 TEST_CASE("empty string", "[tokenizer]") {
-  REQUIRE(tokenize("") == Tokens{Token{TokenId::Eof}});
+  REQUIRE(tokenize("") == Tokens{Token{TokenId::Eof, "", 0}});
 }

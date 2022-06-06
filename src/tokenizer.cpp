@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstdlib>
 #include <iostream>
 #include <iterator>
 #include <map>
@@ -188,9 +189,9 @@ bool operator==(const Token &lhs, const Token &rhs) {
   return (lhs.id == rhs.id) && (lhs.value == rhs.value);
 }
 
-void fatal_error(const std::string &msg) {
-  std::cerr << "fatal: " << msg << std::endl;
-  std::exit(1);
+void fatalLexerError(const std::string &msg) {
+  std::cerr << "Lexer error: " << msg << std::endl;
+  std::exit(EXIT_FAILURE);
 }
 
 bool isKeyword(const std::string &s) {
@@ -201,7 +202,7 @@ bool isKeyword(const std::string &s) {
 TokenId getKeywordTokenId(const std::string &s) {
   auto search = keywordsNameMap.find(s);
   if (search == keywordsNameMap.end()) {
-    fatal_error(std::string("unknown token ") + s);
+    fatalLexerError(std::string("unknown token ") + s);
   }
   return search->second;
 }
@@ -209,16 +210,17 @@ TokenId getKeywordTokenId(const std::string &s) {
 TokenId getSpecialCharTokenId(char c) {
   auto search = specialCharsNameMap.find(c);
   if (search == specialCharsNameMap.end()) {
-    fatal_error(std::string("unknown special char ") + c);
+    fatalLexerError(std::string("unknown special char ") + c);
   }
   return search->second;
 }
 
-Token getKeywordOrIdentifierTokenFromString(const std::string &s) {
+Token getKeywordOrIdentifierTokenFromString(const std::string &s,
+                                            const size_t tokenPosition) {
   if (isKeyword(s)) {
-    return Token{getKeywordTokenId(s)};
+    return Token{getKeywordTokenId(s), "", tokenPosition};
   }
-  return Token{TokenId::Identifier, s};
+  return Token{TokenId::Identifier, s, tokenPosition};
 }
 
 bool isKnownChar(char c) {
@@ -235,19 +237,18 @@ std::vector<Token> tokenize(const std::string &in) {
   std::string identifierStr{};
   TokenizeState state{TokenizeState::Begin};
 
-  for (auto it = std::begin(in); it <= std::end(in); ++it) {
+  for (size_t i = 0; i <= in.size(); ++i) {
     char c;
 
-    bool hasEndReached = (it == std::end(in));
-    if (hasEndReached) {
+    if (i == in.size()) {
       c = ' '; // extra whitespace lets wrap a token that can be in
                // progress
     } else {
-      c = *it;
+      c = in[i];
     }
 
     if (!isKnownChar(c)) {
-      fatal_error(std::string("unknown char ") + c);
+      fatalLexerError(std::string("unknown char ") + c);
     }
 
     switch (state) {
@@ -257,7 +258,7 @@ std::vector<Token> tokenize(const std::string &in) {
       case WHITESPACE:
         break;
       case SINGLE_CHAR_TOKENS:
-        tokens.push_back(Token{getSpecialCharTokenId(c)});
+        tokens.push_back(Token{getSpecialCharTokenId(c), "", i});
         break;
       case ALPHA:
         identifierStr += c;
@@ -267,7 +268,8 @@ std::vector<Token> tokenize(const std::string &in) {
         identifierStr += c;
         state = TokenizeState::Number;
         break;
-      default:;
+      default:
+        break;
       }
       break;
     case TokenizeState::Identifier:
@@ -276,9 +278,11 @@ std::vector<Token> tokenize(const std::string &in) {
         identifierStr += c;
         break;
       default:
-        tokens.push_back(getKeywordOrIdentifierTokenFromString(identifierStr));
+        i--;
+        auto tokenPosition = i;
+        tokens.push_back(getKeywordOrIdentifierTokenFromString(identifierStr,
+                                                               tokenPosition));
         state = TokenizeState::Begin;
-        std::advance(it, -1);
         break;
       }
       break;
@@ -289,21 +293,25 @@ std::vector<Token> tokenize(const std::string &in) {
         identifierStr += c;
         break;
       default:
+        i--;
+        auto tokenPosition = i;
         bool isFloat = identifierStr.find(DOT) != std::string::npos;
         if (isFloat) {
-          tokens.push_back(Token{TokenId::FloatLiteral, identifierStr});
+          tokens.push_back(
+              Token{TokenId::FloatLiteral, identifierStr, tokenPosition});
         } else {
-          tokens.push_back(Token{TokenId::IntegerLiteral, identifierStr});
+          tokens.push_back(
+              Token{TokenId::IntegerLiteral, identifierStr, tokenPosition});
         }
         state = TokenizeState::Begin;
-        std::advance(it, -1);
+        break;
       }
       break;
     default:;
     }
   }
 
-  tokens.push_back(Token{TokenId::Eof});
+  tokens.push_back(Token{TokenId::Eof, "", in.size()});
 
   return tokens;
 }

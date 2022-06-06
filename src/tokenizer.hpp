@@ -27,8 +27,10 @@ enum class TokenId {
 };
 
 struct Token {
+  Token(const TokenId id, const std::string &value, const size_t position) : id(id), value(value), position(position) {}
+
   TokenId id;
-  std::string value{};
+  std::string value;
   size_t position;
 
   friend std::ostream &operator<<(std::ostream &os, const Token &o);

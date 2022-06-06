@@ -18,12 +18,12 @@ AstNodePtr parseBlock(ParserCtxt &ctxt);
 TEST_CASE("BinOpRhsExpr inverted operation priority - 1 + 2 * 3", "[parser]") {
   // clang-format off
   Tokens inputTokens = {
-    Token{TokenId::IntegerLiteral, "1"},
-    Token{TokenId::Plus},
-    Token{TokenId::IntegerLiteral, "2"},
-    Token{TokenId::Asterisk},
-    Token{TokenId::IntegerLiteral, "3"},
-    Token{TokenId::Eof}
+    Token{TokenId::IntegerLiteral, "1", 0},
+    Token{TokenId::Plus, "", 0},
+    Token{TokenId::IntegerLiteral, "2", 0},
+    Token{TokenId::Asterisk, "", 0},
+    Token{TokenId::IntegerLiteral, "3", 0},
+    Token{TokenId::Eof, "", 0}
   };
 
   AstNodePtr expectedAST = std::make_shared<BinExprNode>(
@@ -48,12 +48,12 @@ TEST_CASE("BinOpRhsExpr inverted operation priority - 1 + 2 * 3", "[parser]") {
 TEST_CASE("BinOpRhsExpr - 1 * 2 + 3", "[parser]") {
   // clang-format off
   Tokens inputTokens = {
-    Token{TokenId::IntegerLiteral, "1"},
-    Token{TokenId::Asterisk},
-    Token{TokenId::IntegerLiteral, "2"},
-    Token{TokenId::Plus},
-    Token{TokenId::IntegerLiteral, "3"},
-    Token{TokenId::Eof}
+    Token{TokenId::IntegerLiteral, "1", 0},
+    Token{TokenId::Asterisk, "", 0},
+    Token{TokenId::IntegerLiteral, "2", 0},
+    Token{TokenId::Plus, "", 0},
+    Token{TokenId::IntegerLiteral, "3", 0},
+    Token{TokenId::Eof, "", 0}
   };
 
   AstNodePtr expectedAST = std::make_shared<BinExprNode>(
@@ -78,14 +78,14 @@ TEST_CASE("BinOpRhsExpr - 1 * 2 + 3", "[parser]") {
 TEST_CASE("GroupedExpr - 3 * (2 + 1)", "[parser]") {
   // clang-format off
   Tokens inputTokens = {
-    Token{TokenId::IntegerLiteral, "3"},
-    Token{TokenId::Asterisk},
-    Token{TokenId::LParen},
-    Token{TokenId::IntegerLiteral, "2"},
-    Token{TokenId::Plus},
-    Token{TokenId::IntegerLiteral, "1"},
-    Token{TokenId::RParen},
-    Token{TokenId::Eof}
+    Token{TokenId::IntegerLiteral, "3", 0},
+    Token{TokenId::Asterisk, "", 0},
+    Token{TokenId::LParen, "", 0},
+    Token{TokenId::IntegerLiteral, "2", 0},
+    Token{TokenId::Plus, "", 0},
+    Token{TokenId::IntegerLiteral, "1", 0},
+    Token{TokenId::RParen, "", 0},
+    Token{TokenId::Eof, "", 0}
   };
 
   AstNodePtr expectedAST = std::make_shared<BinExprNode>(
@@ -110,10 +110,10 @@ TEST_CASE("GroupedExpr - 3 * (2 + 1)", "[parser]") {
 TEST_CASE("floating point numbers expr", "[parser]") {
   // clang-format off
   Tokens inputTokens = {
-    Token{TokenId::FloatLiteral, "1.0"},
-    Token{TokenId::Asterisk},
-    Token{TokenId::FloatLiteral, "2.0"},
-    Token{TokenId::Eof}
+    Token{TokenId::FloatLiteral, "1.0", 0},
+    Token{TokenId::Asterisk, "", 0},
+    Token{TokenId::FloatLiteral, "2.0", 0},
+    Token{TokenId::Eof, "", 0}
   };
 
   AstNodePtr expectedAST = std::make_shared<BinExprNode>(
@@ -134,14 +134,14 @@ TEST_CASE("floating point numbers expr", "[parser]") {
 TEST_CASE("VarDecl 'var y: i32 = 123;'", "[parser]") {
   // clang-format off
   Tokens inputTokens = {
-    Token{TokenId::KwVar},
-    Token{TokenId::Identifier, "y"},
-    Token{TokenId::Colon},
-    Token{TokenId::Identifier, "i32"},
-    Token{TokenId::Equal},
-    Token{TokenId::IntegerLiteral, "123"},
-    Token{TokenId::Semicolon},
-    Token{TokenId::Eof}
+    Token{TokenId::KwVar, "", 0},
+    Token{TokenId::Identifier, "y", 0},
+    Token{TokenId::Colon, "", 0},
+    Token{TokenId::Identifier, "i32", 0},
+    Token{TokenId::Equal, "", 0},
+    Token{TokenId::IntegerLiteral, "123", 0},
+    Token{TokenId::Semicolon, "", 0},
+    Token{TokenId::Eof, "", 0}
   };
 
   AstNodePtr expectedAST = std::make_shared<VarDeclNode>(
@@ -163,14 +163,14 @@ TEST_CASE("VarDecl 'var y: i32 = 123;'", "[parser]") {
 TEST_CASE("FnDef 'fn main() void {};'", "[parser]") {
   // clang-format off
   Tokens inputTokens = {
-    Token{TokenId::KwFn},
-    Token{TokenId::Identifier, "main"},
-    Token{TokenId::LParen},
-    Token{TokenId::RParen},
-    Token{TokenId::Identifier, "void"},
-    Token{TokenId::LBrace},
-    Token{TokenId::RBrace},
-    Token{TokenId::Eof}
+    Token{TokenId::KwFn, "", 0},
+    Token{TokenId::Identifier, "main", 0},
+    Token{TokenId::LParen, "", 0},
+    Token{TokenId::RParen, "", 0},
+    Token{TokenId::Identifier, "void", 0},
+    Token{TokenId::LBrace, "", 0},
+    Token{TokenId::RBrace, "", 0},
+    Token{TokenId::Eof, "", 0}
   };
   // clang-format on
   //
@@ -196,19 +196,19 @@ TEST_CASE("block of statements", "[parser]") {
   // }
   // clang-format off
   Tokens inputTokens = {
-    Token{TokenId::LBrace},
-    Token{TokenId::KwVar},
-    Token{TokenId::Identifier, "x"},
-    Token{TokenId::Colon},
-    Token{TokenId::Identifier, "i32"},
-    Token{TokenId::Equal},
-    Token{TokenId::IntegerLiteral, "1"},
-    Token{TokenId::Semicolon},
-    Token{TokenId::KwReturn},
-    Token{TokenId::IntegerLiteral, "1"},
-    Token{TokenId::Semicolon},
-    Token{TokenId::RBrace},
-    Token{TokenId::Eof}
+    Token{TokenId::LBrace, "", 0},
+    Token{TokenId::KwVar, "", 0},
+    Token{TokenId::Identifier, "x", 0},
+    Token{TokenId::Colon, "", 0},
+    Token{TokenId::Identifier, "i32", 0},
+    Token{TokenId::Equal, "", 0},
+    Token{TokenId::IntegerLiteral, "1", 0},
+    Token{TokenId::Semicolon, "", 0},
+    Token{TokenId::KwReturn, "", 0},
+    Token{TokenId::IntegerLiteral, "1", 0},
+    Token{TokenId::Semicolon, "", 0},
+    Token{TokenId::RBrace, "", 0},
+    Token{TokenId::Eof, "", 0}
   };
   // clang-format on
 
@@ -232,10 +232,10 @@ TEST_CASE("block of statements", "[parser]") {
 TEST_CASE("VarExpr 'x + 2'", "[parser]") {
   // clang-format off
   Tokens inputTokens = {
-    Token{TokenId::Identifier, "x"},
-    Token{TokenId::Plus},
-    Token{TokenId::IntegerLiteral, "2"},
-    Token{TokenId::Eof}
+    Token{TokenId::Identifier, "x", 0},
+    Token{TokenId::Plus, "", 0},
+    Token{TokenId::IntegerLiteral, "2", 0},
+    Token{TokenId::Eof, "", 0}
   };
 
   AstNodePtr expectedAST = std::make_shared<BinExprNode>(
@@ -256,12 +256,12 @@ TEST_CASE("VarExpr 'x + 2'", "[parser]") {
 TEST_CASE("FnCallExpr 'f() + 2'", "[parser]") {
   // clang-format off
   Tokens inputTokens = {
-    Token{TokenId::Identifier, "f"},
-    Token{TokenId::LParen},
-    Token{TokenId::RParen},
-    Token{TokenId::Plus},
-    Token{TokenId::IntegerLiteral, "2"},
-    Token{TokenId::Eof}
+    Token{TokenId::Identifier, "f", 0},
+    Token{TokenId::LParen, "", 0},
+    Token{TokenId::RParen, "", 0},
+    Token{TokenId::Plus, "", 0},
+    Token{TokenId::IntegerLiteral, "2", 0},
+    Token{TokenId::Eof, "", 0}
   };
 
   AstNodePtr expectedAST = std::make_shared<BinExprNode>(
