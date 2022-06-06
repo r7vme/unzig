@@ -23,8 +23,8 @@ AstNodePtr resetToken(ParserCtxt &ctxt, const size_t resetMark) {
   return nullptr;
 }
 
-std::string getHighlightedSourceCode(const std::string &input,
-                                     const size_t position) {
+std::string getHighlightedSourceCodeForPosition(const std::string &input,
+                                                const size_t position) {
   std::size_t lineBegin = input.rfind('\n', position);
   if (lineBegin == std::string::npos)
     lineBegin = 0;
@@ -44,7 +44,7 @@ std::string getHighlightedSourceCode(const std::string &input,
 void printSyntaxError(ParserCtxt &ctxt, const std::string &msg) {
   const auto token = ctxt.getToken();
   auto hightlightedLine =
-      getHighlightedSourceCode(ctxt.getSource(), token.position);
+      getHighlightedSourceCodeForPosition(ctxt.getSource(), token.position);
   std::cerr << "Syntax error: " << msg << '\n' << hightlightedLine << std::endl;
 }
 
@@ -201,33 +201,29 @@ AstNodePtr parseExpr(ParserCtxt &ctxt) {
 
 // VarDecl <- KEYWORD_var IDENTIFIER COLON TypeExpr (AssignOp Expr)? SEMICOLON
 AstNodePtr parseVarDecl(ParserCtxt &ctxt) {
+  const std::string errorMsg = "unable to parse variable declaration";
   const auto mark = ctxt.getCursor();
 
   auto kwVarToken = ctxt.getTokenAndAdvance();
-  if (kwVarToken.id != TokenId::KwVar) {
+  if (kwVarToken.id != TokenId::KwVar)
     return resetToken(ctxt, mark);
-  }
 
   auto varIdentifierToken = ctxt.getTokenAndAdvance();
-  if (varIdentifierToken.id != TokenId::Identifier) {
-    return resetToken(ctxt, mark);
-  }
+  if (varIdentifierToken.id != TokenId::Identifier)
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(), errorMsg);
 
   auto colonToken = ctxt.getTokenAndAdvance();
-  if (colonToken.id != TokenId::Colon) {
-    return resetToken(ctxt, mark);
-  }
+  if (colonToken.id != TokenId::Colon)
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(), errorMsg);
 
   auto typeExprToken = ctxt.getTokenAndAdvance();
-  if (typeExprToken.id != TokenId::Identifier) {
-    return resetToken(ctxt, mark);
-  }
+  if (typeExprToken.id != TokenId::Identifier)
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(), errorMsg);
 
-  auto varName = varIdentifierToken.value;
   auto varType = toUzType(typeExprToken.value);
-  if (!varType) {
-    return resetToken(ctxt, mark);
-  }
+  if (!varType)
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(),
+                     std::string("unknown type ") + typeExprToken.value);
 
   // optional
   AstNodePtr initExpr = nullptr;
@@ -236,31 +232,30 @@ AstNodePtr parseVarDecl(ParserCtxt &ctxt) {
     ctxt.skipToken();
     initExpr = parseExpr(ctxt);
     if (!initExpr) {
-      return resetToken(ctxt, mark);
+      fatalSyntaxError(ctxt, ctxt.getCursor(),
+                       "unable to parse initialization expression");
     }
   }
 
   auto semicolonToken = ctxt.getTokenAndAdvance();
-  if (semicolonToken.id != TokenId::Semicolon) {
-    return resetToken(ctxt, mark);
-  }
+  if (semicolonToken.id != TokenId::Semicolon)
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected semicolon");
 
-  return std::make_shared<VarDeclNode>(varName, varType.value(), initExpr);
+  return std::make_shared<VarDeclNode>(varIdentifierToken.value,
+                                       varType.value(), initExpr);
 }
 
 // ReturnSt <- KEYWORD_return Expr? SEMICOLON
 AstNodePtr parseReturnSt(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
-  if (ctxt.getTokenAndAdvance().id != TokenId::KwReturn) {
+  if (ctxt.getTokenAndAdvance().id != TokenId::KwReturn)
     return resetToken(ctxt, mark);
-  }
 
   auto mayBeExpr = parseExpr(ctxt);
 
-  if (ctxt.getTokenAndAdvance().id != TokenId::Semicolon) {
-    return resetToken(ctxt, mark);
-  }
+  if (ctxt.getTokenAndAdvance().id != TokenId::Semicolon)
+    fatalSyntaxError(ctxt, ctxt.getCursor(), "missing semicolon");
 
   return std::make_shared<ReturnStNode>(mayBeExpr);
 }
@@ -270,22 +265,18 @@ AstNodePtr parseAssignSt(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
   auto lhs = parseExpr(ctxt);
-  if (!lhs) {
+  if (!lhs)
     return resetToken(ctxt, mark);
-  }
 
-  if (ctxt.getTokenAndAdvance().id != TokenId::Equal) {
-    return resetToken(ctxt, mark);
-  }
+  if (ctxt.getTokenAndAdvance().id != TokenId::Equal)
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected right brace");
 
   auto rhs = parseExpr(ctxt);
-  if (!rhs) {
-    return resetToken(ctxt, mark);
-  }
+  if (!rhs)
+    fatalSyntaxError(ctxt, ctxt.getCursor(), "unable to parse assign statement");
 
-  if (ctxt.getTokenAndAdvance().id != TokenId::Semicolon) {
-    return resetToken(ctxt, mark);
-  }
+  if (ctxt.getTokenAndAdvance().id != TokenId::Semicolon)
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "missing semicolon");
 
   return std::make_shared<AssignStNode>(lhs, rhs);
 }
@@ -312,17 +303,12 @@ AstNodePtr parseBlock(ParserCtxt &ctxt) {
   }
 
   std::vector<AstNodePtr> mayBeStatements;
-  while (true) {
-    if (auto statement = parseStatement(ctxt)) {
-      mayBeStatements.push_back(statement);
-    } else {
-      break;
-    }
+  while (auto statement = parseStatement(ctxt)) {
+    mayBeStatements.push_back(statement);
   }
 
-  if (ctxt.getTokenAndAdvance().id != TokenId::RBrace) {
-    return resetToken(ctxt, mark);
-  }
+  if (ctxt.getTokenAndAdvance().id != TokenId::RBrace)
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected right brace");
 
   return std::make_shared<BlockNode>(mayBeStatements);
 }
