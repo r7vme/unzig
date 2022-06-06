@@ -10,7 +10,7 @@ AstNodePtr parseRoot(ParserCtxt &ctxt);
 void generateDot(const std::string &input) {
   auto tokens = tokenize(input);
 
-  ParserCtxt ctxt(std::move(tokens));
+  ParserCtxt ctxt(tokens, input);
   auto ast = parseRoot(ctxt);
   if (ast) {
     std::string output;

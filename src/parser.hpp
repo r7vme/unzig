@@ -5,21 +5,23 @@
 #include "tokenizer.hpp"
 
 class ParserCtxt {
-  Tokens tokens;
+  const Tokens &tokens;
+  const std::string &source;
   size_t cursor{0};
 
 public:
-  ParserCtxt(Tokens &&tokens) : tokens(std::move(tokens)){};
+  ParserCtxt(const Tokens &tokens, const std::string &source)
+      : tokens(tokens), source(source){};
 
-  Token &getToken() {
+  const Token &getToken() const {
     assert(tokens.size() > cursor);
     return tokens[cursor];
   }
 
   void skipToken() { cursor++; }
 
-  Token &getTokenAndAdvance() {
-    Token &t = getToken();
+  const Token &getTokenAndAdvance() {
+    const Token &t = getToken();
     skipToken();
     return t;
   }
@@ -31,4 +33,4 @@ public:
   }
 };
 
-AstNodePtr parse(Tokens &&tokens);
+AstNodePtr parse(const Tokens &tokens, const std::string &source);

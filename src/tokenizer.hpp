@@ -29,12 +29,12 @@ enum class TokenId {
 struct Token {
   TokenId id;
   std::string value{};
+  size_t position;
 
   friend std::ostream &operator<<(std::ostream &os, const Token &o);
 };
 
 using Tokens = std::vector<Token>;
-using TokenIndex = uint32_t;
 
 bool operator==(const Token &lhs, const Token &rhs);
 

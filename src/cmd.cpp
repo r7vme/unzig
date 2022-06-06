@@ -8,7 +8,7 @@
 
 void processInput(const std::string &input) {
   auto tokens = tokenize(input);
-  auto ast = parse(std::move(tokens));
+  auto ast = parse(tokens, input);
   if (ast) {
     CodeGenerator generator;
     if (auto *code = ast->codegen(&generator)) {

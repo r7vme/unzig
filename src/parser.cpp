@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <iostream>
 #include <optional>
 #include <vector>
@@ -16,9 +17,25 @@ AstNodePtr parseVarDecl(ParserCtxt &ctxt);
 AstNodePtr LogError(const std::string &str);
 std::optional<BinOpType> mayBeToBinOpType(const Token &token);
 
-AstNodePtr parseErr(ParserCtxt &ctxt, const size_t resetMark) {
+AstNodePtr resetToken(ParserCtxt &ctxt, const size_t resetMark) {
   ctxt.resetCursor(resetMark);
   return nullptr;
+}
+
+void printSyntaxError(ParserCtxt &ctxt, const std::string &msg) {
+  std::cerr << "Syntax error: " << msg << std::endl;
+  // TODO: Print token info
+}
+
+void fatalSyntaxError(ParserCtxt &ctxt, const size_t resetMark,
+                      const std::string &msg) {
+  ctxt.resetCursor(resetMark);
+  printSyntaxError(ctxt, msg);
+  std::exit(EXIT_FAILURE);
+}
+
+void fatalSyntaxError(ParserCtxt &ctxt, const std::string &msg) {
+  fatalSyntaxError(ctxt, ctxt.getCursor(), msg);
 }
 
 static const std::map<BinOpType, uint32_t> binOpPrec{
@@ -54,7 +71,7 @@ AstNodePtr parseNumberExpr(ParserCtxt &ctxt) {
   case (TokenId::FloatLiteral):
     return std::make_shared<FloatExprNode>(token.value);
   default:
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
   assert(false);
 }
@@ -64,16 +81,16 @@ AstNodePtr parseGroupedExpr(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
   if (ctxt.getTokenAndAdvance().id != TokenId::LParen) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   auto expr = parseExpr(ctxt);
   if (!expr) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   if (ctxt.getTokenAndAdvance().id != TokenId::RParen) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   return expr;
@@ -85,7 +102,7 @@ AstNodePtr parseVarExpr(ParserCtxt &ctxt) {
 
   auto token = ctxt.getTokenAndAdvance();
   if (token.id != TokenId::Identifier) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   return std::make_shared<VarExprNode>(token.value);
@@ -97,17 +114,17 @@ AstNodePtr parseFnCallExpr(ParserCtxt &ctxt) {
 
   auto fnNameToken = ctxt.getTokenAndAdvance();
   if (fnNameToken.id != TokenId::Identifier) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   auto lParenToken = ctxt.getTokenAndAdvance();
   if (lParenToken.id != TokenId::LParen) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   auto rParenToken = ctxt.getTokenAndAdvance();
   if (rParenToken.id != TokenId::RParen) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   return std::make_shared<FnCallExprNode>(fnNameToken.value);
@@ -167,28 +184,28 @@ AstNodePtr parseVarDecl(ParserCtxt &ctxt) {
 
   auto kwVarToken = ctxt.getTokenAndAdvance();
   if (kwVarToken.id != TokenId::KwVar) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   auto varIdentifierToken = ctxt.getTokenAndAdvance();
   if (varIdentifierToken.id != TokenId::Identifier) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   auto colonToken = ctxt.getTokenAndAdvance();
   if (colonToken.id != TokenId::Colon) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   auto typeExprToken = ctxt.getTokenAndAdvance();
   if (typeExprToken.id != TokenId::Identifier) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   auto varName = varIdentifierToken.value;
   auto varType = toUzType(typeExprToken.value);
   if (!varType) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   // optional
@@ -198,13 +215,13 @@ AstNodePtr parseVarDecl(ParserCtxt &ctxt) {
     ctxt.skipToken();
     initExpr = parseExpr(ctxt);
     if (!initExpr) {
-      return parseErr(ctxt, mark);
+      return resetToken(ctxt, mark);
     }
   }
 
   auto semicolonToken = ctxt.getTokenAndAdvance();
   if (semicolonToken.id != TokenId::Semicolon) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   return std::make_shared<VarDeclNode>(varName, varType.value(), initExpr);
@@ -215,13 +232,13 @@ AstNodePtr parseReturnSt(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
   if (ctxt.getTokenAndAdvance().id != TokenId::KwReturn) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   auto mayBeExpr = parseExpr(ctxt);
 
   if (ctxt.getTokenAndAdvance().id != TokenId::Semicolon) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   return std::make_shared<ReturnStNode>(mayBeExpr);
@@ -233,20 +250,20 @@ AstNodePtr parseAssignSt(ParserCtxt &ctxt) {
 
   auto lhs = parseExpr(ctxt);
   if (!lhs) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   if (ctxt.getTokenAndAdvance().id != TokenId::Equal) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   auto rhs = parseExpr(ctxt);
   if (!rhs) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   if (ctxt.getTokenAndAdvance().id != TokenId::Semicolon) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   return std::make_shared<AssignStNode>(lhs, rhs);
@@ -270,7 +287,7 @@ AstNodePtr parseBlock(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
   if (ctxt.getTokenAndAdvance().id != TokenId::LBrace) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   std::vector<AstNodePtr> mayBeStatements;
@@ -283,7 +300,7 @@ AstNodePtr parseBlock(ParserCtxt &ctxt) {
   }
 
   if (ctxt.getTokenAndAdvance().id != TokenId::RBrace) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   return std::make_shared<BlockNode>(mayBeStatements);
@@ -295,39 +312,38 @@ AstNodePtr parseFnDef(ParserCtxt &ctxt) {
 
   auto kwFnToken = ctxt.getTokenAndAdvance();
   if (kwFnToken.id != TokenId::KwFn) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   auto fnIdentifierToken = ctxt.getTokenAndAdvance();
   if (fnIdentifierToken.id != TokenId::Identifier) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   auto lParenToken = ctxt.getTokenAndAdvance();
   if (lParenToken.id != TokenId::LParen) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   auto rParenToken = ctxt.getTokenAndAdvance();
   if (rParenToken.id != TokenId::RParen) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   auto typeExprToken = ctxt.getTokenAndAdvance();
   if (typeExprToken.id != TokenId::Identifier) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   auto fnBody = parseBlock(ctxt);
   if (!fnBody) {
-    return parseErr(ctxt, mark);
+    return resetToken(ctxt, mark);
   }
 
   auto fnName = fnIdentifierToken.value;
   auto fnReturnType = toUzType(typeExprToken.value);
-  if (!fnReturnType)
-  {
-    return parseErr(ctxt, mark);
+  if (!fnReturnType) {
+    return resetToken(ctxt, mark);
   }
 
   return std::make_shared<FnDefNode>(fnName, fnReturnType.value(), fnBody);
@@ -347,7 +363,7 @@ AstNodePtr parseTopLevelDecl(ParserCtxt &ctxt) {
 AstNodePtr parseTopLevelDeclarations(ParserCtxt &ctxt) {
   auto topLevelDecl = parseTopLevelDecl(ctxt);
   if (!topLevelDecl) {
-    return nullptr;
+    fatalSyntaxError(ctxt, "");
   }
 
   std::vector<AstNodePtr> declarations;
@@ -365,10 +381,17 @@ AstNodePtr parseTopLevelDeclarations(ParserCtxt &ctxt) {
 
 // Root <- skip TopLevelDeclarations eof
 AstNodePtr parseRoot(ParserCtxt &ctxt) {
-  return parseTopLevelDeclarations(ctxt);
+  auto tlds = parseTopLevelDeclarations(ctxt);
+  if (!tlds)
+    fatalSyntaxError(ctxt, "");
+
+  // make sure all tokens consumed
+  if (ctxt.getToken().id != TokenId::Eof)
+    fatalSyntaxError(ctxt, "");
+  return tlds;
 }
 
-AstNodePtr parse(Tokens &&tokens) {
-  ParserCtxt ctxt(std::move(tokens));
+AstNodePtr parse(const Tokens &tokens, const std::string &source) {
+  ParserCtxt ctxt(tokens, source);
   return parseRoot(ctxt);
 }
