@@ -278,11 +278,11 @@ std::vector<Token> tokenize(const std::string &in) {
         identifierStr += c;
         break;
       default:
-        i--;
-        auto tokenPosition = i;
+        auto tokenPosition = (i - identifierStr.size());
         tokens.push_back(getKeywordOrIdentifierTokenFromString(identifierStr,
                                                                tokenPosition));
         state = TokenizeState::Begin;
+        i--;
         break;
       }
       break;
@@ -293,8 +293,7 @@ std::vector<Token> tokenize(const std::string &in) {
         identifierStr += c;
         break;
       default:
-        i--;
-        auto tokenPosition = i;
+        auto tokenPosition = (i - identifierStr.size());
         bool isFloat = identifierStr.find(DOT) != std::string::npos;
         if (isFloat) {
           tokens.push_back(
@@ -304,6 +303,7 @@ std::vector<Token> tokenize(const std::string &in) {
               Token{TokenId::IntegerLiteral, identifierStr, tokenPosition});
         }
         state = TokenizeState::Begin;
+        i--;
         break;
       }
       break;

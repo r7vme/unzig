@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <string>
 
 #include "ast.hpp"
 #include "tokenizer.hpp"
@@ -16,6 +17,10 @@ public:
   const Token &getToken() const {
     assert(tokens.size() > cursor);
     return tokens[cursor];
+  }
+
+  const std::string &getSource() const {
+    return source;
   }
 
   void skipToken() { cursor++; }

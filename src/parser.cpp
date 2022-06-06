@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <optional>
+#include <string>
 #include <vector>
 
 #include "ast.hpp"
@@ -22,9 +23,28 @@ AstNodePtr resetToken(ParserCtxt &ctxt, const size_t resetMark) {
   return nullptr;
 }
 
+std::string getHighlightedSourceCode(const std::string &input,
+                                     const size_t position) {
+  std::size_t lineBegin = input.rfind('\n', position);
+  if (lineBegin == std::string::npos)
+    lineBegin = 0;
+
+  std::size_t lineEnd = input.find('\n', position);
+  if (lineEnd == std::string::npos)
+    lineEnd = (input.size() - 1);
+
+  auto line = input.substr(lineBegin, lineEnd - lineBegin);
+  auto relativeTokenPosition = position - lineBegin;
+  std::string highlightLine(line.size(), ' ');
+  highlightLine.at(relativeTokenPosition) = '^';
+  const std::string prefix = " | ";
+  return prefix + line + '\n' + prefix + highlightLine;
+}
+
 void printSyntaxError(ParserCtxt &ctxt, const std::string &msg) {
-  std::cerr << "Syntax error: " << msg << std::endl;
-  // TODO: Print token info
+  const auto token = ctxt.getToken();
+  auto hightlightedLine = getHighlightedSourceCode(ctxt.getSource(), token.position);
+  std::cerr << "Syntax error: " << msg << '\n' << hightlightedLine << std::endl;
 }
 
 void fatalSyntaxError(ParserCtxt &ctxt, const size_t resetMark,
@@ -362,9 +382,8 @@ AstNodePtr parseTopLevelDecl(ParserCtxt &ctxt) {
 // TopLevelDeclarations <- TopLevelDecl TopLevelDeclarations*
 AstNodePtr parseTopLevelDeclarations(ParserCtxt &ctxt) {
   auto topLevelDecl = parseTopLevelDecl(ctxt);
-  if (!topLevelDecl) {
-    fatalSyntaxError(ctxt, "");
-  }
+  if (!topLevelDecl)
+    fatalSyntaxError(ctxt, "expected at least one top level declaration");
 
   std::vector<AstNodePtr> declarations;
   declarations.push_back(topLevelDecl);
@@ -383,11 +402,11 @@ AstNodePtr parseTopLevelDeclarations(ParserCtxt &ctxt) {
 AstNodePtr parseRoot(ParserCtxt &ctxt) {
   auto tlds = parseTopLevelDeclarations(ctxt);
   if (!tlds)
-    fatalSyntaxError(ctxt, "");
+    fatalSyntaxError(ctxt, "unable to parse top level declarations");
 
   // make sure all tokens consumed
   if (ctxt.getToken().id != TokenId::Eof)
-    fatalSyntaxError(ctxt, "");
+    fatalSyntaxError(ctxt, "expected eof");
   return tlds;
 }
 
