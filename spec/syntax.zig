@@ -1,9 +1,9 @@
-fn foo() u64 {
+fn foo() i32 {
     return 1;
 }
 
 fn main() void {
-    var x: u64 = foo();
-    var y: u64 = 123 + (1 * x);
+    var x: i32 = foo();
+    var y: i32 = 123 + (1 * x);
     y = 1;
 }

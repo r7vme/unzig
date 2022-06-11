@@ -107,11 +107,11 @@ AstNodePtr parseGroupedExpr(ParserCtxt &ctxt) {
 
   auto expr = parseExpr(ctxt);
   if (!expr) {
-    return resetToken(ctxt, mark);
+    fatalSyntaxError(ctxt, mark, "unable to parse grouped expression");
   }
 
   if (ctxt.getTokenAndAdvance().id != TokenId::RParen) {
-    return resetToken(ctxt, mark);
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected )");
   }
 
   return expr;
@@ -145,7 +145,7 @@ AstNodePtr parseFnCallExpr(ParserCtxt &ctxt) {
 
   auto rParenToken = ctxt.getTokenAndAdvance();
   if (rParenToken.id != TokenId::RParen) {
-    return resetToken(ctxt, mark);
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected )");
   }
 
   return std::make_shared<FnCallExprNode>(fnNameToken.value);
@@ -178,7 +178,7 @@ AstNodePtr parseBinOpRhsExpr(ParserCtxt &ctxt, AstNodePtr lhs) {
 
     auto rhs = parsePrimaryExpr(ctxt);
     if (!rhs) {
-      return nullptr;
+      fatalSyntaxError(ctxt, ctxt.getCursor(), "expected primary expression");
     }
 
     auto nextBinOp = mayBeToBinOpType(ctxt.getToken());
