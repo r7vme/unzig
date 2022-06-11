@@ -1,5 +1,5 @@
 fn foo() i32 {
-    return 1;
+    return 1.0;
 }
 
 fn main() void {
