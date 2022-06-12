@@ -38,7 +38,7 @@ void DotGenerator::generate(BinExprNode *astNode, std::string &output) {
     break;
   }
 
-  const auto text = std::string("BinExprNode\\n") + binOpType;
+  const auto text = std::string("BinExpr\\n") + binOpType;
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
 
