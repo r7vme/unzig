@@ -15,16 +15,18 @@ class VarExprNode;
 class FnCallExprNode;
 
 class DotGenerator {
+  std::string output;
 public:
-  void generate(FloatExprNode *astNode, std::string &output);
-  void generate(IntegerExprNode *astNode, std::string &output);
-  void generate(BinExprNode *astNode, std::string &output);
-  void generate(VarDeclNode *astNode, std::string &output);
-  void generate(FnDefNode *astNode, std::string &output);
-  void generate(BlockNode *astNode, std::string &output);
-  void generate(RootNode *astNode, std::string &output);
-  void generate(AssignStNode *astNode, std::string &output);
-  void generate(ReturnStNode *astNode, std::string &output);
-  void generate(VarExprNode *astNode, std::string &output);
-  void generate(FnCallExprNode *astNode, std::string &output);
+  std::string getDotOutput();
+  void generate(FloatExprNode *astNode);
+  void generate(IntegerExprNode *astNode);
+  void generate(BinExprNode *astNode);
+  void generate(VarDeclNode *astNode);
+  void generate(FnDefNode *astNode);
+  void generate(BlockNode *astNode);
+  void generate(RootNode *astNode);
+  void generate(AssignStNode *astNode);
+  void generate(ReturnStNode *astNode);
+  void generate(VarExprNode *astNode);
+  void generate(FnCallExprNode *astNode);
 };

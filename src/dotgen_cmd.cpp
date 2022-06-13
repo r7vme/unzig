@@ -9,17 +9,12 @@ AstNodePtr parseRoot(ParserCtxt &ctxt);
 
 void generateDot(const std::string &input) {
   auto tokens = tokenize(input);
-
   ParserCtxt ctxt(tokens, input);
   auto ast = parseRoot(ctxt);
   if (ast) {
-    std::string output;
     DotGenerator g;
-    ast->dotgen(&g, output);
-
-    std::string header = "digraph \"AST\" {\n";
-    std::string footer = "}";
-    std::cout << header << output << footer << std::endl;
+    ast->dotgen(&g);
+    std::cout << g.getDotOutput() << std::endl;
   } else {
     std::cerr << "Unable to parse input" << std::endl;
     std::exit(1);
