@@ -99,16 +99,3 @@ struct RootNode {
   std::vector<AstNode> declarations;
   COMMON_MEMBERS(RootNode)
 };
-
-//bool operator==(const FloatExprNode &lhs, const FloatExprNode &rhs);
-//bool operator==(const IntegerExprNode &lhs, const IntegerExprNode &rhs);
-//bool operator==(const BinExprNode &lhs, const BinExprNode &rhs);
-//bool operator==(const VarDeclNode &lhs, const VarDeclNode &rhs);
-//bool operator==(const FnDefNode &lhs, const FnDefNode &rhs);
-//bool operator==(const BlockNode &lhs, const BlockNode &rhs);
-//bool operator==(const RootNode &lhs, const RootNode &rhs);
-//bool operator==(const AssignStNode &lhs, const AssignStNode &rhs);
-//bool operator==(const ReturnStNode &lhs, const ReturnStNode &rhs);
-//bool operator==(const VarExprNode &lhs, const VarExprNode &rhs);
-//bool operator==(const FnCallExprNode &lhs, const FnCallExprNode &rhs);
-//bool operator==(const EmptyNode &lhs, const EmptyNode &rhs);
