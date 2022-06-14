@@ -13,7 +13,7 @@ add_definitions(${LLVM_DEFINITIONS})
 include_directories(src)
 
 add_library(unzig_lib
-  #  src/ast_equality_comparator.cpp
+  src/ast.cpp
   src/parser.cpp
   src/codegen.cpp
   src/dotgen.cpp

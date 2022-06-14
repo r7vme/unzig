@@ -3,21 +3,18 @@
 #include <memory>
 #include <string>
 
-#include "ast_equality_comparator.hpp"
 #include "codegen.hpp"
 #include "dotgen.hpp"
-#include "scope.hpp"
-#include "types.hpp"
 
+// Inspired by https://www.foonathan.net/2020/01/type-erasure/
 class AstNode {
   class Base {
   public:
     virtual ~Base() = default;
     virtual std::unique_ptr<Base> clone() const = 0;
-
-    // mine
-    virtual llvm::Value *codegen(CodeGenerator *g) = 0;
-    virtual void dotgen(DotGenerator *g) = 0;
+    virtual bool isEqual(const Base &other) const = 0;
+    virtual llvm::Value *codegen(CodeGenerator *g) const = 0;
+    virtual void dotgen(DotGenerator *g) const = 0;
   };
 
   template <typename T> class Wrapper final : public Base {
@@ -27,9 +24,15 @@ class AstNode {
       return std::make_unique<Wrapper<T>>(obj);
     }
 
-    // mine
-    llvm::Value *codegen(CodeGenerator *g) override { return obj.codegen(g); };
-    void dotgen(DotGenerator *g) override { return obj.dotgen(g); }
+    bool isEqual(const Base &other) const {
+      return obj.isEqual(static_cast<const Wrapper<T> &>(other).obj);
+    };
+
+    llvm::Value *codegen(CodeGenerator *g) const override {
+      return obj.codegen(g);
+    };
+
+    void dotgen(DotGenerator *g) const override { return obj.dotgen(g); }
 
   private:
     T obj;
@@ -44,9 +47,13 @@ public:
     return *this;
   }
 
-  // mine
-  llvm::Value *codegen(CodeGenerator *g) { return ptr->codegen(g); };
-  void dotgen(DotGenerator *g) { return ptr->dotgen(g); }
+  bool operator==(const AstNode &other) const {
+    return ptr->isEqual(*other.ptr);
+  }
+
+  llvm::Value *codegen(CodeGenerator *g) const { return ptr->codegen(g); };
+
+  void dotgen(DotGenerator *g) const { return ptr->dotgen(g); }
 
 private:
   std::unique_ptr<Base> ptr;

@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "ast.hpp"
-#include "ast_equality_comparator.hpp"
+#include "ast_node.hpp"
 #include "parser.hpp"
 #include "tokenizer.hpp"
 #include "types.hpp"
@@ -27,7 +27,7 @@ TEST_CASE("BinOpRhsExpr inverted operation priority - 1 + 2 * 3", "[parser]") {
     Token{TokenId::Eof, "", 0}
   };
 
-  AstNode expectedAST = BinExprNode(
+  auto expectedAST = BinExprNode(
     BinOpType::ADD,
     IntegerExprNode("1"),
     BinExprNode(
@@ -36,14 +36,13 @@ TEST_CASE("BinOpRhsExpr inverted operation priority - 1 + 2 * 3", "[parser]") {
       IntegerExprNode("3")
     )
   );
+
   // clang-format on
   const std::string input{};
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseExpr(ctxt);
   REQUIRE(AST);
-
-  //AstEqualityComparator c;
-  //REQUIRE(AST->isEqual(&c, *expectedAST));
+  REQUIRE(AST.value() == expectedAST);
 }
 
 TEST_CASE("BinOpRhsExpr - 1 * 2 + 3", "[parser]") {
@@ -71,9 +70,7 @@ TEST_CASE("BinOpRhsExpr - 1 * 2 + 3", "[parser]") {
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseExpr(ctxt);
   REQUIRE(AST);
-
-  //AstEqualityComparator c;
-  //REQUIRE(AST->isEqual(&c, *expectedAST));
+  REQUIRE(AST.value() == expectedAST);
 }
 
 TEST_CASE("GroupedExpr - 3 * (2 + 1)", "[parser]") {
@@ -103,9 +100,7 @@ TEST_CASE("GroupedExpr - 3 * (2 + 1)", "[parser]") {
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseExpr(ctxt);
   REQUIRE(AST);
-
-  //AstEqualityComparator c;
-  //REQUIRE(AST->isEqual(&c, *expectedAST));
+  REQUIRE(AST.value() == expectedAST);
 }
 
 TEST_CASE("floating point numbers expr", "[parser]") {
@@ -127,9 +122,6 @@ TEST_CASE("floating point numbers expr", "[parser]") {
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseExpr(ctxt);
   REQUIRE(AST);
-
-  //AstEqualityComparator c;
-  //REQUIRE(AST->isEqual(&c, *expectedAST));
 }
 
 TEST_CASE("VarDecl 'var y: i32 = 123;'", "[parser]") {
@@ -156,9 +148,7 @@ TEST_CASE("VarDecl 'var y: i32 = 123;'", "[parser]") {
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseVarDecl(ctxt);
   REQUIRE(AST);
-
-  //AstEqualityComparator c;
-  //REQUIRE(AST->isEqual(&c, *expectedAST));
+  REQUIRE(AST.value() == expectedAST);
 }
 
 TEST_CASE("FnDef 'fn main() void {};'", "[parser]") {
@@ -176,18 +166,15 @@ TEST_CASE("FnDef 'fn main() void {};'", "[parser]") {
   // clang-format on
   //
   std::vector<AstNode> declarations;
-  declarations.push_back(FnDefNode(
-      "main", UzType{UzTypeId::Void},
-      BlockNode(std::vector<AstNode>())));
+  declarations.push_back(FnDefNode("main", UzType{UzTypeId::Void},
+                                   BlockNode(std::vector<AstNode>())));
   auto expectedAST = RootNode(declarations);
 
   const std::string input{};
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseRoot(ctxt);
   REQUIRE(AST);
-
-  //AstEqualityComparator c;
-  //REQUIRE(AST->isEqual(&c, *expectedAST));
+  REQUIRE(AST.value() == expectedAST);
 }
 
 TEST_CASE("block of statements", "[parser]") {
@@ -214,21 +201,19 @@ TEST_CASE("block of statements", "[parser]") {
   };
   // clang-format on
 
-  auto varDecl = VarDeclNode(
-      "x", UzType{UzTypeId::Int32}, IntegerExprNode("1"));
+  auto varDecl =
+      VarDeclNode("x", UzType{UzTypeId::Int32}, IntegerExprNode("1"));
   std::vector<AstNode> statements{
       varDecl,
       ReturnStNode(IntegerExprNode("1")),
   };
-  auto expected = BlockNode(statements);
+  auto expectedAST = BlockNode(statements);
 
   const std::string input{};
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseBlock(ctxt);
   REQUIRE(AST);
-
-  //AstEqualityComparator c;
-  //REQUIRE(AST->isEqual(&c, *expected));
+  REQUIRE(AST.value() == expectedAST);
 }
 
 TEST_CASE("VarExpr 'x + 2'", "[parser]") {
@@ -250,9 +235,7 @@ TEST_CASE("VarExpr 'x + 2'", "[parser]") {
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseExpr(ctxt);
   REQUIRE(AST);
-
-  //AstEqualityComparator c;
-  //REQUIRE(AST->isEqual(&c, *expectedAST));
+  REQUIRE(AST.value() == expectedAST);
 }
 
 TEST_CASE("FnCallExpr 'f() + 2'", "[parser]") {
@@ -276,7 +259,5 @@ TEST_CASE("FnCallExpr 'f() + 2'", "[parser]") {
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseExpr(ctxt);
   REQUIRE(AST);
-
-  //AstEqualityComparator c;
-  //REQUIRE(AST->isEqual(&c, *expectedAST));
+  REQUIRE(AST.value() == expectedAST);
 }

@@ -1,6 +1,5 @@
 #include "codegen.hpp"
 #include "ast.hpp"
-#include "ast_equality_comparator.hpp"
 #include "types.hpp"
 #include <cstdint>
 #include <llvm/ADT/APFloat.h>
