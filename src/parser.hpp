@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ast.hpp"
+#include "ast_node.hpp"
 #include "tokenizer.hpp"
 
 class ParserCtxt {
@@ -37,4 +38,4 @@ public:
   }
 };
 
-AstNodePtr parse(const Tokens &tokens, const std::string &source);
+AstNode parse(const Tokens &tokens, const std::string &source);

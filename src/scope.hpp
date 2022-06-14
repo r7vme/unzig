@@ -9,23 +9,20 @@ struct Scope;
 using SymbolTable = std::unordered_map<std::string, Symbol>;
 using ScopePtr = std::shared_ptr<Scope>;
 
-enum class SymbolId {
+enum class SymbolType {
   Var,
-  Func,
 };
 
 struct Symbol {
-  SymbolId id;
+  SymbolType type;
   std::string name;
   // data
 };
 
 struct Scope {
-  SymbolTable symbolTable;
   ScopePtr parentScope;
+  SymbolTable symbolTable;
 
-  void insert(const Symbol& symbol) {};
-  bool lookup(const std::string& name) {
-    return false;
-  };
-}
+  void insert(const Symbol &symbol){};
+  bool lookup(const std::string &name) { return false; };
+};

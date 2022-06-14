@@ -75,12 +75,12 @@ int main(int argc, char **argv) {
   // llvmIRBuilder.CreateRet(llvmIRBuilder.getInt32(0));
   // llvmModule.print(llFile, nullptr);
 
-  std::vector<AstNodePtr> declarations;
+  std::vector<AstNode> declarations;
   declarations.push_back(
-      std::make_shared<FnDefNode>("main", UzType{UzTypeId::Void}, nullptr));
-  auto root = std::make_shared<RootNode>(declarations);
+      FnDefNode("main", UzType{UzTypeId::Void}, BlockNode({})));
+  auto root = RootNode(declarations);
   CodeGenerator c;
-  if (!root->codegen(&c)) {
+  if (!root.codegen(&c)) {
     std::exit(1);
   }
   c.getLLVMModule().print(llFile, nullptr);

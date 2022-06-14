@@ -22,14 +22,14 @@ entry:
 }
 )";
 
-  std::vector<AstNodePtr> declarations;
+  std::vector<AstNode> declarations;
   declarations.push_back(
-      std::make_shared<FnDefNode>("main", UzType{UzTypeId::Void}, nullptr));
+      FnDefNode("main", UzType{UzTypeId::Void}, BlockNode({})));
   declarations.push_back(
-      std::make_shared<FnDefNode>("f", UzType{UzTypeId::Void}, nullptr));
-  auto root = std::make_shared<RootNode>(declarations);
+      FnDefNode("f", UzType{UzTypeId::Void}, BlockNode({})));
+  auto root = RootNode(declarations);
   CodeGenerator c;
-  REQUIRE(root->codegen(&c));
+  REQUIRE(root.codegen(&c));
 
   std::string output;
   llvm::raw_string_ostream rso(output);

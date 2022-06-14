@@ -16,17 +16,17 @@ class FnCallExprNode;
 
 class AstEqualityComparator {
 public:
-  bool compare(const BinExprNode &lhs, const BinExprNode &rhs);
-  bool compare(const VarDeclNode &lhs, const VarDeclNode &rhs);
-  bool compare(const FnDefNode &lhs, const FnDefNode &rhs);
-  bool compare(const BlockNode &lhs, const BlockNode &rhs);
-  bool compare(const RootNode &lhs, const RootNode &rhs);
-  bool compare(const AssignStNode &lhs, const AssignStNode &rhs);
-  bool compare(const ReturnStNode &lhs, const ReturnStNode &rhs);
-  bool compare(const VarExprNode &lhs, const VarExprNode &rhs);
-  bool compare(const FnCallExprNode &lhs, const FnCallExprNode &rhs);
+  bool compare(const BinExprNode lhs, const BinExprNode rhs);
+  bool compare(const VarDeclNode lhs, const VarDeclNode rhs);
+  bool compare(const FnDefNode lhs, const FnDefNode rhs);
+  bool compare(const BlockNode lhs, const BlockNode rhs);
+  bool compare(const RootNode lhs, const RootNode rhs);
+  bool compare(const AssignStNode lhs, const AssignStNode rhs);
+  bool compare(const ReturnStNode lhs, const ReturnStNode rhs);
+  bool compare(const VarExprNode lhs, const VarExprNode rhs);
+  bool compare(const FnCallExprNode lhs, const FnCallExprNode rhs);
 
-  template <typename T> bool compare(const T &lhs, const T &rhs) {
+  template <typename T> bool compare(const T lhs, const T rhs) {
     return lhs.value == rhs.value;
   }
 };

@@ -15,6 +15,7 @@ class AssignStNode;
 class ReturnStNode;
 class VarExprNode;
 class FnCallExprNode;
+class EmptyNode;
 
 class CodeGenerator {
   llvm::LLVMContext llvmCtxt;
@@ -26,15 +27,16 @@ public:
       : llvmCtxt(), llvmModule("unzig", llvmCtxt), llvmIRBuilder(llvmCtxt) {}
   const llvm::Module &getLLVMModule() const { return llvmModule; };
 
-  llvm::Value *generate(FloatExprNode *astNode);
-  llvm::Value *generate(IntegerExprNode *astNode);
-  llvm::Value *generate(BinExprNode *astNode);
-  llvm::Value *generate(VarDeclNode *astNode);
-  llvm::Value *generate(FnDefNode *astNode);
-  llvm::Value *generate(BlockNode *astNode);
-  llvm::Value *generate(RootNode *astNode);
-  llvm::Value *generate(AssignStNode *astNode);
-  llvm::Value *generate(ReturnStNode *astNode);
-  llvm::Value *generate(VarExprNode *astNode);
-  llvm::Value *generate(FnCallExprNode *astNode);
+  llvm::Value *generate(FloatExprNode astNode);
+  llvm::Value *generate(IntegerExprNode astNode);
+  llvm::Value *generate(BinExprNode astNode);
+  llvm::Value *generate(VarDeclNode astNode);
+  llvm::Value *generate(FnDefNode astNode);
+  llvm::Value *generate(BlockNode astNode);
+  llvm::Value *generate(RootNode astNode);
+  llvm::Value *generate(AssignStNode astNode);
+  llvm::Value *generate(ReturnStNode astNode);
+  llvm::Value *generate(VarExprNode astNode);
+  llvm::Value *generate(FnCallExprNode astNode);
+  llvm::Value *generate(EmptyNode astNode);
 };

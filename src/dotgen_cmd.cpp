@@ -1,24 +1,20 @@
 #include <iostream>
 
+#include "ast.hpp"
 #include "dotgen.hpp"
 #include "parser.hpp"
 #include "tokenizer.hpp"
 
-AstNodePtr parseExpr(ParserCtxt &ctxt);
-AstNodePtr parseRoot(ParserCtxt &ctxt);
+MayBeAstNode parseExpr(ParserCtxt &ctxt);
+MayBeAstNode parseRoot(ParserCtxt &ctxt);
 
 void generateDot(const std::string &input) {
   auto tokens = tokenize(input);
   ParserCtxt ctxt(tokens, input);
-  auto ast = parseRoot(ctxt);
-  if (ast) {
-    DotGenerator g;
-    ast->dotgen(&g);
-    std::cout << g.getDotOutput() << std::endl;
-  } else {
-    std::cerr << "Unable to parse input" << std::endl;
-    std::exit(1);
-  }
+  auto ast = parseRoot(ctxt).value();
+  DotGenerator g;
+  ast.dotgen(&g);
+  std::cout << g.getDotOutput() << std::endl;
 }
 
 int main(int argc, char **argv) {

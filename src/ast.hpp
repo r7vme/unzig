@@ -3,110 +3,100 @@
 #include <memory>
 #include <string>
 
-#include "ast_equality_comparator.hpp"
 #include "codegen.hpp"
 #include "dotgen.hpp"
+#include "scope.hpp"
 #include "types.hpp"
 
-#define EXTRA_METHODS(CLASS)                                                   \
-  llvm::Value *codegen(CodeGenerator *g) override {                            \
-    return g->generate(this);                                                  \
-  };                                                                           \
-  void dotgen(DotGenerator *g) override { return g->generate(this); };         \
-  bool isEqual(AstEqualityComparator *c, const AstNode &other)                 \
-      const override {                                                         \
-    return (typeid(*this) == typeid(other)) &&                                 \
-           c->compare(*this, static_cast<const CLASS &>(other));               \
-  };
+#include "ast_node.hpp"
 
-struct AstNode;
-using AstNodePtr = std::shared_ptr<AstNode>;
+#define COMMON_MEMBERS(CLASS)                                                  \
+  llvm::Value *codegen(CodeGenerator *g) { return g->generate(*this); };        \
+  void dotgen(DotGenerator *g) { return g->generate(*this); };                  \
 
 enum BinOpType { ADD, SUB, MUL, DIV };
 
-struct AstNode {
-  virtual ~AstNode() = default;
-  virtual llvm::Value *codegen(CodeGenerator *g) = 0;
-  virtual void dotgen(DotGenerator *g) = 0;
-  virtual bool isEqual(AstEqualityComparator *c,
-                       const AstNode &other) const = 0;
+using MayBeAstNode = std::optional<AstNode>;
+
+struct EmptyNode {
+  COMMON_MEMBERS(EmptyExprNode)
 };
 
-struct FnCallExprNode : public AstNode {
+struct FnCallExprNode {
   FnCallExprNode(const std::string &callee) : callee(callee){};
   const std::string callee;
-  EXTRA_METHODS(FnCallExprNode)
+  COMMON_MEMBERS(FnCallExprNode)
 };
 
-struct VarExprNode : public AstNode {
+struct VarExprNode {
   VarExprNode(const std::string &name) : name(name){};
   const std::string name;
-  EXTRA_METHODS(VarExprNode)
+  COMMON_MEMBERS(VarExprNode)
 };
 
-struct FloatExprNode : public AstNode {
+struct FloatExprNode {
   FloatExprNode(const std::string &value) : value(value){};
   const std::string value;
-  EXTRA_METHODS(FloatExprNode)
+  COMMON_MEMBERS(FloatExprNode)
 };
 
-struct IntegerExprNode : public AstNode {
+struct IntegerExprNode {
   IntegerExprNode(const std::string &value) : value(value){};
   const std::string value;
-  EXTRA_METHODS(IntegerExprNode)
+  COMMON_MEMBERS(IntegerExprNode)
 };
 
-struct BinExprNode : public AstNode {
-  BinExprNode(const BinOpType type, const AstNodePtr lhs, const AstNodePtr rhs)
+struct BinExprNode {
+  BinExprNode(const BinOpType type, const AstNode lhs, const AstNode rhs)
       : type(type), lhs(lhs), rhs(rhs) {}
   BinOpType type;
-  AstNodePtr lhs, rhs;
-  EXTRA_METHODS(BinExprNode)
+  AstNode lhs, rhs;
+  COMMON_MEMBERS(BinExprNode)
 };
 
-struct AssignStNode : public AstNode {
-  AssignStNode(const AstNodePtr lhs, const AstNodePtr rhs)
+struct AssignStNode {
+  AssignStNode(const AstNode lhs, const AstNode rhs)
       : lhs(lhs), rhs(rhs) {}
-  AstNodePtr lhs, rhs;
-  EXTRA_METHODS(AssignStNode)
+  AstNode lhs, rhs;
+  COMMON_MEMBERS(AssignStNode)
 };
 
-struct ReturnStNode : public AstNode {
-  ReturnStNode(const AstNodePtr expr) : expr(expr) {}
-  AstNodePtr expr;
-  EXTRA_METHODS(ReturnStNode)
+struct ReturnStNode {
+  ReturnStNode(const AstNode expr) : expr(expr) {}
+  AstNode expr;
+  COMMON_MEMBERS(ReturnStNode)
 };
 
-struct BlockNode : public AstNode {
-  BlockNode(const std::vector<AstNodePtr> statements)
+struct BlockNode {
+  BlockNode(const std::vector<AstNode> statements)
       : statements(statements) {}
-  std::vector<AstNodePtr> statements;
-  EXTRA_METHODS(BlockNode)
+  std::vector<AstNode> statements;
+  COMMON_MEMBERS(BlockNode)
 };
 
-struct FnDefNode : public AstNode {
+struct FnDefNode {
   FnDefNode(const std::string &name, const UzType &returnType,
-            const AstNodePtr body)
+            const AstNode body)
       : name(name), returnType(returnType), body(body){};
   const std::string name;
   const UzType returnType;
-  AstNodePtr body;
-  EXTRA_METHODS(FnDefNode)
+  AstNode body;
+  COMMON_MEMBERS(FnDefNode)
 };
 
-struct VarDeclNode : public AstNode {
+struct VarDeclNode {
   VarDeclNode(const std::string &name, const UzType &type,
-              const AstNodePtr initExpr)
+              const AstNode initExpr)
       : name(name), type(type), initExpr(initExpr){};
   const std::string name;
   const UzType type;
-  AstNodePtr initExpr;
-  EXTRA_METHODS(VarDeclNode)
+  AstNode initExpr;
+  COMMON_MEMBERS(VarDeclNode)
 };
 
-struct RootNode : public AstNode {
-  RootNode(const std::vector<AstNodePtr> declarations)
+struct RootNode {
+  RootNode(const std::vector<AstNode> declarations)
       : declarations(declarations) {}
-  std::vector<AstNodePtr> declarations;
-  EXTRA_METHODS(RootNode)
+  std::vector<AstNode> declarations;
+  COMMON_MEMBERS(RootNode)
 };

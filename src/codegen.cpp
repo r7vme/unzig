@@ -36,23 +36,23 @@ Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
   return nullptr;
 }
 
-Value *CodeGenerator::generate(FloatExprNode *astNode) {
-  return ConstantFP::get(Type::getFloatTy(llvmCtxt), astNode->value);
+Value *CodeGenerator::generate(FloatExprNode astNode) {
+  return ConstantFP::get(Type::getFloatTy(llvmCtxt), astNode.value);
 }
 
-Value *CodeGenerator::generate(IntegerExprNode *astNode) {
+Value *CodeGenerator::generate(IntegerExprNode astNode) {
   const int32_t decimal = 10;
-  return ConstantInt::get(Type::getInt32Ty(llvmCtxt), astNode->value, decimal);
+  return ConstantInt::get(Type::getInt32Ty(llvmCtxt), astNode.value, decimal);
 }
 
-Value *CodeGenerator::generate(BinExprNode *astNode) {
-  auto *l = astNode->lhs->codegen(this);
-  auto *r = astNode->rhs->codegen(this);
+Value *CodeGenerator::generate(BinExprNode astNode) {
+  auto *l = astNode.lhs.codegen(this);
+  auto *r = astNode.rhs.codegen(this);
   if (!l || !r) {
     return nullptr;
   }
 
-  switch (astNode->type) {
+  switch (astNode.type) {
   case BinOpType::ADD:
     return llvmIRBuilder.CreateAdd(l, r);
   case BinOpType::SUB:
@@ -66,13 +66,13 @@ Value *CodeGenerator::generate(BinExprNode *astNode) {
   return nullptr;
 };
 
-Value *CodeGenerator::generate(VarDeclNode *astNode) { return nullptr; }
-Value *CodeGenerator::generate(VarExprNode *astNode) { return nullptr; }
-Value *CodeGenerator::generate(FnCallExprNode *astNode) { return nullptr; }
+Value *CodeGenerator::generate(VarDeclNode astNode) { return nullptr; }
+Value *CodeGenerator::generate(VarExprNode astNode) { return nullptr; }
+Value *CodeGenerator::generate(FnCallExprNode astNode) { return nullptr; }
 
-Value *CodeGenerator::generate(FnDefNode *astNode) {
-  auto funcName = astNode->name;
-  auto *funcReturnType = toLLVMType(astNode->returnType, llvmCtxt);
+Value *CodeGenerator::generate(FnDefNode astNode) {
+  auto funcName = astNode.name;
+  auto *funcReturnType = toLLVMType(astNode.returnType, llvmCtxt);
   auto *funcType = FunctionType::get(funcReturnType, false);
   auto *func = Function::Create(funcType, Function::ExternalLinkage, funcName,
                                 llvmModule);
@@ -82,7 +82,7 @@ Value *CodeGenerator::generate(FnDefNode *astNode) {
   llvmIRBuilder.CreateRet(nullptr);
 
   // TODO block codegen
-  // if (Value *RetVal = astNode->body->codegen()) {
+  // if (Value *RetVal = astNode.body.codegen()) {
   //   llvmIRBuilder.CreateRet(RetVal);
   // }
   // else {
@@ -93,13 +93,14 @@ Value *CodeGenerator::generate(FnDefNode *astNode) {
   return func;
 }
 
-Value *CodeGenerator::generate(BlockNode *astNode) { return nullptr; }
-Value *CodeGenerator::generate(AssignStNode *astNode) { return nullptr; }
-Value *CodeGenerator::generate(ReturnStNode *astNode) { return nullptr; }
+Value *CodeGenerator::generate(BlockNode astNode) { return nullptr; }
+Value *CodeGenerator::generate(AssignStNode astNode) { return nullptr; }
+Value *CodeGenerator::generate(ReturnStNode astNode) { return nullptr; }
+Value *CodeGenerator::generate(EmptyNode astNode) { return nullptr; }
 
-Value *CodeGenerator::generate(RootNode *astNode) {
-  for (auto &decl : astNode->declarations) {
-    if (!(decl && decl->codegen(this))) {
+Value *CodeGenerator::generate(RootNode astNode) {
+  for (auto &decl : astNode.declarations) {
+    if (!(decl.codegen(this))) {
       return nullptr;
     }
   }

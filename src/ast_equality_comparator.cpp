@@ -2,25 +2,25 @@
 #include "ast.hpp"
 #include <cstddef>
 
-bool AstEqualityComparator::compare(const FnCallExprNode &lhs,
-                                    const FnCallExprNode &rhs) {
+bool AstEqualityComparator::compare(const FnCallExprNode lhs,
+                                    const FnCallExprNode rhs) {
   return lhs.callee == rhs.callee;
 }
 
-bool AstEqualityComparator::compare(const VarExprNode &lhs,
-                                    const VarExprNode &rhs) {
+bool AstEqualityComparator::compare(const VarExprNode lhs,
+                                    const VarExprNode rhs) {
   return lhs.name == rhs.name;
 }
 
-bool AstEqualityComparator::compare(const BinExprNode &lhs,
-                                    const BinExprNode &rhs) {
+bool AstEqualityComparator::compare(const BinExprNode lhs,
+                                    const BinExprNode rhs) {
   bool isLhsMemberEqual = lhs.lhs->isEqual(this, *(rhs.lhs));
   bool isRhsMemberEqual = lhs.rhs->isEqual(this, *(rhs.rhs));
   return lhs.type == rhs.type && isLhsMemberEqual && isRhsMemberEqual;
 }
 
-bool AstEqualityComparator::compare(const VarDeclNode &lhs,
-                                    const VarDeclNode &rhs) {
+bool AstEqualityComparator::compare(const VarDeclNode lhs,
+                                    const VarDeclNode rhs) {
   // TODO: handle nullptr
   assert(lhs.initExpr != nullptr);
   assert(rhs.initExpr != nullptr);
@@ -28,16 +28,16 @@ bool AstEqualityComparator::compare(const VarDeclNode &lhs,
          lhs.initExpr->isEqual(this, *(rhs.initExpr));
 }
 
-bool AstEqualityComparator::compare(const FnDefNode &lhs,
-                                    const FnDefNode &rhs) {
+bool AstEqualityComparator::compare(const FnDefNode lhs,
+                                    const FnDefNode rhs) {
   assert(lhs.body != nullptr);
   assert(rhs.body != nullptr);
   return lhs.name == rhs.name && lhs.returnType == rhs.returnType &&
          lhs.body->isEqual(this, *(rhs.body));
 }
 
-bool AstEqualityComparator::compare(const BlockNode &lhs,
-                                    const BlockNode &rhs) {
+bool AstEqualityComparator::compare(const BlockNode lhs,
+                                    const BlockNode rhs) {
   if (lhs.statements.size() != rhs.statements.size()) {
     return false;
   }
@@ -50,7 +50,7 @@ bool AstEqualityComparator::compare(const BlockNode &lhs,
   return true;
 }
 
-bool AstEqualityComparator::compare(const RootNode &lhs, const RootNode &rhs) {
+bool AstEqualityComparator::compare(const RootNode lhs, const RootNode rhs) {
   if (lhs.declarations.size() != rhs.declarations.size()) {
     return false;
   }
@@ -64,8 +64,8 @@ bool AstEqualityComparator::compare(const RootNode &lhs, const RootNode &rhs) {
   return true;
 }
 
-bool AstEqualityComparator::compare(const ReturnStNode &lhs,
-                                    const ReturnStNode &rhs) {
+bool AstEqualityComparator::compare(const ReturnStNode lhs,
+                                    const ReturnStNode rhs) {
   bool isLhsNullptr = lhs.expr == nullptr;
   bool isRhsNullptr = rhs.expr == nullptr;
   if (isLhsNullptr && isRhsNullptr) {
@@ -76,8 +76,8 @@ bool AstEqualityComparator::compare(const ReturnStNode &lhs,
   return lhs.expr->isEqual(this, *(rhs.expr));
 }
 
-bool AstEqualityComparator::compare(const AssignStNode &lhs,
-                                    const AssignStNode &rhs) {
+bool AstEqualityComparator::compare(const AssignStNode lhs,
+                                    const AssignStNode rhs) {
   bool isLhsMemberEqual = lhs.lhs->isEqual(this, *(rhs.lhs));
   bool isRhsMemberEqual = lhs.rhs->isEqual(this, *(rhs.rhs));
   return isLhsMemberEqual && isRhsMemberEqual;
