@@ -6,21 +6,20 @@
 
 #include "ast.hpp"
 #include "parser.hpp"
-#include "tokenizer.hpp"
 #include "types.hpp"
 
-MayBeAstNode parseBinOpRhsExpr(ParserCtxt &ctxt, AstNode lhs);
-MayBeAstNode parsePrimaryExpr(ParserCtxt &ctxt);
-MayBeAstNode parseGroupedExpr(ParserCtxt &ctxt);
-MayBeAstNode parseNumberExpr(ParserCtxt &ctxt);
-MayBeAstNode parseExpr(ParserCtxt &ctxt);
-MayBeAstNode parseVarDecl(ParserCtxt &ctxt);
-MayBeAstNode LogError(const std::string &str);
+AstNode parseBinOpRhsExpr(ParserCtxt &ctxt, AstNode lhs);
+AstNode parsePrimaryExpr(ParserCtxt &ctxt);
+AstNode parseGroupedExpr(ParserCtxt &ctxt);
+AstNode parseNumberExpr(ParserCtxt &ctxt);
+AstNode parseExpr(ParserCtxt &ctxt);
+AstNode parseVarDecl(ParserCtxt &ctxt);
+AstNode LogError(const std::string &str);
 std::optional<BinOpType> mayBeToBinOpType(const Token &token);
 
-MayBeAstNode resetToken(ParserCtxt &ctxt, const size_t resetMark) {
+AstNode resetToken(ParserCtxt &ctxt, const size_t resetMark) {
   ctxt.resetCursor(resetMark);
-  return std::nullopt;
+  return EmptyNode();
 }
 
 std::string getHighlightedSourceCodeForPosition(const std::string &input,
@@ -82,7 +81,7 @@ std::optional<BinOpType> mayBeToBinOpType(const Token &token) {
 }
 
 // NumberExpr <- FLOAT / INTEGER
-MayBeAstNode parseNumberExpr(ParserCtxt &ctxt) {
+AstNode parseNumberExpr(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
   auto token = ctxt.getTokenAndAdvance();
@@ -98,7 +97,7 @@ MayBeAstNode parseNumberExpr(ParserCtxt &ctxt) {
 }
 
 // GroupedExpr <- LPAREN Expr RPAREN
-MayBeAstNode parseGroupedExpr(ParserCtxt &ctxt) {
+AstNode parseGroupedExpr(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
   if (ctxt.getTokenAndAdvance().id != TokenId::LParen) {
@@ -118,7 +117,7 @@ MayBeAstNode parseGroupedExpr(ParserCtxt &ctxt) {
 }
 
 // VarExpr <- IDENTIFIER
-MayBeAstNode parseVarExpr(ParserCtxt &ctxt) {
+AstNode parseVarExpr(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
   auto token = ctxt.getTokenAndAdvance();
@@ -130,7 +129,7 @@ MayBeAstNode parseVarExpr(ParserCtxt &ctxt) {
 }
 
 // FnCallExpr <- IDENTIFIER LPAREN RPAREN
-MayBeAstNode parseFnCallExpr(ParserCtxt &ctxt) {
+AstNode parseFnCallExpr(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
   auto fnNameToken = ctxt.getTokenAndAdvance();
@@ -155,7 +154,7 @@ MayBeAstNode parseFnCallExpr(ParserCtxt &ctxt) {
 //             / FnCallExpr
 //             / VarExpr
 //             / NumberExpr
-MayBeAstNode parsePrimaryExpr(ParserCtxt &ctxt) {
+AstNode parsePrimaryExpr(ParserCtxt &ctxt) {
   if (auto expr = parseGroupedExpr(ctxt))
     return expr;
   if (auto expr = parseFnCallExpr(ctxt))
@@ -164,11 +163,11 @@ MayBeAstNode parsePrimaryExpr(ParserCtxt &ctxt) {
     return expr;
   if (auto expr = parseNumberExpr(ctxt))
     return expr;
-  return std::nullopt;
+  return EmptyNode();
 }
 
 // BinOpRhsExpr <- (BinOp PrimaryExpr)*
-MayBeAstNode parseBinOpRhsExpr(ParserCtxt &ctxt, AstNode lhs) {
+AstNode parseBinOpRhsExpr(ParserCtxt &ctxt, AstNode lhs) {
   while (true) {
     auto binOp = mayBeToBinOpType(ctxt.getToken());
     if (!binOp) {
@@ -184,23 +183,23 @@ MayBeAstNode parseBinOpRhsExpr(ParserCtxt &ctxt, AstNode lhs) {
     auto nextBinOp = mayBeToBinOpType(ctxt.getToken());
     if ((nextBinOp) &&
         (binOpPrec.at(nextBinOp.value()) > binOpPrec.at(binOp.value()))) {
-      rhs = parseBinOpRhsExpr(ctxt, rhs.value());
+      rhs = parseBinOpRhsExpr(ctxt, rhs);
     }
 
-    lhs = BinExprNode(binOp.value(), lhs, rhs.value());
+    lhs = BinExprNode(binOp.value(), lhs, rhs);
   }
 }
 
 // Expr <- PrimaryExpr BinOpRhsExpr
-MayBeAstNode parseExpr(ParserCtxt &ctxt) {
+AstNode parseExpr(ParserCtxt &ctxt) {
   if (auto lhs = parsePrimaryExpr(ctxt)) {
-    return parseBinOpRhsExpr(ctxt, lhs.value());
+    return parseBinOpRhsExpr(ctxt, lhs);
   }
-  return std::nullopt;
+  return EmptyNode();
 }
 
 // VarDecl <- KEYWORD_var IDENTIFIER COLON TypeExpr (AssignOp Expr)? SEMICOLON
-MayBeAstNode parseVarDecl(ParserCtxt &ctxt) {
+AstNode parseVarDecl(ParserCtxt &ctxt) {
   const std::string errorMsg = "unable to parse variable declaration";
   const auto mark = ctxt.getCursor();
 
@@ -226,7 +225,7 @@ MayBeAstNode parseVarDecl(ParserCtxt &ctxt) {
                      std::string("unknown type ") + typeExprToken.value);
 
   // optional
-  MayBeAstNode initExpr = std::nullopt;
+  AstNode initExpr = EmptyNode();
   auto equalToken = ctxt.getToken();
   if (equalToken.id == TokenId::Equal) {
     ctxt.skipToken();
@@ -242,11 +241,11 @@ MayBeAstNode parseVarDecl(ParserCtxt &ctxt) {
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected semicolon");
 
   return VarDeclNode(varIdentifierToken.value, varType.value(),
-                     initExpr.value());
+                     initExpr);
 }
 
 // ReturnSt <- KEYWORD_return Expr? SEMICOLON
-MayBeAstNode parseReturnSt(ParserCtxt &ctxt) {
+AstNode parseReturnSt(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
   if (ctxt.getTokenAndAdvance().id != TokenId::KwReturn)
@@ -257,11 +256,11 @@ MayBeAstNode parseReturnSt(ParserCtxt &ctxt) {
   if (ctxt.getTokenAndAdvance().id != TokenId::Semicolon)
     fatalSyntaxError(ctxt, ctxt.getCursor(), "missing semicolon");
 
-  return ReturnStNode(mayBeExpr.value());
+  return ReturnStNode(mayBeExpr);
 }
 
 // AssignSt <- Expr AssignOp Expr SEMICOLON
-MayBeAstNode parseAssignSt(ParserCtxt &ctxt) {
+AstNode parseAssignSt(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
   auto lhs = parseExpr(ctxt);
@@ -279,24 +278,24 @@ MayBeAstNode parseAssignSt(ParserCtxt &ctxt) {
   if (ctxt.getTokenAndAdvance().id != TokenId::Semicolon)
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "missing semicolon");
 
-  return AssignStNode(lhs.value(), rhs.value());
+  return AssignStNode(lhs, rhs);
 }
 
 // Statement <- VarDecl
 //           / AssignSt
 //           / ReturnSt
-MayBeAstNode parseStatement(ParserCtxt &ctxt) {
+AstNode parseStatement(ParserCtxt &ctxt) {
   if (auto varDecl = parseVarDecl(ctxt))
     return varDecl;
   if (auto assighSt = parseAssignSt(ctxt))
     return assighSt;
   if (auto returnSt = parseReturnSt(ctxt))
     return returnSt;
-  return std::nullopt;
+  return EmptyNode();
 }
 
 // Block <- LBRACE Statement* RBRACE
-MayBeAstNode parseBlock(ParserCtxt &ctxt) {
+AstNode parseBlock(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
   if (ctxt.getTokenAndAdvance().id != TokenId::LBrace) {
@@ -305,7 +304,7 @@ MayBeAstNode parseBlock(ParserCtxt &ctxt) {
 
   std::vector<AstNode> statements;
   while (auto statement = parseStatement(ctxt)) {
-    statements.push_back(statement.value());
+    statements.push_back(statement);
   }
 
   if (ctxt.getTokenAndAdvance().id != TokenId::RBrace)
@@ -315,7 +314,7 @@ MayBeAstNode parseBlock(ParserCtxt &ctxt) {
 }
 
 // FnDef <- KEYWORD_fn IDENTIFIER LPAREN RPAREN TypeExpr Block
-MayBeAstNode parseFnDef(ParserCtxt &ctxt) {
+AstNode parseFnDef(ParserCtxt &ctxt) {
   const std::string errorMsg = "unable to parse function definition";
   const auto mark = ctxt.getCursor();
 
@@ -349,35 +348,35 @@ MayBeAstNode parseFnDef(ParserCtxt &ctxt) {
     fatalSyntaxError(ctxt, ctxt.getCursor(), errorMsg);
 
   return FnDefNode(fnIdentifierToken.value, fnReturnType.value(),
-                   fnBody.value());
+                   fnBody);
 }
 
 // TopLevelDecl <- FnDef
 //              / VarDecl
-MayBeAstNode parseTopLevelDecl(ParserCtxt &ctxt) {
+AstNode parseTopLevelDecl(ParserCtxt &ctxt) {
   if (auto fnDef = parseFnDef(ctxt))
     return fnDef;
   if (auto varDecl = parseVarDecl(ctxt))
     return varDecl;
-  return std::nullopt;
+  return EmptyNode();
 }
 
 // TopLevelDeclarations <- TopLevelDecl TopLevelDeclarations*
-MayBeAstNode parseTopLevelDeclarations(ParserCtxt &ctxt) {
+AstNode parseTopLevelDeclarations(ParserCtxt &ctxt) {
   auto tld = parseTopLevelDecl(ctxt);
   if (!tld)
     fatalSyntaxError(ctxt, "expected at least one top level declaration");
 
   std::vector<AstNode> declarations;
-  declarations.push_back(tld.value());
+  declarations.push_back(tld);
   while (auto mayBeDecl = parseTopLevelDecl(ctxt)) {
-    declarations.push_back(mayBeDecl.value());
+    declarations.push_back(mayBeDecl);
   }
   return RootNode(declarations);
 }
 
 // Root <- skip TopLevelDeclarations eof
-MayBeAstNode parseRoot(ParserCtxt &ctxt) {
+AstNode parseRoot(ParserCtxt &ctxt) {
   auto tlds = parseTopLevelDeclarations(ctxt);
   if (!tlds)
     fatalSyntaxError(ctxt, "unable to parse top level declarations");
@@ -391,7 +390,7 @@ MayBeAstNode parseRoot(ParserCtxt &ctxt) {
 AstNode parse(const Tokens &tokens, const std::string &source) {
   ParserCtxt ctxt(tokens, source);
   if (auto root = parseRoot(ctxt)) {
-    return root.value();
+    return root;
   }
   fatalSyntaxError(ctxt, "unable to parse");
   std::exit(EXIT_FAILURE);

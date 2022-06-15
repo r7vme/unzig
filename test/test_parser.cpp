@@ -6,15 +6,16 @@
 
 #include "ast.hpp"
 #include "ast_node.hpp"
+#include "dotgen.hpp"
 #include "parser.hpp"
 #include "tokenizer.hpp"
 #include "types.hpp"
 
-MayBeAstNode parseExpr(ParserCtxt &ctxt);
-MayBeAstNode parseVarDecl(ParserCtxt &ctxt);
-MayBeAstNode parseFnDef(ParserCtxt &ctxt);
-MayBeAstNode parseBlock(ParserCtxt &ctxt);
-MayBeAstNode parseRoot(ParserCtxt &ctxt);
+AstNode parseExpr(ParserCtxt &ctxt);
+AstNode parseVarDecl(ParserCtxt &ctxt);
+AstNode parseFnDef(ParserCtxt &ctxt);
+AstNode parseBlock(ParserCtxt &ctxt);
+AstNode parseRoot(ParserCtxt &ctxt);
 
 TEST_CASE("BinOpRhsExpr inverted operation priority - 1 + 2 * 3", "[parser]") {
   // clang-format off
@@ -41,8 +42,7 @@ TEST_CASE("BinOpRhsExpr inverted operation priority - 1 + 2 * 3", "[parser]") {
   const std::string input{};
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseExpr(ctxt);
-  REQUIRE(AST);
-  REQUIRE(AST.value() == expectedAST);
+  REQUIRE(AST == expectedAST);
 }
 
 TEST_CASE("BinOpRhsExpr - 1 * 2 + 3", "[parser]") {
@@ -69,8 +69,7 @@ TEST_CASE("BinOpRhsExpr - 1 * 2 + 3", "[parser]") {
   const std::string input{};
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseExpr(ctxt);
-  REQUIRE(AST);
-  REQUIRE(AST.value() == expectedAST);
+  REQUIRE(AST == expectedAST);
 }
 
 TEST_CASE("GroupedExpr - 3 * (2 + 1)", "[parser]") {
@@ -99,8 +98,7 @@ TEST_CASE("GroupedExpr - 3 * (2 + 1)", "[parser]") {
   const std::string input{};
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseExpr(ctxt);
-  REQUIRE(AST);
-  REQUIRE(AST.value() == expectedAST);
+  REQUIRE(AST == expectedAST);
 }
 
 TEST_CASE("floating point numbers expr", "[parser]") {
@@ -147,8 +145,7 @@ TEST_CASE("VarDecl 'var y: i32 = 123;'", "[parser]") {
   const std::string input{};
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseVarDecl(ctxt);
-  REQUIRE(AST);
-  REQUIRE(AST.value() == expectedAST);
+  REQUIRE(AST == expectedAST);
 }
 
 TEST_CASE("FnDef 'fn main() void {};'", "[parser]") {
@@ -173,8 +170,7 @@ TEST_CASE("FnDef 'fn main() void {};'", "[parser]") {
   const std::string input{};
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseRoot(ctxt);
-  REQUIRE(AST);
-  REQUIRE(AST.value() == expectedAST);
+  REQUIRE(AST == expectedAST);
 }
 
 TEST_CASE("block of statements", "[parser]") {
@@ -212,8 +208,7 @@ TEST_CASE("block of statements", "[parser]") {
   const std::string input{};
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseBlock(ctxt);
-  REQUIRE(AST);
-  REQUIRE(AST.value() == expectedAST);
+  REQUIRE(AST == expectedAST);
 }
 
 TEST_CASE("VarExpr 'x + 2'", "[parser]") {
@@ -234,8 +229,7 @@ TEST_CASE("VarExpr 'x + 2'", "[parser]") {
   const std::string input{};
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseExpr(ctxt);
-  REQUIRE(AST);
-  REQUIRE(AST.value() == expectedAST);
+  REQUIRE(AST == expectedAST);
 }
 
 TEST_CASE("FnCallExpr 'f() + 2'", "[parser]") {
@@ -258,6 +252,5 @@ TEST_CASE("FnCallExpr 'f() + 2'", "[parser]") {
   const std::string input{};
   ParserCtxt ctxt(inputTokens, input);
   auto AST = parseExpr(ctxt);
-  REQUIRE(AST);
-  REQUIRE(AST.value() == expectedAST);
+  REQUIRE(AST == expectedAST);
 }

@@ -1,6 +1,8 @@
+#include <cstdint>
 #include <iostream>
 
 #include "ast.hpp"
+#include "ast_node.hpp"
 #include "dotgen.hpp"
 #include "parser.hpp"
 #include "tokenizer.hpp"

@@ -1,32 +1,30 @@
 #include "dotgen.hpp"
 #include "ast.hpp"
+#include <iostream>
 #include <sstream>
 #include <string>
 
-std::string getNodeId(AstNode astNode) {
-  std::ostringstream ss;
-  // TODO: wrong
-  ss << "node_" << static_cast<const void *>(&astNode);
-  return ss.str();
+std::string getNodeId(const AstNode &astNode) {
+  return std::to_string(astNode.getNodeId());
 }
 
 std::string DotGenerator::getDotOutput() {
   return std::string("digraph \"AST\" {\n") + output + "}";
 }
 
-void DotGenerator::generate(FloatExprNode astNode) {
+void DotGenerator::generate(const FloatExprNode &astNode) {
   const auto text = std::string("FloatExpr\\n") + astNode.value;
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
 }
 
-void DotGenerator::generate(IntegerExprNode astNode) {
+void DotGenerator::generate(const IntegerExprNode &astNode) {
   const auto text = std::string("IntegerExpr\\n") + astNode.value;
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
 }
 
-void DotGenerator::generate(BinExprNode astNode) {
+void DotGenerator::generate(const BinExprNode &astNode) {
   std::string binOpType;
   switch (astNode.type) {
   case BinOpType::ADD:
@@ -56,7 +54,7 @@ void DotGenerator::generate(BinExprNode astNode) {
   output.append(nodeId + "->" + getNodeId(astNode.rhs) + "\n");
 }
 
-void DotGenerator::generate(VarDeclNode astNode) {
+void DotGenerator::generate(const VarDeclNode &astNode) {
   const auto text = std::string("VarDecl\\n") + astNode.name;
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
@@ -65,7 +63,7 @@ void DotGenerator::generate(VarDeclNode astNode) {
   output.append(nodeId + "->" + getNodeId(astNode.initExpr) + "\n");
 }
 
-void DotGenerator::generate(FnDefNode astNode) {
+void DotGenerator::generate(const FnDefNode &astNode) {
   const auto text = std::string("FnDef\\n") + astNode.name;
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
@@ -74,7 +72,7 @@ void DotGenerator::generate(FnDefNode astNode) {
   output.append(nodeId + "->" + getNodeId(astNode.body) + "\n");
 }
 
-void DotGenerator::generate(BlockNode astNode) {
+void DotGenerator::generate(const BlockNode &astNode) {
   const auto text = std::string("Block");
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
@@ -85,7 +83,7 @@ void DotGenerator::generate(BlockNode astNode) {
   }
 }
 
-void DotGenerator::generate(RootNode astNode) {
+void DotGenerator::generate(const RootNode &astNode) {
   const auto text = std::string("Root");
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
@@ -95,7 +93,7 @@ void DotGenerator::generate(RootNode astNode) {
     output.append(nodeId + "->" + getNodeId(d) + "\n");
   }
 }
-void DotGenerator::generate(AssignStNode astNode) {
+void DotGenerator::generate(const AssignStNode &astNode) {
   const auto text = std::string("AssignSt");
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
@@ -109,7 +107,7 @@ void DotGenerator::generate(AssignStNode astNode) {
   output.append(nodeId + "->" + getNodeId(astNode.rhs) + "\n");
 }
 
-void DotGenerator::generate(ReturnStNode astNode) {
+void DotGenerator::generate(const ReturnStNode &astNode) {
   const auto text = std::string("ReturnSt");
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
@@ -118,19 +116,19 @@ void DotGenerator::generate(ReturnStNode astNode) {
   output.append(nodeId + "->" + getNodeId(astNode.expr) + "\n");
 }
 
-void DotGenerator::generate(VarExprNode astNode) {
+void DotGenerator::generate(const VarExprNode &astNode) {
   const auto text = std::string("VarExpr\\n") + astNode.name;
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
 }
 
-void DotGenerator::generate(FnCallExprNode astNode) {
+void DotGenerator::generate(const FnCallExprNode &astNode) {
   const auto text = std::string("FnCallExpr\\n") + astNode.callee;
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
 }
 
-void DotGenerator::generate(EmptyNode astNode) {
+void DotGenerator::generate(const EmptyNode &astNode) {
   const auto text = std::string("Empty\\n");
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");

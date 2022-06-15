@@ -17,18 +17,19 @@ class EmptyNode;
 
 class DotGenerator {
   std::string output;
+
 public:
   std::string getDotOutput();
-  void generate(FloatExprNode astNode);
-  void generate(IntegerExprNode astNode);
-  void generate(BinExprNode astNode);
-  void generate(VarDeclNode astNode);
-  void generate(FnDefNode astNode);
-  void generate(BlockNode astNode);
-  void generate(RootNode astNode);
-  void generate(AssignStNode astNode);
-  void generate(ReturnStNode astNode);
-  void generate(VarExprNode astNode);
-  void generate(FnCallExprNode astNode);
-  void generate(EmptyNode astNode);
+  void generate(const FloatExprNode &astNode);
+  void generate(const IntegerExprNode &astNode);
+  void generate(const BinExprNode &astNode);
+  void generate(const VarDeclNode &astNode);
+  void generate(const FnDefNode &astNode);
+  void generate(const BlockNode &astNode);
+  void generate(const RootNode &astNode);
+  void generate(const AssignStNode &astNode);
+  void generate(const ReturnStNode &astNode);
+  void generate(const VarExprNode &astNode);
+  void generate(const FnCallExprNode &astNode);
+  void generate(const EmptyNode &astNode);
 };
