@@ -1,3 +1,6 @@
+
+var gvar: i32 = 123;
+
 fn foo() i32 {
     return 1.0;
 }

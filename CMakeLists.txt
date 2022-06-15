@@ -19,6 +19,7 @@ add_library(unzig_lib
   src/dotgen.cpp
   src/tokenizer.cpp
   src/types.cpp
+  src/sema.cpp
 )
 target_link_libraries(unzig_lib PRIVATE LLVM)
 
@@ -37,5 +38,6 @@ add_executable(tests
   test/test_tokenizer.cpp
   test/test_parser.cpp
   test/test_codegen.cpp
+  test/test_sema.cpp
 )
 target_link_libraries(tests PRIVATE unzig_lib Catch2::Catch2WithMain)

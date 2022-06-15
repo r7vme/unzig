@@ -27,16 +27,16 @@ public:
       : llvmCtxt(), llvmModule("unzig", llvmCtxt), llvmIRBuilder(llvmCtxt) {}
   const llvm::Module &getLLVMModule() const { return llvmModule; };
 
-  llvm::Value *generate(FloatExprNode astNode);
-  llvm::Value *generate(IntegerExprNode astNode);
-  llvm::Value *generate(BinExprNode astNode);
-  llvm::Value *generate(VarDeclNode astNode);
-  llvm::Value *generate(FnDefNode astNode);
-  llvm::Value *generate(BlockNode astNode);
-  llvm::Value *generate(RootNode astNode);
-  llvm::Value *generate(AssignStNode astNode);
-  llvm::Value *generate(ReturnStNode astNode);
-  llvm::Value *generate(VarExprNode astNode);
-  llvm::Value *generate(FnCallExprNode astNode);
-  llvm::Value *generate(EmptyNode astNode);
+  llvm::Value *generate(const FloatExprNode & astNode);
+  llvm::Value *generate(const IntegerExprNode & astNode);
+  llvm::Value *generate(const BinExprNode & astNode);
+  llvm::Value *generate(const VarDeclNode & astNode);
+  llvm::Value *generate(const FnDefNode & astNode);
+  llvm::Value *generate(const BlockNode & astNode);
+  llvm::Value *generate(const RootNode & astNode);
+  llvm::Value *generate(const AssignStNode & astNode);
+  llvm::Value *generate(const ReturnStNode & astNode);
+  llvm::Value *generate(const VarExprNode & astNode);
+  llvm::Value *generate(const FnCallExprNode & astNode);
+  llvm::Value *generate(const EmptyNode & astNode);
 };

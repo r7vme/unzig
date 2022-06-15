@@ -14,7 +14,6 @@ AstNode parseGroupedExpr(ParserCtxt &ctxt);
 AstNode parseNumberExpr(ParserCtxt &ctxt);
 AstNode parseExpr(ParserCtxt &ctxt);
 AstNode parseVarDecl(ParserCtxt &ctxt);
-AstNode LogError(const std::string &str);
 std::optional<BinOpType> mayBeToBinOpType(const Token &token);
 
 AstNode resetToken(ParserCtxt &ctxt, const size_t resetMark) {

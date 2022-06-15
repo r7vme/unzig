@@ -7,13 +7,11 @@
 #include "parser.hpp"
 #include "tokenizer.hpp"
 
-MayBeAstNode parseExpr(ParserCtxt &ctxt);
-MayBeAstNode parseRoot(ParserCtxt &ctxt);
+AstNode parseRoot(ParserCtxt &ctxt);
 
 void generateDot(const std::string &input) {
   auto tokens = tokenize(input);
-  ParserCtxt ctxt(tokens, input);
-  auto ast = parseRoot(ctxt).value();
+  auto ast = parse(tokens, input);
   DotGenerator g;
   ast.dotgen(&g);
   std::cout << g.getDotOutput() << std::endl;

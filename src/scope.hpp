@@ -1,28 +1,46 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
 struct Symbol;
-struct Scope;
+struct ScopeObject;
+
+using Scope = std::shared_ptr<ScopeObject>;
 using SymbolTable = std::unordered_map<std::string, Symbol>;
-using ScopePtr = std::shared_ptr<Scope>;
 
 enum class SymbolType {
   Var,
+  Fn,
 };
 
 struct Symbol {
-  SymbolType type;
   std::string name;
+  SymbolType type;
   // data
+  Symbol(const std::string &name, SymbolType type) : name(name), type(type) {}
 };
 
-struct Scope {
-  ScopePtr parentScope;
-  SymbolTable symbolTable;
+class ScopeObject {
+  SymbolTable table{};
+  Scope parent{nullptr};
 
-  void insert(const Symbol &symbol){};
-  bool lookup(const std::string &name) { return false; };
+public:
+  void insertSymbol(const Symbol &symbol) {
+    table.insert({symbol.name, symbol});
+  }
+
+  std::optional<Symbol> lookupSymbol(const std::string &name) {
+    auto it = table.find(name);
+    if (it != table.end()) {
+      return it->second;
+    }
+    if (parent) {
+      return parent->lookupSymbol(name);
+    }
+    return std::nullopt;
+  }
+  void setParent(const Scope scope) { parent = scope; }
 };

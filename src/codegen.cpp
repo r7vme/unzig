@@ -35,16 +35,16 @@ Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
   return nullptr;
 }
 
-Value *CodeGenerator::generate(FloatExprNode astNode) {
+Value *CodeGenerator::generate(const FloatExprNode & astNode) {
   return ConstantFP::get(Type::getFloatTy(llvmCtxt), astNode.value);
 }
 
-Value *CodeGenerator::generate(IntegerExprNode astNode) {
+Value *CodeGenerator::generate(const IntegerExprNode & astNode) {
   const int32_t decimal = 10;
   return ConstantInt::get(Type::getInt32Ty(llvmCtxt), astNode.value, decimal);
 }
 
-Value *CodeGenerator::generate(BinExprNode astNode) {
+Value *CodeGenerator::generate(const BinExprNode & astNode) {
   auto *l = astNode.lhs.codegen(this);
   auto *r = astNode.rhs.codegen(this);
   if (!l || !r) {
@@ -65,11 +65,11 @@ Value *CodeGenerator::generate(BinExprNode astNode) {
   return nullptr;
 };
 
-Value *CodeGenerator::generate(VarDeclNode astNode) { return nullptr; }
-Value *CodeGenerator::generate(VarExprNode astNode) { return nullptr; }
-Value *CodeGenerator::generate(FnCallExprNode astNode) { return nullptr; }
+Value *CodeGenerator::generate(const VarDeclNode & astNode) { return nullptr; }
+Value *CodeGenerator::generate(const VarExprNode & astNode) { return nullptr; }
+Value *CodeGenerator::generate(const FnCallExprNode & astNode) { return nullptr; }
 
-Value *CodeGenerator::generate(FnDefNode astNode) {
+Value *CodeGenerator::generate(const FnDefNode & astNode) {
   auto funcName = astNode.name;
   auto *funcReturnType = toLLVMType(astNode.returnType, llvmCtxt);
   auto *funcType = FunctionType::get(funcReturnType, false);
@@ -92,12 +92,12 @@ Value *CodeGenerator::generate(FnDefNode astNode) {
   return func;
 }
 
-Value *CodeGenerator::generate(BlockNode astNode) { return nullptr; }
-Value *CodeGenerator::generate(AssignStNode astNode) { return nullptr; }
-Value *CodeGenerator::generate(ReturnStNode astNode) { return nullptr; }
-Value *CodeGenerator::generate(EmptyNode astNode) { return nullptr; }
+Value *CodeGenerator::generate(const BlockNode & astNode) { return nullptr; }
+Value *CodeGenerator::generate(const AssignStNode & astNode) { return nullptr; }
+Value *CodeGenerator::generate(const ReturnStNode & astNode) { return nullptr; }
+Value *CodeGenerator::generate(const EmptyNode & astNode) { return nullptr; }
 
-Value *CodeGenerator::generate(RootNode astNode) {
+Value *CodeGenerator::generate(const RootNode & astNode) {
   for (auto &decl : astNode.declarations) {
     if (!(decl.codegen(this))) {
       return nullptr;
