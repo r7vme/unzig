@@ -50,6 +50,8 @@ struct FnCallExprNode {
 struct VarExprNode {
   const std::string name;
 
+  Symbol varSymbol{nullptr};
+
   VarExprNode(const std::string &name, const size_t sourcePos)
       : name(name), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(VarExprNode)

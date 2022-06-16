@@ -23,7 +23,7 @@ void SemanticAnalyzer::analyze(VarDeclNode &astNode) {
     fatalSemaError("redifinition of the symbol");
   }
 
-  astNode.symbol = std::make_shared<SymbolObject>(astNode.name, SymbolType::Var,
+  astNode.symbol = std::make_shared<SymbolObject>(SymbolType::Var, astNode.name, astNode.type, 
                                                astNode.scope->isGlobal);
   astNode.scope->insertSymbol(astNode.symbol);
   astNode.initExpr.setScope(astNode.scope);
@@ -35,7 +35,7 @@ void SemanticAnalyzer::analyze(FnDefNode &astNode) {
     fatalSemaError("redifinition of the symbol");
   }
   astNode.scope->insertSymbol(std::make_shared<SymbolObject>(
-      astNode.name, SymbolType::Fn, astNode.scope->isGlobal));
+      SymbolType::Fn, astNode.name, astNode.returnType, astNode.scope->isGlobal));
 
   // new scope
   auto blockScope = std::make_shared<ScopeObject>();
@@ -66,14 +66,16 @@ void SemanticAnalyzer::analyze(ReturnStNode &astNode) {
 
 void SemanticAnalyzer::analyze(VarExprNode &astNode) {
   auto symbol = astNode.scope->lookupSymbol(astNode.name);
-  if (!symbol || symbol.value()->type != SymbolType::Var) {
+  if (!symbol || symbol.value()->symbolType != SymbolType::Var) {
     fatalSemaError("undeclared variable");
   }
+
+  astNode.varSymbol = symbol.value();
 }
 
 void SemanticAnalyzer::analyze(FnCallExprNode &astNode) {
   auto symbol = astNode.scope->lookupSymbol(astNode.callee);
-  if (!symbol || symbol.value()->type != SymbolType::Fn) {
+  if (!symbol || symbol.value()->symbolType != SymbolType::Fn) {
     fatalSemaError("undeclared function");
   }
 }

@@ -37,9 +37,11 @@ Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
   return nullptr;
 }
 
-void CodeGenerator::fatalCodegenError(const std::string &msg, const size_t sourcePos) {
+void CodeGenerator::fatalCodegenError(const std::string &msg,
+                                      const size_t sourcePos) {
   auto hightlightedLine = source->getHightlightedPosition(sourcePos);
-  std::cerr << "Codegen error: " << msg << '\n' << hightlightedLine << std::endl;
+  std::cerr << "Codegen error: " << msg << '\n'
+            << hightlightedLine << std::endl;
   std::exit(EXIT_FAILURE);
 }
 
@@ -83,20 +85,27 @@ Value *CodeGenerator::generate(const VarDeclNode &astNode) {
   llvm::IRBuilder<> TmpB(&curFunc->getEntryBlock(),
                          curFunc->getEntryBlock().begin());
   auto *alloca = TmpB.CreateAlloca(llvmType, nullptr, astNode.name);
+  astNode.symbol->allocaInst = alloca;
 
   return llvmIRBuilder.CreateStore(initValue, alloca);
 }
 
-Value *CodeGenerator::generate(const VarExprNode &astNode) { return nullptr; }
+Value *CodeGenerator::generate(const VarExprNode &astNode) {
+  if (!astNode.varSymbol->allocaInst) {
+    fatalCodegenError("xxx", astNode.sourcePos);
+  }
+  return llvmIRBuilder.CreateLoad(
+      toLLVMType(astNode.varSymbol->dataType, llvmCtxt),
+      astNode.varSymbol->allocaInst, astNode.name);
+}
 
 Value *CodeGenerator::generate(const FnCallExprNode &astNode) {
   auto *callee = llvmModule.getFunction(astNode.callee);
   if (!callee) {
     fatalCodegenError("function not declared", astNode.sourcePos);
   }
-  auto* call = llvmIRBuilder.CreateCall(callee, nullptr, "calltmp");
-  if (!call)
-  {
+  auto *call = llvmIRBuilder.CreateCall(callee, nullptr, "calltmp");
+  if (!call) {
     fatalCodegenError("HUJ", astNode.sourcePos);
   }
   return call;
@@ -137,7 +146,8 @@ Value *CodeGenerator::generate(const EmptyNode &astNode) { return nullptr; }
 Value *CodeGenerator::generate(const RootNode &astNode) {
   for (auto &decl : astNode.declarations) {
     if (!decl.codegen(this)) {
-      fatalCodegenError("code generation for the root node failed", astNode.sourcePos);
+      fatalCodegenError("code generation for the root node failed",
+                        astNode.sourcePos);
     }
   }
   return llvmModule.getFunction("main");

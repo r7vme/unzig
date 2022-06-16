@@ -1,5 +1,7 @@
 #pragma once
 
+#include "types.hpp"
+#include <llvm/IR/Instructions.h>
 #include <memory>
 #include <optional>
 #include <string>
@@ -18,12 +20,18 @@ enum class SymbolType {
 };
 
 struct SymbolObject {
+  SymbolType symbolType;
   std::string name;
-  SymbolType type;
+  UzType dataType;
   bool isGlobal{false};
-  // data
-  SymbolObject(const std::string &name, SymbolType type, bool isGlobal)
-      : name(name), type(type), isGlobal(isGlobal) {}
+
+  // codegen
+  llvm::AllocaInst *allocaInst{nullptr};
+
+  SymbolObject(SymbolType symbolType, const std::string &name,
+               const UzType dataType, const bool isGlobal)
+      : symbolType(symbolType), name(name), dataType(dataType),
+        isGlobal(isGlobal) {}
 };
 
 class ScopeObject {
