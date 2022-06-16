@@ -223,7 +223,7 @@ AstNode parseVarDecl(ParserCtxt &ctxt) {
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected semicolon");
 
   return VarDeclNode(varIdentifierToken.value, varType.value(), initExpr,
-                     varIdentifierToken.position);
+                     kwVarToken.position);
 }
 
 // ReturnSt <- KEYWORD_return Expr? SEMICOLON

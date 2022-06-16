@@ -26,6 +26,7 @@
 #include "codegen.hpp"
 #include "parser.hpp"
 #include "sema.hpp"
+#include "source.hpp"
 #include "tokenizer.hpp"
 
 namespace fs = std::filesystem;

@@ -39,7 +39,7 @@ Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
 
 void CodeGenerator::fatalCodegenError(const std::string &msg, const size_t sourcePos) {
   auto hightlightedLine = source->getHightlightedPosition(sourcePos);
-  std::cerr << "Syntax error: " << msg << '\n' << hightlightedLine << std::endl;
+  std::cerr << "Codegen error: " << msg << '\n' << hightlightedLine << std::endl;
   std::exit(EXIT_FAILURE);
 }
 
