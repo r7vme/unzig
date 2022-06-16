@@ -13,7 +13,7 @@
 #include "ast_node.hpp"
 
 #define COMMON_MEMBERS(CLASS)                                                  \
-  Scope scope{std::make_shared<ScopeObject>()};                                \
+  Scope scope{nullptr};                                \
   void setScope(Scope newScope) { scope = newScope; };                         \
   Scope &getScope() { return scope; };                                         \
   const uint64_t nodeId{curNodeId++};                                          \

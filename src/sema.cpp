@@ -2,13 +2,15 @@
 #include "ast.hpp"
 #include "scope.hpp"
 
-void SemanticAnalyzer::fatalSemaError(const std::string & msg) {
+void SemanticAnalyzer::fatalSemaError(const std::string &msg) {
   std::cerr << msg << std::endl;
   std::exit(EXIT_FAILURE);
 }
 
 void SemanticAnalyzer::analyze(RootNode &astNode) {
-  Scope globalScope = astNode.scope;
+  auto globalScope = std::make_shared<ScopeObject>();
+  astNode.setScope(globalScope);
+
   for (auto &child : astNode.declarations) {
     child.setScope(globalScope);
     child.sema(this);
@@ -20,8 +22,7 @@ void SemanticAnalyzer::analyze(VarDeclNode &astNode) {
     fatalSemaError("redifinition of the symbol");
   }
   astNode.scope->insertSymbol(Symbol(astNode.name, SymbolType::Var));
-
-  astNode.initExpr.getScope()->setParent(astNode.scope);
+  astNode.initExpr.setScope(astNode.scope);
   astNode.initExpr.sema(this);
 }
 
@@ -31,16 +32,55 @@ void SemanticAnalyzer::analyze(FnDefNode &astNode) {
   }
   astNode.scope->insertSymbol(Symbol(astNode.name, SymbolType::Fn));
 
+  // new scope
+  auto blockScope = std::make_shared<ScopeObject>();
+  astNode.body.setScope(blockScope);
   astNode.body.getScope()->setParent(astNode.scope);
   astNode.body.sema(this);
 }
 
+void SemanticAnalyzer::analyze(BlockNode &astNode) {
+  for (auto &statement : astNode.statements) {
+    statement.setScope(astNode.scope);
+    statement.sema(this);
+  }
+}
+
+void SemanticAnalyzer::analyze(AssignStNode &astNode) {
+  astNode.lhs.setScope(astNode.scope);
+  astNode.lhs.sema(this);
+
+  astNode.lhs.setScope(astNode.scope);
+  astNode.rhs.sema(this);
+}
+
+void SemanticAnalyzer::analyze(ReturnStNode &astNode) {
+  astNode.expr.setScope(astNode.scope);
+  astNode.expr.sema(this);
+}
+
+void SemanticAnalyzer::analyze(VarExprNode &astNode) {
+  auto symbol = astNode.scope->lookupSymbol(astNode.name);
+  if (!symbol || symbol.value().type != SymbolType::Var) {
+    fatalSemaError("undeclared variable");
+  }
+}
+
+void SemanticAnalyzer::analyze(FnCallExprNode &astNode) {
+  auto symbol = astNode.scope->lookupSymbol(astNode.callee);
+  if (!symbol || symbol.value().type != SymbolType::Fn) {
+    fatalSemaError("undeclared variable");
+  }
+}
+
+void SemanticAnalyzer::analyze(BinExprNode &astNode) {
+  astNode.lhs.setScope(astNode.scope);
+  astNode.lhs.sema(this);
+
+  astNode.rhs.setScope(astNode.scope);
+  astNode.rhs.sema(this);
+}
+
 void SemanticAnalyzer::analyze(FloatExprNode &astNode) {}
 void SemanticAnalyzer::analyze(IntegerExprNode &astNode) {}
-void SemanticAnalyzer::analyze(BinExprNode &astNode) {}
-void SemanticAnalyzer::analyze(BlockNode &astNode) {}
-void SemanticAnalyzer::analyze(AssignStNode &astNode) {}
-void SemanticAnalyzer::analyze(ReturnStNode &astNode) {}
-void SemanticAnalyzer::analyze(VarExprNode &astNode) {}
-void SemanticAnalyzer::analyze(FnCallExprNode &astNode) {}
 void SemanticAnalyzer::analyze(EmptyNode &astNode) {}
