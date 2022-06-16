@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
     std::exit(EXIT_FAILURE);
   }
 
-  CodeGenerator codegen;
+  CodeGenerator codegen(source);
   auto code = ast.codegen(&codegen);
   if (!code) {
     std::cerr << "unzig: unable to generate code" << std::endl;

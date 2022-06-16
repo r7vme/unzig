@@ -1,5 +1,6 @@
 #include "codegen.hpp"
 #include "ast.hpp"
+#include "ast_node.hpp"
 #include "types.hpp"
 #include <cstdint>
 #include <llvm/ADT/APFloat.h>
@@ -36,8 +37,9 @@ Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
   return nullptr;
 }
 
-void CodeGenerator::fatalCodegenError(const std::string &msg) {
-  std::cerr << msg << std::endl;
+void CodeGenerator::fatalCodegenError(const std::string &msg, const size_t sourcePos) {
+  auto hightlightedLine = source->getHightlightedPosition(sourcePos);
+  std::cerr << "Syntax error: " << msg << '\n' << hightlightedLine << std::endl;
   std::exit(EXIT_FAILURE);
 }
 
@@ -76,7 +78,7 @@ Value *CodeGenerator::generate(const VarDeclNode &astNode) {
   auto *llvmType = toLLVMType(astNode.type, llvmCtxt);
   auto *initValue = astNode.initExpr.codegen(this);
   if (!initValue) {
-    fatalCodegenError("variable must be initialized");
+    fatalCodegenError("variable must be initialized", astNode.sourcePos);
   }
   llvm::IRBuilder<> TmpB(&curFunc->getEntryBlock(),
                          curFunc->getEntryBlock().begin());
@@ -90,12 +92,12 @@ Value *CodeGenerator::generate(const VarExprNode &astNode) { return nullptr; }
 Value *CodeGenerator::generate(const FnCallExprNode &astNode) {
   auto *callee = llvmModule.getFunction(astNode.callee);
   if (!callee) {
-    fatalCodegenError("function not declared");
+    fatalCodegenError("function not declared", astNode.sourcePos);
   }
   auto* call = llvmIRBuilder.CreateCall(callee, nullptr, "calltmp");
   if (!call)
   {
-    fatalCodegenError("HUJ");
+    fatalCodegenError("HUJ", astNode.sourcePos);
   }
   return call;
 }
@@ -135,7 +137,7 @@ Value *CodeGenerator::generate(const EmptyNode &astNode) { return nullptr; }
 Value *CodeGenerator::generate(const RootNode &astNode) {
   for (auto &decl : astNode.declarations) {
     if (!decl.codegen(this)) {
-      fatalCodegenError("code generation for the root node failed");
+      fatalCodegenError("code generation for the root node failed", astNode.sourcePos);
     }
   }
   return llvmModule.getFunction("main");

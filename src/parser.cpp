@@ -23,7 +23,8 @@ AstNode resetToken(ParserCtxt &ctxt, const size_t resetMark) {
 
 void printSyntaxError(ParserCtxt &ctxt, const std::string &msg) {
   const auto token = ctxt.getToken();
-  auto hightlightedLine = ctxt.getSource()->getHightlightedPosition(token.position);
+  auto hightlightedLine =
+      ctxt.getSource()->getHightlightedPosition(token.position);
   std::cerr << "Syntax error: " << msg << '\n' << hightlightedLine << std::endl;
 }
 
@@ -67,9 +68,9 @@ AstNode parseNumberExpr(ParserCtxt &ctxt) {
   auto token = ctxt.getTokenAndAdvance();
   switch (token.id) {
   case (TokenId::IntegerLiteral):
-    return IntegerExprNode(token.value);
+    return IntegerExprNode(token.value, token.position);
   case (TokenId::FloatLiteral):
-    return FloatExprNode(token.value);
+    return FloatExprNode(token.value, token.position);
   default:
     return resetToken(ctxt, mark);
   }
@@ -105,7 +106,7 @@ AstNode parseVarExpr(ParserCtxt &ctxt) {
     return resetToken(ctxt, mark);
   }
 
-  return VarExprNode(token.value);
+  return VarExprNode(token.value, token.position);
 }
 
 // FnCallExpr <- IDENTIFIER LPAREN RPAREN
@@ -127,7 +128,7 @@ AstNode parseFnCallExpr(ParserCtxt &ctxt) {
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected )");
   }
 
-  return FnCallExprNode(fnNameToken.value);
+  return FnCallExprNode(fnNameToken.value, fnNameToken.position);
 }
 
 // PrimaryExpr <- GroupedExpr
@@ -149,7 +150,8 @@ AstNode parsePrimaryExpr(ParserCtxt &ctxt) {
 // BinOpRhsExpr <- (BinOp PrimaryExpr)*
 AstNode parseBinOpRhsExpr(ParserCtxt &ctxt, AstNode lhs) {
   while (true) {
-    auto binOp = mayBeToBinOpType(ctxt.getToken());
+    auto binOpToken = ctxt.getToken();
+    auto binOp = mayBeToBinOpType(binOpToken);
     if (!binOp) {
       return lhs;
     }
@@ -166,7 +168,7 @@ AstNode parseBinOpRhsExpr(ParserCtxt &ctxt, AstNode lhs) {
       rhs = parseBinOpRhsExpr(ctxt, rhs);
     }
 
-    lhs = BinExprNode(binOp.value(), lhs, rhs);
+    lhs = BinExprNode(binOp.value(), lhs, rhs, binOpToken.position);
   }
 }
 
@@ -220,15 +222,16 @@ AstNode parseVarDecl(ParserCtxt &ctxt) {
   if (semicolonToken.id != TokenId::Semicolon)
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected semicolon");
 
-  return VarDeclNode(varIdentifierToken.value, varType.value(),
-                     initExpr);
+  return VarDeclNode(varIdentifierToken.value, varType.value(), initExpr,
+                     varIdentifierToken.position);
 }
 
 // ReturnSt <- KEYWORD_return Expr? SEMICOLON
 AstNode parseReturnSt(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
-  if (ctxt.getTokenAndAdvance().id != TokenId::KwReturn)
+  auto kwReturnToken = ctxt.getTokenAndAdvance();
+  if (kwReturnToken.id != TokenId::KwReturn)
     return resetToken(ctxt, mark);
 
   auto mayBeExpr = parseExpr(ctxt);
@@ -236,7 +239,7 @@ AstNode parseReturnSt(ParserCtxt &ctxt) {
   if (ctxt.getTokenAndAdvance().id != TokenId::Semicolon)
     fatalSyntaxError(ctxt, ctxt.getCursor(), "missing semicolon");
 
-  return ReturnStNode(mayBeExpr);
+  return ReturnStNode(mayBeExpr, kwReturnToken.position);
 }
 
 // AssignSt <- Expr AssignOp Expr SEMICOLON
@@ -247,7 +250,8 @@ AstNode parseAssignSt(ParserCtxt &ctxt) {
   if (!lhs)
     return resetToken(ctxt, mark);
 
-  if (ctxt.getTokenAndAdvance().id != TokenId::Equal)
+  auto assignOpToken = ctxt.getTokenAndAdvance();
+  if (assignOpToken.id != TokenId::Equal)
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected right brace");
 
   auto rhs = parseExpr(ctxt);
@@ -258,7 +262,7 @@ AstNode parseAssignSt(ParserCtxt &ctxt) {
   if (ctxt.getTokenAndAdvance().id != TokenId::Semicolon)
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "missing semicolon");
 
-  return AssignStNode(lhs, rhs);
+  return AssignStNode(lhs, rhs, assignOpToken.position);
 }
 
 // Statement <- VarDecl
@@ -278,7 +282,8 @@ AstNode parseStatement(ParserCtxt &ctxt) {
 AstNode parseBlock(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
-  if (ctxt.getTokenAndAdvance().id != TokenId::LBrace) {
+  auto lBraceToken = ctxt.getTokenAndAdvance();
+  if (lBraceToken.id != TokenId::LBrace) {
     return resetToken(ctxt, mark);
   }
 
@@ -290,7 +295,7 @@ AstNode parseBlock(ParserCtxt &ctxt) {
   if (ctxt.getTokenAndAdvance().id != TokenId::RBrace)
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected right brace");
 
-  return BlockNode(statements);
+  return BlockNode(statements, lBraceToken.position);
 }
 
 // FnDef <- KEYWORD_fn IDENTIFIER LPAREN RPAREN TypeExpr Block
@@ -327,8 +332,8 @@ AstNode parseFnDef(ParserCtxt &ctxt) {
   if (!fnBody)
     fatalSyntaxError(ctxt, ctxt.getCursor(), errorMsg);
 
-  return FnDefNode(fnIdentifierToken.value, fnReturnType.value(),
-                   fnBody);
+  return FnDefNode(fnIdentifierToken.value, fnReturnType.value(), fnBody,
+                   kwFnToken.position);
 }
 
 // TopLevelDecl <- FnDef
@@ -352,7 +357,7 @@ AstNode parseTopLevelDeclarations(ParserCtxt &ctxt) {
   while (auto mayBeDecl = parseTopLevelDecl(ctxt)) {
     declarations.push_back(mayBeDecl);
   }
-  return RootNode(declarations);
+  return RootNode(declarations, 0U);
 }
 
 // Root <- skip TopLevelDeclarations eof
@@ -367,7 +372,7 @@ AstNode parseRoot(ParserCtxt &ctxt) {
   return tlds;
 }
 
-AstNode parse(const Tokens &tokens, const Source& source) {
+AstNode parse(const Tokens &tokens, const Source &source) {
   ParserCtxt ctxt(tokens, source);
   if (auto root = parseRoot(ctxt)) {
     return root;

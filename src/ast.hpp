@@ -12,7 +12,7 @@
 #include "types.hpp"
 
 #define COMMON_MEMBERS(CLASS)                                                  \
-  size_t position{0};                                                          \
+  size_t sourcePos{0};                                                         \
   Scope scope{nullptr};                                                        \
   void setScope(Scope newScope) { scope = newScope; };                         \
   Scope &getScope() { return scope; };                                         \
@@ -42,29 +42,32 @@ struct EmptyNode {
 struct FnCallExprNode {
   const std::string callee;
 
-  FnCallExprNode(const std::string &callee) : callee(callee) {}
+  FnCallExprNode(const std::string &callee, const size_t sourcePos)
+      : callee(callee), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(FnCallExprNode);
 };
 
 struct VarExprNode {
   const std::string name;
 
-  VarExprNode(const std::string &name) : name(name) {}
+  VarExprNode(const std::string &name, const size_t sourcePos)
+      : name(name), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(VarExprNode)
 };
 
 struct FloatExprNode {
   const std::string value;
 
-  FloatExprNode(const std::string &value) : value(value) {}
+  FloatExprNode(const std::string &value, const size_t sourcePos)
+      : value(value), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(FloatExprNode)
 };
 
 struct IntegerExprNode {
   const std::string value;
 
-  IntegerExprNode(const std::string &value)
-      : value(value) {}
+  IntegerExprNode(const std::string &value, const size_t sourcePos)
+      : value(value), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(IntegerExprNode)
 };
 
@@ -72,29 +75,33 @@ struct BinExprNode {
   BinOpType type;
   AstNode lhs, rhs;
 
-  BinExprNode(const BinOpType type, const AstNode lhs, const AstNode rhs)
-      : type(type), lhs(lhs), rhs(rhs) {}
+  BinExprNode(const BinOpType type, const AstNode lhs, const AstNode rhs,
+              const size_t sourcePos)
+      : type(type), lhs(lhs), rhs(rhs), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(BinExprNode)
 };
 
 struct AssignStNode {
   AstNode lhs, rhs;
 
-  AssignStNode(const AstNode lhs, const AstNode rhs) : lhs(lhs), rhs(rhs) {}
+  AssignStNode(const AstNode lhs, const AstNode rhs, const size_t sourcePos)
+      : lhs(lhs), rhs(rhs), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(AssignStNode)
 };
 
 struct ReturnStNode {
   AstNode expr;
 
-  ReturnStNode(const AstNode expr) : expr(expr) {}
+  ReturnStNode(const AstNode expr, const size_t sourcePos)
+      : expr(expr), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(ReturnStNode)
 };
 
 struct BlockNode {
   std::vector<AstNode> statements;
 
-  BlockNode(const std::vector<AstNode> statements) : statements(statements) {}
+  BlockNode(const std::vector<AstNode> statements, const size_t sourcePos)
+      : statements(statements), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(BlockNode)
 };
 
@@ -104,8 +111,8 @@ struct FnDefNode {
   AstNode body;
 
   FnDefNode(const std::string &name, const UzType &returnType,
-            const AstNode body)
-      : name(name), returnType(returnType), body(body) {}
+            const AstNode body, const size_t sourcePos)
+      : name(name), returnType(returnType), body(body), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(FnDefNode)
 };
 
@@ -117,15 +124,15 @@ struct VarDeclNode {
   Symbol symbol{nullptr};
 
   VarDeclNode(const std::string &name, const UzType &type,
-              const AstNode initExpr)
-      : name(name), type(type), initExpr(initExpr) {}
+              const AstNode initExpr, const size_t sourcePos)
+      : name(name), type(type), initExpr(initExpr), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(VarDeclNode)
 };
 
 struct RootNode {
   std::vector<AstNode> declarations;
 
-  RootNode(const std::vector<AstNode> declarations)
-      : declarations(declarations) {}
+  RootNode(const std::vector<AstNode> declarations, const size_t sourcePos)
+      : declarations(declarations), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(RootNode)
 };

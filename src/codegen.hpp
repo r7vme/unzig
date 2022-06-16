@@ -1,4 +1,5 @@
 #pragma once
+#include "source.hpp"
 #include <llvm/IR/Function.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
@@ -19,17 +20,20 @@ class FnCallExprNode;
 class EmptyNode;
 
 class CodeGenerator {
+  const Source source;
   llvm::LLVMContext llvmCtxt;
   llvm::Module llvmModule;
   llvm::IRBuilder<> llvmIRBuilder;
 
-  llvm::Function* curFunc;
+  llvm::Function *curFunc;
+
 public:
-  CodeGenerator()
-      : llvmCtxt(), llvmModule("unzig", llvmCtxt), llvmIRBuilder(llvmCtxt) {}
+  CodeGenerator(const Source source)
+      : source(source), llvmCtxt(), llvmModule("unzig", llvmCtxt),
+        llvmIRBuilder(llvmCtxt) {}
   const llvm::Module &getLLVMModule() const { return llvmModule; };
 
-  void fatalCodegenError(const std::string& msg);
+  void fatalCodegenError(const std::string &msg, const size_t sourcePos);
 
   llvm::Value *generate(const FloatExprNode &astNode);
   llvm::Value *generate(const IntegerExprNode &astNode);

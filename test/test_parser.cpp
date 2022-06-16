@@ -31,12 +31,12 @@ TEST_CASE("BinOpRhsExpr inverted operation priority - 1 + 2 * 3", "[parser]") {
 
   auto expectedAST = BinExprNode(
     BinOpType::ADD,
-    IntegerExprNode("1"),
+    IntegerExprNode("1", 0),
     BinExprNode(
       BinOpType::MUL,
-      IntegerExprNode("2"),
-      IntegerExprNode("3")
-    )
+      IntegerExprNode("2", 0),
+      IntegerExprNode("3", 0), 0
+    ), 0
   );
 
   // clang-format on
@@ -60,10 +60,10 @@ TEST_CASE("BinOpRhsExpr - 1 * 2 + 3", "[parser]") {
     BinOpType::ADD,
     BinExprNode(
       BinOpType::MUL,
-      IntegerExprNode("1"),
-      IntegerExprNode("2")
+      IntegerExprNode("1", 0),
+      IntegerExprNode("2", 0), 0
     ),
-    IntegerExprNode("3")
+    IntegerExprNode("3", 0), 0
   );
   // clang-format on
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
@@ -86,12 +86,12 @@ TEST_CASE("GroupedExpr - 3 * (2 + 1)", "[parser]") {
 
   AstNode expectedAST = BinExprNode(
     BinOpType::MUL,
-    IntegerExprNode("3"),
+    IntegerExprNode("3", 0),
     BinExprNode(
       BinOpType::ADD,
-      IntegerExprNode("2"),
-      IntegerExprNode("1")
-    )
+      IntegerExprNode("2", 0),
+      IntegerExprNode("1", 0), 0
+    ), 0
   );
   // clang-format on
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
@@ -110,8 +110,8 @@ TEST_CASE("floating point numbers expr", "[parser]") {
 
   AstNode expectedAST = BinExprNode(
     BinOpType::MUL,
-    FloatExprNode("1.0"),
-    FloatExprNode("2.0")
+    FloatExprNode("1.0", 0),
+    FloatExprNode("2.0", 0), 0
   );
   // clang-format on
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
@@ -135,7 +135,7 @@ TEST_CASE("VarDecl 'var y: i32 = 123;'", "[parser]") {
   AstNode expectedAST = VarDeclNode(
     "y",
     UzType{UzTypeId::Int32},
-    IntegerExprNode("123")
+    IntegerExprNode("123", 0), 0
   );
   // clang-format on
 
@@ -160,8 +160,8 @@ TEST_CASE("FnDef 'fn main() void {};'", "[parser]") {
   //
   std::vector<AstNode> declarations;
   declarations.push_back(FnDefNode("main", UzType{UzTypeId::Void},
-                                   BlockNode(std::vector<AstNode>())));
-  auto expectedAST = RootNode(declarations);
+                                   BlockNode(std::vector<AstNode>(), 0), 0));
+  auto expectedAST = RootNode(declarations, 0);
 
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
   auto AST = parseRoot(ctxt);
@@ -193,12 +193,12 @@ TEST_CASE("block of statements", "[parser]") {
   // clang-format on
 
   auto varDecl =
-      VarDeclNode("x", UzType{UzTypeId::Int32}, IntegerExprNode("1"));
+      VarDeclNode("x", UzType{UzTypeId::Int32}, IntegerExprNode("1", 0), 0);
   std::vector<AstNode> statements{
       varDecl,
-      ReturnStNode(IntegerExprNode("1")),
+      ReturnStNode(IntegerExprNode("1", 0), 0),
   };
-  auto expectedAST = BlockNode(statements);
+  auto expectedAST = BlockNode(statements, 0);
 
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
   auto AST = parseBlock(ctxt);
@@ -216,8 +216,8 @@ TEST_CASE("VarExpr 'x + 2'", "[parser]") {
 
   AstNode expectedAST = BinExprNode(
     BinOpType::ADD,
-    VarExprNode("x"),
-    IntegerExprNode("2")
+    VarExprNode("x", 0),
+    IntegerExprNode("2", 0), 0
     );
   // clang-format on
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
@@ -238,8 +238,8 @@ TEST_CASE("FnCallExpr 'f() + 2'", "[parser]") {
 
   AstNode expectedAST = BinExprNode(
     BinOpType::ADD,
-    FnCallExprNode("f"),
-    IntegerExprNode("2")
+    FnCallExprNode("f", 0),
+    IntegerExprNode("2", 0), 0
     );
   // clang-format on
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
