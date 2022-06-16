@@ -1,32 +1,16 @@
 #include <catch2/catch_test_macros.hpp>
-#include <cstdio>
-#include <unistd.h>
 #include <fstream>
 #include <filesystem>
 
-#include "ast.hpp"
-#include "codegen.hpp"
 #include "dotgen.hpp"
 #include "parser.hpp"
-#include "sema.hpp"
 #include "tokenizer.hpp"
+#include "code_example.hpp"
 
 namespace fs = std::filesystem;
 
 TEST_CASE("generates valid .dot graph", "[dotgen]") {
-  std::string input = R"(
-var gvar: i32 = 123;
-
-fn foo() i32 {
-    return 1.0;
-}
-
-fn main() void {
-    var x: i32 = foo();
-    var y: i32 = 123 + (1 * x);
-    y = 1;
-}
-)";
+  std::string input = codeExample;
 
   INFO("checking if dot is intalled");
   REQUIRE(std::system("hash dot") == 0);
