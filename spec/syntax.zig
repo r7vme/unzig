@@ -1,4 +1,3 @@
-
 var gvar: i32 = 123;
 
 fn foo() i32 {
