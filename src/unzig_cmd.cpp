@@ -88,14 +88,14 @@ int main(int argc, char **argv) {
   CodeGenerator codegen;
   auto code = ast.codegen(&codegen);
   if (!code) {
-    std::cerr << "unable to generate code" << std::endl;
+    std::cerr << "unzig: unable to generate code" << std::endl;
     std::exit(EXIT_FAILURE);
   }
   code->print(llFile);
 
   auto llcCmd = std::string("llc -filetype=obj ") + llFileName;
   if (std::system(llcCmd.c_str()) != 0) {
-    std::cerr << "llc compilation failed" << std::endl;
+    std::cerr << "unzig: llc compilation failed" << std::endl;
     std::exit(EXIT_FAILURE);
   }
 
@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
       " -dynamic-linker /lib64/ld-linux-x86-64.so.2 /usr/lib/crt1.o -lc " +
       objFileName;
   if (std::system(linkerCmd.c_str()) != 0) {
-    std::cerr << "linking failed" << std::endl;
+    std::cerr << "unzig: linking failed" << std::endl;
     std::exit(EXIT_FAILURE);
   }
   return EXIT_SUCCESS;

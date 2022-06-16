@@ -5,10 +5,11 @@
 #include <string>
 #include <unordered_map>
 
-struct Symbol;
+struct SymbolObject;
 struct ScopeObject;
 
 using Scope = std::shared_ptr<ScopeObject>;
+using Symbol = std::shared_ptr<SymbolObject>;
 using SymbolTable = std::unordered_map<std::string, Symbol>;
 
 enum class SymbolType {
@@ -16,11 +17,11 @@ enum class SymbolType {
   Fn,
 };
 
-struct Symbol {
+struct SymbolObject {
   std::string name;
   SymbolType type;
   // data
-  Symbol(const std::string &name, SymbolType type) : name(name), type(type) {}
+  SymbolObject(const std::string &name, SymbolType type) : name(name), type(type) {}
 };
 
 class ScopeObject {
@@ -29,10 +30,10 @@ class ScopeObject {
 
 public:
   void insertSymbol(const Symbol &symbol) {
-    table.insert({symbol.name, symbol});
+    table.insert({symbol->name, symbol});
   }
 
-  std::optional<Symbol> lookupSymbol(const std::string &name) {
+  std::optional<Symbol> lookupSymbol(const std::string &name) const {
     auto it = table.find(name);
     if (it != table.end()) {
       return it->second;
