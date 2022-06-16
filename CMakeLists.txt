@@ -34,5 +34,6 @@ add_executable(tests
   test/test_codegen.cpp
   test/test_sema.cpp
   test/test_scope.cpp
+  test/test_dotgen.cpp
 )
 target_link_libraries(tests PRIVATE unzig_lib Catch2::Catch2WithMain)

@@ -7,7 +7,6 @@ cmake --build build
 
 # tests
 ./build/tests
-./test/test_dotgen.sh
 
 # compile
 cp spec/syntax.zig build
