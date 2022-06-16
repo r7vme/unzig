@@ -4,9 +4,9 @@
 
 TEST_CASE("test parent scope lookup", "[scope]") {
   auto parent = std::make_shared<ScopeObject>();
-  parent->insertSymbol(std::make_shared<SymbolObject>("s1", SymbolType::Var));
+  parent->insertSymbol(std::make_shared<SymbolObject>("s1", SymbolType::Var, false));
   auto scope = std::make_shared<ScopeObject>();
-  scope->insertSymbol(std::make_shared<SymbolObject>("s2", SymbolType::Var));
+  scope->insertSymbol(std::make_shared<SymbolObject>("s2", SymbolType::Var, false));
   scope->setParent(parent);
 
   REQUIRE(scope->lookupSymbol("s1"));

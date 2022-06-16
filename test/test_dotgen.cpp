@@ -10,13 +10,13 @@
 namespace fs = std::filesystem;
 
 TEST_CASE("generates valid .dot graph", "[dotgen]") {
-  std::string input = codeExample;
+  auto source = std::make_shared<SourceObject>(codeExample);
 
   INFO("checking if dot is intalled");
   REQUIRE(std::system("hash dot") == 0);
 
-  auto tokens = tokenize(input);
-  auto ast = parse(tokens, input);
+  auto tokens = tokenize(source);
+  auto ast = parse(tokens, source);
   DotGenerator g;
   ast.dotgen(&g);
 

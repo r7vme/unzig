@@ -3,7 +3,7 @@ set -e
 
 [ -d build ] || mkdir build
 cmake -Bbuild
-cmake --build build
+cmake --build build --parallel 16
 
 # tests
 ./build/tests

@@ -232,7 +232,9 @@ bool isKnownChar(char c) {
   }
 }
 
-std::vector<Token> tokenize(const std::string &in) {
+std::vector<Token> tokenize(const Source source) {
+  auto& in = source->getRawSource();
+
   std::vector<Token> tokens;
   std::string identifierStr{};
   TokenizeState state{TokenizeState::Begin};

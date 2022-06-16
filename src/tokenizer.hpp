@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include "source.hpp"
 
 enum class TokenId {
   Eof,
@@ -40,4 +41,4 @@ using Tokens = std::vector<Token>;
 
 bool operator==(const Token &lhs, const Token &rhs);
 
-Tokens tokenize(const std::string &in);
+Tokens tokenize(const Source in);

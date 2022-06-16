@@ -8,6 +8,7 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Value.h>
 
@@ -35,16 +36,21 @@ Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
   return nullptr;
 }
 
-Value *CodeGenerator::generate(const FloatExprNode & astNode) {
+void CodeGenerator::fatalCodegenError(const std::string &msg) {
+  std::cerr << msg << std::endl;
+  std::exit(EXIT_FAILURE);
+}
+
+Value *CodeGenerator::generate(const FloatExprNode &astNode) {
   return ConstantFP::get(Type::getFloatTy(llvmCtxt), astNode.value);
 }
 
-Value *CodeGenerator::generate(const IntegerExprNode & astNode) {
+Value *CodeGenerator::generate(const IntegerExprNode &astNode) {
   const int32_t decimal = 10;
   return ConstantInt::get(Type::getInt32Ty(llvmCtxt), astNode.value, decimal);
 }
 
-Value *CodeGenerator::generate(const BinExprNode & astNode) {
+Value *CodeGenerator::generate(const BinExprNode &astNode) {
   auto *l = astNode.lhs.codegen(this);
   auto *r = astNode.rhs.codegen(this);
   if (!l || !r) {
@@ -65,44 +71,72 @@ Value *CodeGenerator::generate(const BinExprNode & astNode) {
   return nullptr;
 };
 
-Value *CodeGenerator::generate(const VarDeclNode & astNode) { return nullptr; }
-Value *CodeGenerator::generate(const VarExprNode & astNode) { return nullptr; }
-Value *CodeGenerator::generate(const FnCallExprNode & astNode) { return nullptr; }
+Value *CodeGenerator::generate(const VarDeclNode &astNode) {
+  // TODO: global variables
+  auto *llvmType = toLLVMType(astNode.type, llvmCtxt);
+  auto *initValue = astNode.initExpr.codegen(this);
+  if (!initValue) {
+    fatalCodegenError("variable must be initialized");
+  }
+  llvm::IRBuilder<> TmpB(&curFunc->getEntryBlock(),
+                         curFunc->getEntryBlock().begin());
+  auto *alloca = TmpB.CreateAlloca(llvmType, nullptr, astNode.name);
 
-Value *CodeGenerator::generate(const FnDefNode & astNode) {
+  return llvmIRBuilder.CreateStore(initValue, alloca);
+}
+
+Value *CodeGenerator::generate(const VarExprNode &astNode) { return nullptr; }
+
+Value *CodeGenerator::generate(const FnCallExprNode &astNode) {
+  auto *callee = llvmModule.getFunction(astNode.callee);
+  if (!callee) {
+    fatalCodegenError("function not declared");
+  }
+  auto* call = llvmIRBuilder.CreateCall(callee, nullptr, "calltmp");
+  if (!call)
+  {
+    fatalCodegenError("HUJ");
+  }
+  return call;
+}
+
+Value *CodeGenerator::generate(const FnDefNode &astNode) {
   auto funcName = astNode.name;
   auto *funcReturnType = toLLVMType(astNode.returnType, llvmCtxt);
   auto *funcType = FunctionType::get(funcReturnType, false);
   auto *func = Function::Create(funcType, Function::ExternalLinkage, funcName,
                                 llvmModule);
-
-  BasicBlock *entryBlock = BasicBlock::Create(llvmCtxt, "entry", func);
-  llvmIRBuilder.SetInsertPoint(entryBlock);
-  llvmIRBuilder.CreateRet(nullptr);
-
-  // TODO block codegen
-  // if (Value *RetVal = astNode.body.codegen()) {
-  //   llvmIRBuilder.CreateRet(RetVal);
-  // }
-  // else {
-  // func->eraseFromParent();
-  // return nullptr;
-  // }
-
+  curFunc = func;
+  astNode.body.codegen(this);
   return func;
 }
 
-Value *CodeGenerator::generate(const BlockNode & astNode) { return nullptr; }
-Value *CodeGenerator::generate(const AssignStNode & astNode) { return nullptr; }
-Value *CodeGenerator::generate(const ReturnStNode & astNode) { return nullptr; }
-Value *CodeGenerator::generate(const EmptyNode & astNode) { return nullptr; }
+Value *CodeGenerator::generate(const BlockNode &astNode) {
+  BasicBlock *bb = BasicBlock::Create(llvmCtxt, "entry", curFunc);
+  llvmIRBuilder.SetInsertPoint(bb);
 
-Value *CodeGenerator::generate(const RootNode & astNode) {
-  for (auto &decl : astNode.declarations) {
-    if (!(decl.codegen(this))) {
+  for (auto &s : astNode.statements) {
+    if (!(s.codegen(this))) {
       return nullptr;
     }
   }
-  // return a pointer to required main function
+
+  return bb;
+}
+
+Value *CodeGenerator::generate(const AssignStNode &astNode) { return nullptr; }
+
+Value *CodeGenerator::generate(const ReturnStNode &astNode) {
+  return llvmIRBuilder.CreateRet(astNode.expr.codegen(this));
+}
+
+Value *CodeGenerator::generate(const EmptyNode &astNode) { return nullptr; }
+
+Value *CodeGenerator::generate(const RootNode &astNode) {
+  for (auto &decl : astNode.declarations) {
+    if (!decl.codegen(this)) {
+      fatalCodegenError("code generation for the root node failed");
+    }
+  }
   return llvmModule.getFunction("main");
 }

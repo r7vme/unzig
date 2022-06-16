@@ -20,8 +20,10 @@ enum class SymbolType {
 struct SymbolObject {
   std::string name;
   SymbolType type;
+  bool isGlobal{false};
   // data
-  SymbolObject(const std::string &name, SymbolType type) : name(name), type(type) {}
+  SymbolObject(const std::string &name, SymbolType type, bool isGlobal)
+      : name(name), type(type), isGlobal(isGlobal) {}
 };
 
 class ScopeObject {
@@ -29,6 +31,8 @@ class ScopeObject {
   Scope parent{nullptr};
 
 public:
+  bool isGlobal{false};
+
   void insertSymbol(const Symbol &symbol) {
     table.insert({symbol->name, symbol});
   }

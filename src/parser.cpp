@@ -21,28 +21,9 @@ AstNode resetToken(ParserCtxt &ctxt, const size_t resetMark) {
   return EmptyNode();
 }
 
-std::string getHighlightedSourceCodeForPosition(const std::string &input,
-                                                const size_t position) {
-  std::size_t lineBegin = input.rfind('\n', position);
-  if (lineBegin == std::string::npos)
-    lineBegin = 0;
-
-  std::size_t lineEnd = input.find('\n', position);
-  if (lineEnd == std::string::npos)
-    lineEnd = (input.size() - 1);
-
-  auto line = input.substr(lineBegin, lineEnd - lineBegin);
-  auto relativeTokenPosition = position - lineBegin;
-  std::string highlightLine(line.size(), ' ');
-  highlightLine.at(relativeTokenPosition) = '^';
-  const std::string prefix = " | ";
-  return prefix + line + '\n' + prefix + highlightLine;
-}
-
 void printSyntaxError(ParserCtxt &ctxt, const std::string &msg) {
   const auto token = ctxt.getToken();
-  auto hightlightedLine =
-      getHighlightedSourceCodeForPosition(ctxt.getSource(), token.position);
+  auto hightlightedLine = ctxt.getSource()->getHightlightedPosition(token.position);
   std::cerr << "Syntax error: " << msg << '\n' << hightlightedLine << std::endl;
 }
 
@@ -386,7 +367,7 @@ AstNode parseRoot(ParserCtxt &ctxt) {
   return tlds;
 }
 
-AstNode parse(const Tokens &tokens, const std::string &source) {
+AstNode parse(const Tokens &tokens, const Source& source) {
   ParserCtxt ctxt(tokens, source);
   if (auto root = parseRoot(ctxt)) {
     return root;

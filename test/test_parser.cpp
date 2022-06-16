@@ -8,6 +8,7 @@
 #include "ast_node.hpp"
 #include "dotgen.hpp"
 #include "parser.hpp"
+#include "source.hpp"
 #include "tokenizer.hpp"
 #include "types.hpp"
 
@@ -39,8 +40,7 @@ TEST_CASE("BinOpRhsExpr inverted operation priority - 1 + 2 * 3", "[parser]") {
   );
 
   // clang-format on
-  const std::string input{};
-  ParserCtxt ctxt(inputTokens, input);
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
   auto AST = parseExpr(ctxt);
   REQUIRE(AST == expectedAST);
 }
@@ -66,8 +66,7 @@ TEST_CASE("BinOpRhsExpr - 1 * 2 + 3", "[parser]") {
     IntegerExprNode("3")
   );
   // clang-format on
-  const std::string input{};
-  ParserCtxt ctxt(inputTokens, input);
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
   auto AST = parseExpr(ctxt);
   REQUIRE(AST == expectedAST);
 }
@@ -95,8 +94,7 @@ TEST_CASE("GroupedExpr - 3 * (2 + 1)", "[parser]") {
     )
   );
   // clang-format on
-  const std::string input{};
-  ParserCtxt ctxt(inputTokens, input);
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
   auto AST = parseExpr(ctxt);
   REQUIRE(AST == expectedAST);
 }
@@ -116,8 +114,7 @@ TEST_CASE("floating point numbers expr", "[parser]") {
     FloatExprNode("2.0")
   );
   // clang-format on
-  const std::string input{};
-  ParserCtxt ctxt(inputTokens, input);
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
   auto AST = parseExpr(ctxt);
   REQUIRE(AST);
 }
@@ -142,8 +139,7 @@ TEST_CASE("VarDecl 'var y: i32 = 123;'", "[parser]") {
   );
   // clang-format on
 
-  const std::string input{};
-  ParserCtxt ctxt(inputTokens, input);
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
   auto AST = parseVarDecl(ctxt);
   REQUIRE(AST == expectedAST);
 }
@@ -167,8 +163,7 @@ TEST_CASE("FnDef 'fn main() void {};'", "[parser]") {
                                    BlockNode(std::vector<AstNode>())));
   auto expectedAST = RootNode(declarations);
 
-  const std::string input{};
-  ParserCtxt ctxt(inputTokens, input);
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
   auto AST = parseRoot(ctxt);
   REQUIRE(AST == expectedAST);
 }
@@ -205,8 +200,7 @@ TEST_CASE("block of statements", "[parser]") {
   };
   auto expectedAST = BlockNode(statements);
 
-  const std::string input{};
-  ParserCtxt ctxt(inputTokens, input);
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
   auto AST = parseBlock(ctxt);
   REQUIRE(AST == expectedAST);
 }
@@ -226,8 +220,7 @@ TEST_CASE("VarExpr 'x + 2'", "[parser]") {
     IntegerExprNode("2")
     );
   // clang-format on
-  const std::string input{};
-  ParserCtxt ctxt(inputTokens, input);
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
   auto AST = parseExpr(ctxt);
   REQUIRE(AST == expectedAST);
 }
@@ -249,8 +242,7 @@ TEST_CASE("FnCallExpr 'f() + 2'", "[parser]") {
     IntegerExprNode("2")
     );
   // clang-format on
-  const std::string input{};
-  ParserCtxt ctxt(inputTokens, input);
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
   auto AST = parseExpr(ctxt);
   REQUIRE(AST == expectedAST);
 }

@@ -5,14 +5,15 @@
 #include "ast.hpp"
 #include "ast_node.hpp"
 #include "tokenizer.hpp"
+#include "source.hpp"
 
 class ParserCtxt {
   const Tokens &tokens;
-  const std::string &source;
+  const Source source;
   size_t cursor{0};
 
 public:
-  ParserCtxt(const Tokens &tokens, const std::string &source)
+  ParserCtxt(const Tokens &tokens, const Source source)
       : tokens(tokens), source(source){};
 
   const Token &getToken() const {
@@ -20,7 +21,7 @@ public:
     return tokens[cursor];
   }
 
-  const std::string &getSource() const { return source; }
+  const Source getSource() const { return source; }
 
   void skipToken() { cursor++; }
 
@@ -38,4 +39,4 @@ public:
   }
 };
 
-AstNode parse(const Tokens &tokens, const std::string &source);
+AstNode parse(const Tokens &tokens, const Source& source);

@@ -1,9 +1,10 @@
 #include <catch2/catch_test_macros.hpp>
 
+#include "source.hpp"
 #include "tokenizer.hpp"
 
 TEST_CASE("function + main", "[tokenizer]") {
-  std::string s = R"(
+  std::string raw = R"(
 fn foo() u64 {
   return 1;
 }
@@ -14,6 +15,8 @@ pub fn main() void {
   y = 1 + 2;
 }
 )";
+  auto s = std::make_shared<SourceObject>(raw);
+
   Tokens expectedTokens = {
       // fn foo
       Token{TokenId::KwFn, "", 0},
@@ -78,12 +81,12 @@ pub fn main() void {
 }
 
 TEST_CASE("last char is part of identifier or number", "[tokenizer]") {
-  REQUIRE(tokenize("1") ==
+  REQUIRE(tokenize(std::make_shared<SourceObject>("1")) ==
           Tokens{Token{TokenId::IntegerLiteral, "1", 0}, Token{TokenId::Eof, "", 0}});
-  REQUIRE(tokenize("foo") ==
+  REQUIRE(tokenize(std::make_shared<SourceObject>("foo")) ==
           Tokens{Token{TokenId::Identifier, "foo", 0}, Token{TokenId::Eof, "", 0}});
 }
 
 TEST_CASE("empty string", "[tokenizer]") {
-  REQUIRE(tokenize("") == Tokens{Token{TokenId::Eof, "", 0}});
+  REQUIRE(tokenize(std::make_shared<SourceObject>("")) == Tokens{Token{TokenId::Eof, "", 0}});
 }

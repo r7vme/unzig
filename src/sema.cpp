@@ -9,6 +9,7 @@ void SemanticAnalyzer::fatalSemaError(const std::string &msg) {
 
 void SemanticAnalyzer::analyze(RootNode &astNode) {
   auto globalScope = std::make_shared<ScopeObject>();
+  globalScope->isGlobal = true;
   astNode.setScope(globalScope);
 
   for (auto &child : astNode.declarations) {
@@ -21,7 +22,10 @@ void SemanticAnalyzer::analyze(VarDeclNode &astNode) {
   if (astNode.scope->lookupSymbol(astNode.name)) {
     fatalSemaError("redifinition of the symbol");
   }
-  astNode.scope->insertSymbol(std::make_shared<SymbolObject>(astNode.name, SymbolType::Var));
+
+  astNode.symbol = std::make_shared<SymbolObject>(astNode.name, SymbolType::Var,
+                                               astNode.scope->isGlobal);
+  astNode.scope->insertSymbol(astNode.symbol);
   astNode.initExpr.setScope(astNode.scope);
   astNode.initExpr.sema(this);
 }
@@ -30,7 +34,8 @@ void SemanticAnalyzer::analyze(FnDefNode &astNode) {
   if (astNode.scope->lookupSymbol(astNode.name)) {
     fatalSemaError("redifinition of the symbol");
   }
-  astNode.scope->insertSymbol(std::make_shared<SymbolObject>(astNode.name, SymbolType::Fn));
+  astNode.scope->insertSymbol(std::make_shared<SymbolObject>(
+      astNode.name, SymbolType::Fn, astNode.scope->isGlobal));
 
   // new scope
   auto blockScope = std::make_shared<ScopeObject>();

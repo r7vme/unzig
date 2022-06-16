@@ -4,16 +4,16 @@
 #include <memory>
 #include <string>
 
+#include "ast_node.hpp"
 #include "codegen.hpp"
 #include "dotgen.hpp"
 #include "scope.hpp"
 #include "sema.hpp"
 #include "types.hpp"
 
-#include "ast_node.hpp"
-
 #define COMMON_MEMBERS(CLASS)                                                  \
-  Scope scope{nullptr};                                \
+  size_t position{0};                                                          \
+  Scope scope{nullptr};                                                        \
   void setScope(Scope newScope) { scope = newScope; };                         \
   Scope &getScope() { return scope; };                                         \
   const uint64_t nodeId{curNodeId++};                                          \
@@ -63,7 +63,8 @@ struct FloatExprNode {
 struct IntegerExprNode {
   const std::string value;
 
-  IntegerExprNode(const std::string &value) : value(value) {}
+  IntegerExprNode(const std::string &value)
+      : value(value) {}
   AST_NODE_MEMBERS(IntegerExprNode)
 };
 
@@ -112,6 +113,8 @@ struct VarDeclNode {
   const std::string name;
   const UzType type;
   AstNode initExpr;
+
+  Symbol symbol{nullptr};
 
   VarDeclNode(const std::string &name, const UzType &type,
               const AstNode initExpr)

@@ -51,6 +51,7 @@ int main(int argc, char **argv) {
     std::exit(1);
   }
   std::string inputCode = readFileIntoString(inputFilePath);
+  auto source = std::make_shared<SourceObject>(inputCode);
 
   std::string llFileName = inputFilePath.replace_extension("ll");
   std::string objFileName = inputFilePath.replace_extension("o");
@@ -67,9 +68,8 @@ int main(int argc, char **argv) {
     std::exit(1);
   }
 
-  auto tokens = tokenize(inputCode);
-  auto ast = parse(tokens, inputCode);
-
+  auto tokens = tokenize(source);
+  auto ast = parse(tokens, source);
   SemanticAnalyzer sema;
   ast.sema(&sema);
 
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
     std::cerr << "unzig: unable to generate code" << std::endl;
     std::exit(EXIT_FAILURE);
   }
-  code->print(llFile);
+  codegen.getLLVMModule().print(llFile, nullptr);
 
   auto llcCmd = std::string("llc -filetype=obj ") + llFileName;
   if (std::system(llcCmd.c_str()) != 0) {
