@@ -23,8 +23,8 @@ add_library(unzig_lib
 )
 target_link_libraries(unzig_lib PRIVATE LLVM)
 
-add_executable(cmd src/cmd.cpp)
-target_link_libraries(cmd unzig_lib edit)
+#add_executable(cmd src/cmd.cpp)
+#target_link_libraries(cmd unzig_lib edit)
 
 add_executable(unzig src/compiler.cpp)
 target_link_libraries(unzig unzig_lib)

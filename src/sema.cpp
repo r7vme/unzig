@@ -69,7 +69,7 @@ void SemanticAnalyzer::analyze(VarExprNode &astNode) {
 void SemanticAnalyzer::analyze(FnCallExprNode &astNode) {
   auto symbol = astNode.scope->lookupSymbol(astNode.callee);
   if (!symbol || symbol.value().type != SymbolType::Fn) {
-    fatalSemaError("undeclared variable");
+    fatalSemaError("undeclared function");
   }
 }
 
