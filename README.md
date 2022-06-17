@@ -2,7 +2,7 @@
 
 A (toy) system programming language.
 
-# Current status
+## Current status
 
 This works
 
@@ -18,3 +18,7 @@ fn main() i32 {
     return 0;
 }
 ```
+
+## Credits
+
+Inspiration from [`zig`](https://www.youtube.com/watch?v=Gv2I7qTux7g)
