@@ -6,38 +6,15 @@
 class SourceObject {
   const std::string rawSource;
 
+  SourceObject(const SourceObject &other) = delete;
+  SourceObject &operator=(const SourceObject &other) = delete;
+
 public:
-  SourceObject(const std::string &rawSource) : rawSource(rawSource) {}
-
-  const std::string &getRawSource() const { return rawSource; };
-
-  std::string getHightlightedPosition(const size_t position) const {
-    if (position >= rawSource.size())
-    {
-      return "";
-    }
-
-    std::size_t lineBegin = rawSource.rfind('\n', position);
-    if (lineBegin == std::string::npos)
-    {
-      lineBegin = 0;
-    } else {
-      lineBegin += 1;
-    }
-
-    std::size_t lineEnd = rawSource.find('\n', position);
-    if (lineEnd == std::string::npos)
-    {
-      lineEnd = (rawSource.size() - 1);
-    }
-
-    auto line = rawSource.substr(lineBegin, lineEnd - lineBegin);
-    auto relativeTokenPosition = position - lineBegin;
-    std::string highlightLine(line.size(), ' ');
-    highlightLine.at(relativeTokenPosition) = '^';
-    const std::string prefix = " | ";
-    return prefix + line + '\n' + prefix + highlightLine;
-  }
+  SourceObject(const std::string &rawSource);
+  const std::string &getRawSource() const;
+  std::string getHightlightedPosition(const size_t position) const;
 };
 
 using Source = std::shared_ptr<SourceObject>;
+
+Source createSource(const std::string &input);

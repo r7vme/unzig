@@ -1,6 +1,7 @@
 #include "sema.hpp"
 #include "ast.hpp"
 #include "scope.hpp"
+#include "symbol.hpp"
 
 void SemanticAnalyzer::fatalSemaError(const std::string &msg) {
   std::cerr << msg << std::endl;
@@ -8,7 +9,7 @@ void SemanticAnalyzer::fatalSemaError(const std::string &msg) {
 }
 
 void SemanticAnalyzer::analyze(RootNode &astNode) {
-  auto globalScope = std::make_shared<ScopeObject>();
+  auto globalScope = createScope(nullptr);
   globalScope->isGlobal = true;
   astNode.setScope(globalScope);
 
@@ -23,8 +24,8 @@ void SemanticAnalyzer::analyze(VarDeclNode &astNode) {
     fatalSemaError("redifinition of the symbol");
   }
 
-  astNode.symbol = std::make_shared<SymbolObject>(SymbolType::Var, astNode.name, astNode.type, 
-                                               astNode.scope->isGlobal);
+  astNode.symbol = createSymbol(SymbolType::Var, astNode.name, astNode.type,
+                                astNode.scope->isGlobal);
   astNode.scope->insertSymbol(astNode.symbol);
   astNode.initExpr.setScope(astNode.scope);
   astNode.initExpr.sema(this);
@@ -34,13 +35,13 @@ void SemanticAnalyzer::analyze(FnDefNode &astNode) {
   if (astNode.scope->lookupSymbol(astNode.name)) {
     fatalSemaError("redifinition of the symbol");
   }
-  astNode.scope->insertSymbol(std::make_shared<SymbolObject>(
-      SymbolType::Fn, astNode.name, astNode.returnType, astNode.scope->isGlobal));
+  astNode.scope->insertSymbol(createSymbol(SymbolType::Fn, astNode.name,
+                                           astNode.returnType,
+                                           astNode.scope->isGlobal));
 
   // new scope
-  auto blockScope = std::make_shared<ScopeObject>();
+  auto blockScope = createScope(astNode.scope);
   astNode.body.setScope(blockScope);
-  astNode.body.getScope()->setParent(astNode.scope);
   astNode.body.sema(this);
 }
 
