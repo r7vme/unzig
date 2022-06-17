@@ -32,9 +32,7 @@ class AstNode {
              obj.isEqual(static_cast<const Wrapper<T> &>(other).obj);
     };
     bool isEmptyNode() const { return obj.isEmptyNode(); };
-    llvm::Value *codegen(CodeGenerator *g) const override {
-      return obj.codegen(g);
-    };
+    llvm::Value *codegen(CodeGenerator *g) const override { return obj.codegen(g); };
     void dotgen(DotGenerator *g) const override { obj.dotgen(g); };
     void sema(SemanticAnalyzer *g) override { obj.sema(g); };
     uint64_t getNodeId() const override { return obj.getNodeId(); };
@@ -46,16 +44,13 @@ class AstNode {
   };
 
 public:
-  template <typename T>
-  AstNode(T obj) : ptr(std::make_shared<Wrapper<T>>(std::move(obj))) {}
+  template <typename T> AstNode(T obj) : ptr(std::make_shared<Wrapper<T>>(std::move(obj))) {}
   AstNode(const AstNode &other) : ptr(other.ptr) {}
   AstNode &operator=(const AstNode other) {
     ptr = other.ptr;
     return *this;
   }
-  bool operator==(const AstNode &other) const {
-    return ptr->isEqual(*other.ptr);
-  }
+  bool operator==(const AstNode &other) const { return ptr->isEqual(*other.ptr); }
   operator bool() const { return !(ptr->isEmptyNode()); }
   llvm::Value *codegen(CodeGenerator *g) const { return ptr->codegen(g); };
   void dotgen(DotGenerator *g) const { ptr->dotgen(g); }

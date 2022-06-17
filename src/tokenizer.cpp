@@ -181,8 +181,7 @@ static std::string getTokenIdName(TokenId id) {
 }
 
 std::ostream &operator<<(std::ostream &os, const Token &o) {
-  return os << "Token ID: " << getTokenIdName(o.id)
-            << ", Token Value: " << o.value;
+  return os << "Token ID: " << getTokenIdName(o.id) << ", Token Value: " << o.value;
 }
 
 bool operator==(const Token &lhs, const Token &rhs) {
@@ -215,8 +214,7 @@ TokenId getSpecialCharTokenId(char c) {
   return search->second;
 }
 
-Token getKeywordOrIdentifierTokenFromString(const std::string &s,
-                                            const size_t tokenPosition) {
+Token getKeywordOrIdentifierTokenFromString(const std::string &s, const size_t tokenPosition) {
   if (isKeyword(s)) {
     return Token{getKeywordTokenId(s), "", tokenPosition};
   }
@@ -233,7 +231,7 @@ bool isKnownChar(char c) {
 }
 
 std::vector<Token> tokenize(const Source source) {
-  auto& in = source->getRawSource();
+  auto &in = source->getRawSource();
 
   std::vector<Token> tokens;
   std::string identifierStr{};
@@ -281,8 +279,7 @@ std::vector<Token> tokenize(const Source source) {
         break;
       default:
         auto tokenPosition = (i - identifierStr.size());
-        tokens.push_back(getKeywordOrIdentifierTokenFromString(identifierStr,
-                                                               tokenPosition));
+        tokens.push_back(getKeywordOrIdentifierTokenFromString(identifierStr, tokenPosition));
         state = TokenizeState::Begin;
         i--;
         break;
@@ -298,11 +295,9 @@ std::vector<Token> tokenize(const Source source) {
         auto tokenPosition = (i - identifierStr.size());
         bool isFloat = identifierStr.find(DOT) != std::string::npos;
         if (isFloat) {
-          tokens.push_back(
-              Token{TokenId::FloatLiteral, identifierStr, tokenPosition});
+          tokens.push_back(Token{TokenId::FloatLiteral, identifierStr, tokenPosition});
         } else {
-          tokens.push_back(
-              Token{TokenId::IntegerLiteral, identifierStr, tokenPosition});
+          tokens.push_back(Token{TokenId::IntegerLiteral, identifierStr, tokenPosition});
         }
         state = TokenizeState::Begin;
         i--;

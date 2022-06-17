@@ -4,9 +4,7 @@
 #include <sstream>
 #include <string>
 
-std::string getNodeId(const AstNode &astNode) {
-  return std::to_string(astNode.getNodeId());
-}
+std::string getNodeId(const AstNode &astNode) { return std::to_string(astNode.getNodeId()); }
 
 std::string DotGenerator::getDotOutput() {
   return std::string("digraph \"AST\" {\n") + output + "}";

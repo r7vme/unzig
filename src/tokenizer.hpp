@@ -1,9 +1,9 @@
 #pragma once
 
+#include "source.hpp"
 #include <cstdint>
 #include <string>
 #include <vector>
-#include "source.hpp"
 
 enum class TokenId {
   Eof,
@@ -28,7 +28,8 @@ enum class TokenId {
 };
 
 struct Token {
-  Token(const TokenId id, const std::string &value, const size_t position) : id(id), value(value), position(position) {}
+  Token(const TokenId id, const std::string &value, const size_t position)
+      : id(id), value(value), position(position) {}
 
   TokenId id;
   std::string value;

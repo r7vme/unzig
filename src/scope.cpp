@@ -1,8 +1,6 @@
 #include "scope.hpp"
 
-void ScopeObject::insertSymbol(const Symbol &symbol) {
-  table.insert({symbol->name, symbol});
-}
+void ScopeObject::insertSymbol(const Symbol &symbol) { table.insert({symbol->name, symbol}); }
 
 std::optional<Symbol> ScopeObject::lookupSymbol(const std::string &name) const {
   auto it = table.find(name);
@@ -15,8 +13,6 @@ std::optional<Symbol> ScopeObject::lookupSymbol(const std::string &name) const {
   return std::nullopt;
 }
 
-Scope createScope(const Scope parent) {
-  return std::make_shared<ScopeObject>(parent);
-}
+Scope createScope(const Scope parent) { return std::make_shared<ScopeObject>(parent); }
 
 ScopeObject::ScopeObject(const Scope parent) : parent(parent) {}

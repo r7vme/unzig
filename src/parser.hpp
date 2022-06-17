@@ -4,8 +4,8 @@
 
 #include "ast.hpp"
 #include "ast_node.hpp"
-#include "tokenizer.hpp"
 #include "source.hpp"
+#include "tokenizer.hpp"
 
 class ParserCtxt {
   const Tokens &tokens;
@@ -13,8 +13,7 @@ class ParserCtxt {
   size_t cursor{0};
 
 public:
-  ParserCtxt(const Tokens &tokens, const Source source)
-      : tokens(tokens), source(source){};
+  ParserCtxt(const Tokens &tokens, const Source source) : tokens(tokens), source(source){};
 
   const Token &getToken() const {
     assert(tokens.size() > cursor);
@@ -39,4 +38,4 @@ public:
   }
 };
 
-AstNode parse(const Tokens &tokens, const Source& source);
+AstNode parse(const Tokens &tokens, const Source &source);

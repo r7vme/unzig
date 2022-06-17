@@ -11,23 +11,23 @@
 #include "sema.hpp"
 #include "types.hpp"
 
-#define COMMON_MEMBERS(CLASS)                                                  \
-  size_t sourcePos{0};                                                         \
-  Scope scope{nullptr};                                                        \
-  void setScope(Scope newScope) { scope = newScope; };                         \
-  Scope &getScope() { return scope; };                                         \
-  const uint64_t nodeId{curNodeId++};                                          \
-  uint64_t getNodeId() const { return nodeId; };                               \
-  llvm::Value *codegen(CodeGenerator *g) const { return g->generate(*this); }; \
-  void dotgen(DotGenerator *g) const { return g->generate(*this); };           \
-  void sema(SemanticAnalyzer *g) { return g->analyze(*this); };                \
+#define COMMON_MEMBERS(CLASS)                                                                      \
+  size_t sourcePos{0};                                                                             \
+  Scope scope{nullptr};                                                                            \
+  void setScope(Scope newScope) { scope = newScope; };                                             \
+  Scope &getScope() { return scope; };                                                             \
+  const uint64_t nodeId{curNodeId++};                                                              \
+  uint64_t getNodeId() const { return nodeId; };                                                   \
+  llvm::Value *codegen(CodeGenerator *g) const { return g->generate(*this); };                     \
+  void dotgen(DotGenerator *g) const { return g->generate(*this); };                               \
+  void sema(SemanticAnalyzer *g) { return g->analyze(*this); };                                    \
   bool isEqual(const CLASS &other) const;
 
-#define IS_EMPTY_NODE_FALSE                                                    \
+#define IS_EMPTY_NODE_FALSE                                                                        \
   bool isEmptyNode() const { return false; };
 
-#define AST_NODE_MEMBERS(CLASS)                                                \
-  COMMON_MEMBERS(CLASS)                                                        \
+#define AST_NODE_MEMBERS(CLASS)                                                                    \
+  COMMON_MEMBERS(CLASS)                                                                            \
   IS_EMPTY_NODE_FALSE
 
 static uint64_t curNodeId{0};
@@ -52,8 +52,7 @@ struct VarExprNode {
 
   Symbol varSymbol{nullptr};
 
-  VarExprNode(const std::string &name, const size_t sourcePos)
-      : name(name), sourcePos(sourcePos) {}
+  VarExprNode(const std::string &name, const size_t sourcePos) : name(name), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(VarExprNode)
 };
 
@@ -77,8 +76,7 @@ struct BinExprNode {
   BinOpType type;
   AstNode lhs, rhs;
 
-  BinExprNode(const BinOpType type, const AstNode lhs, const AstNode rhs,
-              const size_t sourcePos)
+  BinExprNode(const BinOpType type, const AstNode lhs, const AstNode rhs, const size_t sourcePos)
       : type(type), lhs(lhs), rhs(rhs), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(BinExprNode)
 };
@@ -97,8 +95,7 @@ struct AssignStNode {
 struct ReturnStNode {
   AstNode expr;
 
-  ReturnStNode(const AstNode expr, const size_t sourcePos)
-      : expr(expr), sourcePos(sourcePos) {}
+  ReturnStNode(const AstNode expr, const size_t sourcePos) : expr(expr), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(ReturnStNode)
 };
 
@@ -115,8 +112,8 @@ struct FnDefNode {
   const UzType returnType;
   AstNode body;
 
-  FnDefNode(const std::string &name, const UzType &returnType,
-            const AstNode body, const size_t sourcePos)
+  FnDefNode(const std::string &name, const UzType &returnType, const AstNode body,
+            const size_t sourcePos)
       : name(name), returnType(returnType), body(body), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(FnDefNode)
 };
@@ -128,8 +125,8 @@ struct VarDeclNode {
 
   Symbol symbol{nullptr};
 
-  VarDeclNode(const std::string &name, const UzType &type,
-              const AstNode initExpr, const size_t sourcePos)
+  VarDeclNode(const std::string &name, const UzType &type, const AstNode initExpr,
+              const size_t sourcePos)
       : name(name), type(type), initExpr(initExpr), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(VarDeclNode)
 };

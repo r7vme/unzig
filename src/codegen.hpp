@@ -29,8 +29,7 @@ class CodeGenerator {
 
 public:
   CodeGenerator(const Source source)
-      : source(source), llvmCtxt(), llvmModule("unzig", llvmCtxt),
-        llvmIRBuilder(llvmCtxt) {}
+      : source(source), llvmCtxt(), llvmModule("unzig", llvmCtxt), llvmIRBuilder(llvmCtxt) {}
   const llvm::Module &getLLVMModule() const { return llvmModule; };
 
   void fatalCodegenError(const std::string &msg, const size_t sourcePos);

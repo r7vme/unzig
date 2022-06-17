@@ -25,4 +25,3 @@ public:
   void insertSymbol(const Symbol &symbol);
   std::optional<Symbol> lookupSymbol(const std::string &name) const;
 };
-

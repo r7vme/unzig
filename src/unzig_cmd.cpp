@@ -102,9 +102,7 @@ int main(int argc, char **argv) {
 
   // linker
   std::string linkerCmd =
-      std::string("ld -o ") + outputFile +
-      " -dynamic-linker /lib64/ld-linux-x86-64.so.2 /usr/lib/crt1.o -lc " +
-      objFileName;
+      std::string("ld -o ") + outputFile + " /usr/lib/crt1.o -lc " + objFileName;
   if (std::system(linkerCmd.c_str()) != 0) {
     std::cerr << "unzig: linking failed" << std::endl;
     std::exit(EXIT_FAILURE);

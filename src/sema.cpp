@@ -24,8 +24,8 @@ void SemanticAnalyzer::analyze(VarDeclNode &astNode) {
     fatalSemaError("redifinition of the symbol");
   }
 
-  astNode.symbol = createSymbol(SymbolType::Var, astNode.name, astNode.type,
-                                astNode.scope->isGlobal);
+  astNode.symbol =
+      createSymbol(SymbolType::Var, astNode.name, astNode.type, astNode.scope->isGlobal);
   astNode.scope->insertSymbol(astNode.symbol);
   astNode.initExpr.setScope(astNode.scope);
   astNode.initExpr.sema(this);
@@ -35,9 +35,8 @@ void SemanticAnalyzer::analyze(FnDefNode &astNode) {
   if (astNode.scope->lookupSymbol(astNode.name)) {
     fatalSemaError("redifinition of the symbol");
   }
-  astNode.scope->insertSymbol(createSymbol(SymbolType::Fn, astNode.name,
-                                           astNode.returnType,
-                                           astNode.scope->isGlobal));
+  astNode.scope->insertSymbol(
+      createSymbol(SymbolType::Fn, astNode.name, astNode.returnType, astNode.scope->isGlobal));
 
   // new scope
   auto blockScope = createScope(astNode.scope);

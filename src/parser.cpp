@@ -23,13 +23,11 @@ AstNode resetToken(ParserCtxt &ctxt, const size_t resetMark) {
 
 void printSyntaxError(ParserCtxt &ctxt, const std::string &msg) {
   const auto token = ctxt.getToken();
-  auto hightlightedLine =
-      ctxt.getSource()->getHightlightedPosition(token.position);
+  auto hightlightedLine = ctxt.getSource()->getHightlightedPosition(token.position);
   std::cerr << "Syntax error: " << msg << '\n' << hightlightedLine << std::endl;
 }
 
-void fatalSyntaxError(ParserCtxt &ctxt, const size_t resetMark,
-                      const std::string &msg) {
+void fatalSyntaxError(ParserCtxt &ctxt, const size_t resetMark, const std::string &msg) {
   ctxt.resetCursor(resetMark);
   printSyntaxError(ctxt, msg);
   std::exit(EXIT_FAILURE);
@@ -163,8 +161,7 @@ AstNode parseBinOpRhsExpr(ParserCtxt &ctxt, AstNode lhs) {
     }
 
     auto nextBinOp = mayBeToBinOpType(ctxt.getToken());
-    if ((nextBinOp) &&
-        (binOpPrec.at(nextBinOp.value()) > binOpPrec.at(binOp.value()))) {
+    if ((nextBinOp) && (binOpPrec.at(nextBinOp.value()) > binOpPrec.at(binOp.value()))) {
       rhs = parseBinOpRhsExpr(ctxt, rhs);
     }
 
@@ -213,8 +210,7 @@ AstNode parseVarDecl(ParserCtxt &ctxt) {
     ctxt.skipToken();
     initExpr = parseExpr(ctxt);
     if (!initExpr) {
-      fatalSyntaxError(ctxt, ctxt.getCursor(),
-                       "unable to parse initialization expression");
+      fatalSyntaxError(ctxt, ctxt.getCursor(), "unable to parse initialization expression");
     }
   }
 
@@ -222,8 +218,7 @@ AstNode parseVarDecl(ParserCtxt &ctxt) {
   if (semicolonToken.id != TokenId::Semicolon)
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected semicolon");
 
-  return VarDeclNode(varIdentifierToken.value, varType.value(), initExpr,
-                     kwVarToken.position);
+  return VarDeclNode(varIdentifierToken.value, varType.value(), initExpr, kwVarToken.position);
 }
 
 // ReturnSt <- KEYWORD_return Expr? SEMICOLON
@@ -255,8 +250,7 @@ AstNode parseAssignSt(ParserCtxt &ctxt) {
 
   auto expr = parseExpr(ctxt);
   if (!expr)
-    fatalSyntaxError(ctxt, ctxt.getCursor(),
-                     "unable to parse assign statement");
+    fatalSyntaxError(ctxt, ctxt.getCursor(), "unable to parse assign statement");
 
   if (ctxt.getTokenAndAdvance().id != TokenId::Semicolon)
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "missing semicolon");
@@ -331,8 +325,7 @@ AstNode parseFnDef(ParserCtxt &ctxt) {
   if (!fnBody)
     fatalSyntaxError(ctxt, ctxt.getCursor(), errorMsg);
 
-  return FnDefNode(fnIdentifierToken.value, fnReturnType.value(), fnBody,
-                   kwFnToken.position);
+  return FnDefNode(fnIdentifierToken.value, fnReturnType.value(), fnBody, kwFnToken.position);
 }
 
 // TopLevelDecl <- FnDef

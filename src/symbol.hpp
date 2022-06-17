@@ -20,7 +20,8 @@ struct SymbolObject {
 
 using Symbol = std::shared_ptr<SymbolObject>;
 
-inline Symbol createSymbol(SymbolType symbolType, const std::string &name, const UzType dataType, const bool isGlobal) {
+inline Symbol createSymbol(SymbolType symbolType, const std::string &name, const UzType dataType,
+                           const bool isGlobal) {
   auto symbol = std::make_shared<SymbolObject>();
   symbol->symbolType = symbolType;
   symbol->name = name;

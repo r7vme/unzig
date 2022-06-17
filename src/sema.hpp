@@ -19,7 +19,7 @@ class EmptyNode;
 
 class SemanticAnalyzer {
 public:
-  void fatalSemaError(const std::string & msg);
+  void fatalSemaError(const std::string &msg);
   void analyze(FloatExprNode &astNode);
   void analyze(IntegerExprNode &astNode);
   void analyze(BinExprNode &astNode);

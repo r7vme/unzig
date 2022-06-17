@@ -1,8 +1,7 @@
 #include "source.hpp"
 #include <stdexcept>
 
-SourceObject::SourceObject(const std::string &rawSource)
-    : rawSource(rawSource) {}
+SourceObject::SourceObject(const std::string &rawSource) : rawSource(rawSource) {}
 
 const std::string &SourceObject::getRawSource() const { return rawSource; };
 
@@ -31,6 +30,4 @@ std::string SourceObject::getHightlightedPosition(const size_t position) const {
   return prefix + line + '\n' + prefix + highlightLine;
 }
 
-Source createSource(const std::string &input) {
-  return std::make_shared<SourceObject>(input);
-}
+Source createSource(const std::string &input) { return std::make_shared<SourceObject>(input); }

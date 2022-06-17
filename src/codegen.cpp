@@ -37,11 +37,9 @@ Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
   return nullptr;
 }
 
-void CodeGenerator::fatalCodegenError(const std::string &msg,
-                                      const size_t sourcePos) {
+void CodeGenerator::fatalCodegenError(const std::string &msg, const size_t sourcePos) {
   auto hightlightedLine = source->getHightlightedPosition(sourcePos);
-  std::cerr << "Codegen error: " << msg << '\n'
-            << hightlightedLine << std::endl;
+  std::cerr << "Codegen error: " << msg << '\n' << hightlightedLine << std::endl;
   std::exit(EXIT_FAILURE);
 }
 
@@ -82,8 +80,7 @@ Value *CodeGenerator::generate(const VarDeclNode &astNode) {
   if (!initValue) {
     fatalCodegenError("variable must be initialized", astNode.sourcePos);
   }
-  llvm::IRBuilder<> TmpB(&curFunc->getEntryBlock(),
-                         curFunc->getEntryBlock().begin());
+  llvm::IRBuilder<> TmpB(&curFunc->getEntryBlock(), curFunc->getEntryBlock().begin());
   auto *alloca = TmpB.CreateAlloca(llvmType, nullptr, astNode.name);
   astNode.symbol->allocaInst = alloca;
 
@@ -92,12 +89,10 @@ Value *CodeGenerator::generate(const VarDeclNode &astNode) {
 
 Value *CodeGenerator::generate(const VarExprNode &astNode) {
   if (!astNode.varSymbol->allocaInst) {
-    fatalCodegenError("unable to find a variable instruction",
-                      astNode.sourcePos);
+    fatalCodegenError("unable to find a variable instruction", astNode.sourcePos);
   }
-  return llvmIRBuilder.CreateLoad(
-      toLLVMType(astNode.varSymbol->dataType, llvmCtxt),
-      astNode.varSymbol->allocaInst, astNode.name);
+  return llvmIRBuilder.CreateLoad(toLLVMType(astNode.varSymbol->dataType, llvmCtxt),
+                                  astNode.varSymbol->allocaInst, astNode.name);
 }
 
 Value *CodeGenerator::generate(const FnCallExprNode &astNode) {
@@ -116,8 +111,7 @@ Value *CodeGenerator::generate(const FnDefNode &astNode) {
   auto funcName = astNode.name;
   auto *funcReturnType = toLLVMType(astNode.returnType, llvmCtxt);
   auto *funcType = FunctionType::get(funcReturnType, false);
-  auto *func = Function::Create(funcType, Function::ExternalLinkage, funcName,
-                                llvmModule);
+  auto *func = Function::Create(funcType, Function::ExternalLinkage, funcName, llvmModule);
   curFunc = func;
   if (!astNode.body.codegen(this)) {
     fatalCodegenError("unable to generate a function body", astNode.sourcePos);
@@ -131,8 +125,7 @@ Value *CodeGenerator::generate(const BlockNode &astNode) {
 
   for (auto &s : astNode.statements) {
     if (!(s.codegen(this))) {
-      fatalCodegenError("unable to generate a block statement",
-                        astNode.sourcePos);
+      fatalCodegenError("unable to generate a block statement", astNode.sourcePos);
     }
   }
 
@@ -141,14 +134,12 @@ Value *CodeGenerator::generate(const BlockNode &astNode) {
 
 Value *CodeGenerator::generate(const AssignStNode &astNode) {
   if (!astNode.varSymbol->allocaInst) {
-    fatalCodegenError("unable to find a variable instruction",
-                      astNode.sourcePos);
+    fatalCodegenError("unable to find a variable instruction", astNode.sourcePos);
   }
 
   auto *exprValue = astNode.expr.codegen(this);
   if (!exprValue) {
-    fatalCodegenError("unable to generate an assignment expression",
-                      astNode.sourcePos);
+    fatalCodegenError("unable to generate an assignment expression", astNode.sourcePos);
   }
 
   return llvmIRBuilder.CreateStore(exprValue, astNode.varSymbol->allocaInst);
@@ -167,8 +158,7 @@ Value *CodeGenerator::generate(const EmptyNode &astNode) { return nullptr; }
 Value *CodeGenerator::generate(const RootNode &astNode) {
   for (auto &decl : astNode.declarations) {
     if (!decl.codegen(this)) {
-      fatalCodegenError("code generation for the root node failed",
-                        astNode.sourcePos);
+      fatalCodegenError("code generation for the root node failed", astNode.sourcePos);
     }
   }
   return llvmModule.getFunction("main");
