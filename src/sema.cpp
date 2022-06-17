@@ -52,11 +52,13 @@ void SemanticAnalyzer::analyze(BlockNode &astNode) {
 }
 
 void SemanticAnalyzer::analyze(AssignStNode &astNode) {
-  astNode.lhs.setScope(astNode.scope);
-  astNode.lhs.sema(this);
-
-  astNode.lhs.setScope(astNode.scope);
-  astNode.rhs.sema(this);
+  auto symbol = astNode.scope->lookupSymbol(astNode.varName);
+  if (!symbol || symbol.value()->symbolType != SymbolType::Var) {
+    fatalSemaError("undeclared variable");
+  }
+  astNode.varSymbol = symbol.value();
+  astNode.expr.setScope(astNode.scope);
+  astNode.expr.sema(this);
 }
 
 void SemanticAnalyzer::analyze(ReturnStNode &astNode) {

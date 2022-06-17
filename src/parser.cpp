@@ -242,27 +242,26 @@ AstNode parseReturnSt(ParserCtxt &ctxt) {
   return ReturnStNode(mayBeExpr, kwReturnToken.position);
 }
 
-// AssignSt <- Expr AssignOp Expr SEMICOLON
+// AssignSt <- IDENTIFIER AssignOp Expr SEMICOLON
 AstNode parseAssignSt(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
-  auto lhs = parseExpr(ctxt);
-  if (!lhs)
+  auto varNameToken = ctxt.getTokenAndAdvance();
+  if (varNameToken.id != TokenId::Identifier)
     return resetToken(ctxt, mark);
 
-  auto assignOpToken = ctxt.getTokenAndAdvance();
-  if (assignOpToken.id != TokenId::Equal)
-    fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected right brace");
+  if (ctxt.getTokenAndAdvance().id != TokenId::Equal)
+    fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected equal");
 
-  auto rhs = parseExpr(ctxt);
-  if (!rhs)
+  auto expr = parseExpr(ctxt);
+  if (!expr)
     fatalSyntaxError(ctxt, ctxt.getCursor(),
                      "unable to parse assign statement");
 
   if (ctxt.getTokenAndAdvance().id != TokenId::Semicolon)
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "missing semicolon");
 
-  return AssignStNode(lhs, rhs, assignOpToken.position);
+  return AssignStNode(varNameToken.value, expr, varNameToken.position);
 }
 
 // Statement <- VarDecl

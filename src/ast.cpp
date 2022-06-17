@@ -30,7 +30,7 @@ bool RootNode::isEqual(const RootNode &other) const {
 }
 
 bool AssignStNode::isEqual(const AssignStNode &other) const {
-  return lhs == other.lhs && rhs == other.rhs;
+  return varName == other.varName && expr == other.expr;
 }
 
 bool ReturnStNode::isEqual(const ReturnStNode &other) const {

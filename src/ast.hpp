@@ -84,10 +84,13 @@ struct BinExprNode {
 };
 
 struct AssignStNode {
-  AstNode lhs, rhs;
+  const std::string varName;
+  AstNode expr;
 
-  AssignStNode(const AstNode lhs, const AstNode rhs, const size_t sourcePos)
-      : lhs(lhs), rhs(rhs), sourcePos(sourcePos) {}
+  Symbol varSymbol{nullptr};
+
+  AssignStNode(const std::string &varName, const AstNode expr, const size_t sourcePos)
+      : varName(varName), expr(expr), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(AssignStNode)
 };
 

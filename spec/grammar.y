@@ -14,7 +14,7 @@ Block <- LBRACE Statement* RBRACE
 Statement <- VarDecl
           / AssignSt
           / ReturnSt
-AssignSt <- Expr AssignOp Expr SEMICOLON
+AssignSt <- IDENTIFIER AssignOp Expr SEMICOLON
 ReturnSt <- KEYWORD_return Expr? SEMICOLON
 
 # *** Expression Level ***

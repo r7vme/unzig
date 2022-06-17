@@ -94,17 +94,12 @@ void DotGenerator::generate(const RootNode &astNode) {
   }
 }
 void DotGenerator::generate(const AssignStNode &astNode) {
-  const auto text = std::string("AssignSt");
+  const auto text = std::string("AssignSt\\n") + astNode.varName;
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
 
-  // lhs
-  astNode.lhs.dotgen(this);
-  output.append(nodeId + "->" + getNodeId(astNode.lhs) + "\n");
-
-  // rhs
-  astNode.rhs.dotgen(this);
-  output.append(nodeId + "->" + getNodeId(astNode.rhs) + "\n");
+  astNode.expr.dotgen(this);
+  output.append(nodeId + "->" + getNodeId(astNode.expr) + "\n");
 }
 
 void DotGenerator::generate(const ReturnStNode &astNode) {

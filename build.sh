@@ -10,4 +10,5 @@ cmake --build build --parallel 16
 
 # compile
 cp spec/syntax.zig build
-./build/unzig build/syntax.zig
+./build/unzig build/syntax.zig || true
+cat ./build/syntax.ll

@@ -104,9 +104,9 @@ Value *CodeGenerator::generate(const FnCallExprNode &astNode) {
   if (!callee) {
     fatalCodegenError("function not declared", astNode.sourcePos);
   }
-  auto *call = llvmIRBuilder.CreateCall(callee, nullptr, "calltmp");
+  auto *call = llvmIRBuilder.CreateCall(callee);
   if (!call) {
-    fatalCodegenError("HUJ", astNode.sourcePos);
+    fatalCodegenError("unable to generate a function call", astNode.sourcePos);
   }
   return call;
 }
@@ -118,7 +118,10 @@ Value *CodeGenerator::generate(const FnDefNode &astNode) {
   auto *func = Function::Create(funcType, Function::ExternalLinkage, funcName,
                                 llvmModule);
   curFunc = func;
-  astNode.body.codegen(this);
+  if (!astNode.body.codegen(this))
+  {
+    fatalCodegenError("unable to generate a function body", astNode.sourcePos);
+  }
   return func;
 }
 
@@ -128,17 +131,23 @@ Value *CodeGenerator::generate(const BlockNode &astNode) {
 
   for (auto &s : astNode.statements) {
     if (!(s.codegen(this))) {
-      return nullptr;
+      fatalCodegenError("unable to generate a block statement", astNode.sourcePos);
     }
   }
 
   return bb;
 }
 
-Value *CodeGenerator::generate(const AssignStNode &astNode) { return nullptr; }
+Value *CodeGenerator::generate(const AssignStNode &astNode) {
+}
 
 Value *CodeGenerator::generate(const ReturnStNode &astNode) {
-  return llvmIRBuilder.CreateRet(astNode.expr.codegen(this));
+  auto* returnValue = llvmIRBuilder.CreateRet(astNode.expr.codegen(this));
+  if (!returnValue)
+  {
+    fatalCodegenError("unable to generate a return value", astNode.sourcePos);
+  }
+  return returnValue;
 }
 
 Value *CodeGenerator::generate(const EmptyNode &astNode) { return nullptr; }
