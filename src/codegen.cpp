@@ -92,7 +92,8 @@ Value *CodeGenerator::generate(const VarDeclNode &astNode) {
 
 Value *CodeGenerator::generate(const VarExprNode &astNode) {
   if (!astNode.varSymbol->allocaInst) {
-    fatalCodegenError("xxx", astNode.sourcePos);
+    fatalCodegenError("unable to find a variable instruction",
+                      astNode.sourcePos);
   }
   return llvmIRBuilder.CreateLoad(
       toLLVMType(astNode.varSymbol->dataType, llvmCtxt),
@@ -118,8 +119,7 @@ Value *CodeGenerator::generate(const FnDefNode &astNode) {
   auto *func = Function::Create(funcType, Function::ExternalLinkage, funcName,
                                 llvmModule);
   curFunc = func;
-  if (!astNode.body.codegen(this))
-  {
+  if (!astNode.body.codegen(this)) {
     fatalCodegenError("unable to generate a function body", astNode.sourcePos);
   }
   return func;
@@ -131,7 +131,8 @@ Value *CodeGenerator::generate(const BlockNode &astNode) {
 
   for (auto &s : astNode.statements) {
     if (!(s.codegen(this))) {
-      fatalCodegenError("unable to generate a block statement", astNode.sourcePos);
+      fatalCodegenError("unable to generate a block statement",
+                        astNode.sourcePos);
     }
   }
 
@@ -139,12 +140,23 @@ Value *CodeGenerator::generate(const BlockNode &astNode) {
 }
 
 Value *CodeGenerator::generate(const AssignStNode &astNode) {
+  if (!astNode.varSymbol->allocaInst) {
+    fatalCodegenError("unable to find a variable instruction",
+                      astNode.sourcePos);
+  }
+
+  auto *exprValue = astNode.expr.codegen(this);
+  if (!exprValue) {
+    fatalCodegenError("unable to generate an assignment expression",
+                      astNode.sourcePos);
+  }
+
+  return llvmIRBuilder.CreateStore(exprValue, astNode.varSymbol->allocaInst);
 }
 
 Value *CodeGenerator::generate(const ReturnStNode &astNode) {
-  auto* returnValue = llvmIRBuilder.CreateRet(astNode.expr.codegen(this));
-  if (!returnValue)
-  {
+  auto *returnValue = llvmIRBuilder.CreateRet(astNode.expr.codegen(this));
+  if (!returnValue) {
     fatalCodegenError("unable to generate a return value", astNode.sourcePos);
   }
   return returnValue;
