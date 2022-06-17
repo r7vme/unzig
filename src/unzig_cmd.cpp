@@ -101,11 +101,11 @@ int main(int argc, char **argv) {
   }
 
   // linker
-  std::string linkerCmd =
-      std::string("ld -o ") + outputFile + " /usr/lib/crt1.o -lc " + objFileName;
+  std::string linkerCmd = std::string("gcc -o ") + outputFile + " " + objFileName;
   if (std::system(linkerCmd.c_str()) != 0) {
     std::cerr << "unzig: linking failed" << std::endl;
     std::exit(EXIT_FAILURE);
   }
+  std::cout << "unzig: compiled " << outputFile << std::endl;
   return EXIT_SUCCESS;
 }
