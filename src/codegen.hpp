@@ -19,7 +19,7 @@ class VarExprNode;
 class FnCallExprNode;
 class EmptyNode;
 
-class CodeGenerator {
+class Codegen {
   const Source source;
   llvm::LLVMContext llvmCtxt;
   llvm::Module llvmModule;
@@ -28,7 +28,7 @@ class CodeGenerator {
   llvm::Function *curFunc;
 
 public:
-  CodeGenerator(const Source source)
+  Codegen(const Source source)
       : source(source), llvmCtxt(), llvmModule("unzig", llvmCtxt), llvmIRBuilder(llvmCtxt) {}
   const llvm::Module &getLLVMModule() const { return llvmModule; };
 

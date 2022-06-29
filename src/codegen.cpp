@@ -37,22 +37,22 @@ Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
   return nullptr;
 }
 
-void CodeGenerator::fatalCodegenError(const std::string &msg, const size_t sourcePos) {
+void Codegen::fatalCodegenError(const std::string &msg, const size_t sourcePos) {
   auto hightlightedLine = source->getHightlightedPosition(sourcePos);
   std::cerr << "Codegen error: " << msg << '\n' << hightlightedLine << std::endl;
   std::exit(EXIT_FAILURE);
 }
 
-Value *CodeGenerator::generate(const FloatExprNode &astNode) {
+Value *Codegen::generate(const FloatExprNode &astNode) {
   return ConstantFP::get(Type::getFloatTy(llvmCtxt), astNode.value);
 }
 
-Value *CodeGenerator::generate(const IntegerExprNode &astNode) {
+Value *Codegen::generate(const IntegerExprNode &astNode) {
   const int32_t decimal = 10;
   return ConstantInt::get(Type::getInt32Ty(llvmCtxt), astNode.value, decimal);
 }
 
-Value *CodeGenerator::generate(const BinExprNode &astNode) {
+Value *Codegen::generate(const BinExprNode &astNode) {
   auto *l = astNode.lhs.codegen(this);
   auto *r = astNode.rhs.codegen(this);
   if (!l || !r) {
@@ -73,7 +73,7 @@ Value *CodeGenerator::generate(const BinExprNode &astNode) {
   return nullptr;
 };
 
-Value *CodeGenerator::generate(const VarDeclNode &astNode) {
+Value *Codegen::generate(const VarDeclNode &astNode) {
   // TODO: global variables
   auto *llvmType = toLLVMType(astNode.type, llvmCtxt);
   auto *initValue = astNode.initExpr.codegen(this);
@@ -87,7 +87,7 @@ Value *CodeGenerator::generate(const VarDeclNode &astNode) {
   return llvmIRBuilder.CreateStore(initValue, alloca);
 }
 
-Value *CodeGenerator::generate(const VarExprNode &astNode) {
+Value *Codegen::generate(const VarExprNode &astNode) {
   if (!astNode.varSymbol->allocaInst) {
     fatalCodegenError("unable to find a variable instruction", astNode.sourcePos);
   }
@@ -95,7 +95,7 @@ Value *CodeGenerator::generate(const VarExprNode &astNode) {
                                   astNode.varSymbol->allocaInst, astNode.name);
 }
 
-Value *CodeGenerator::generate(const FnCallExprNode &astNode) {
+Value *Codegen::generate(const FnCallExprNode &astNode) {
   auto *callee = llvmModule.getFunction(astNode.callee);
   if (!callee) {
     fatalCodegenError("function not declared", astNode.sourcePos);
@@ -107,7 +107,7 @@ Value *CodeGenerator::generate(const FnCallExprNode &astNode) {
   return call;
 }
 
-Value *CodeGenerator::generate(const FnDefNode &astNode) {
+Value *Codegen::generate(const FnDefNode &astNode) {
   auto funcName = astNode.name;
   auto *funcReturnType = toLLVMType(astNode.returnType, llvmCtxt);
   auto *funcType = FunctionType::get(funcReturnType, false);
@@ -119,7 +119,7 @@ Value *CodeGenerator::generate(const FnDefNode &astNode) {
   return func;
 }
 
-Value *CodeGenerator::generate(const BlockNode &astNode) {
+Value *Codegen::generate(const BlockNode &astNode) {
   BasicBlock *bb = BasicBlock::Create(llvmCtxt, "entry", curFunc);
   llvmIRBuilder.SetInsertPoint(bb);
 
@@ -132,7 +132,7 @@ Value *CodeGenerator::generate(const BlockNode &astNode) {
   return bb;
 }
 
-Value *CodeGenerator::generate(const AssignStNode &astNode) {
+Value *Codegen::generate(const AssignStNode &astNode) {
   if (!astNode.varSymbol->allocaInst) {
     fatalCodegenError("unable to find a variable instruction", astNode.sourcePos);
   }
@@ -145,7 +145,7 @@ Value *CodeGenerator::generate(const AssignStNode &astNode) {
   return llvmIRBuilder.CreateStore(exprValue, astNode.varSymbol->allocaInst);
 }
 
-Value *CodeGenerator::generate(const ReturnStNode &astNode) {
+Value *Codegen::generate(const ReturnStNode &astNode) {
   auto *returnValue = llvmIRBuilder.CreateRet(astNode.expr.codegen(this));
   if (!returnValue) {
     fatalCodegenError("unable to generate a return value", astNode.sourcePos);
@@ -153,9 +153,9 @@ Value *CodeGenerator::generate(const ReturnStNode &astNode) {
   return returnValue;
 }
 
-Value *CodeGenerator::generate(const EmptyNode &astNode) { return nullptr; }
+Value *Codegen::generate(const EmptyNode &astNode) { return nullptr; }
 
-Value *CodeGenerator::generate(const RootNode &astNode) {
+Value *Codegen::generate(const RootNode &astNode) {
   for (auto &decl : astNode.declarations) {
     if (!decl.codegen(this)) {
       fatalCodegenError("code generation for the root node failed", astNode.sourcePos);

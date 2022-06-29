@@ -16,7 +16,7 @@ class AstNode {
     virtual ~Base() = default;
     virtual bool isEqual(const Base &other) const = 0;
     virtual bool isEmptyNode() const = 0;
-    virtual llvm::Value *codegen(CodeGenerator *g) const = 0;
+    virtual llvm::Value *codegen(Codegen *g) const = 0;
     virtual void dotgen(DotGenerator *g) const = 0;
     virtual void sema(SemanticAnalyzer *g) = 0;
     virtual uint64_t getNodeId() const = 0;
@@ -32,7 +32,7 @@ class AstNode {
              obj.isEqual(static_cast<const Wrapper<T> &>(other).obj);
     };
     bool isEmptyNode() const { return obj.isEmptyNode(); };
-    llvm::Value *codegen(CodeGenerator *g) const override { return obj.codegen(g); };
+    llvm::Value *codegen(Codegen *g) const override { return obj.codegen(g); };
     void dotgen(DotGenerator *g) const override { obj.dotgen(g); };
     void sema(SemanticAnalyzer *g) override { obj.sema(g); };
     uint64_t getNodeId() const override { return obj.getNodeId(); };
@@ -52,7 +52,7 @@ public:
   }
   bool operator==(const AstNode &other) const { return ptr->isEqual(*other.ptr); }
   operator bool() const { return !(ptr->isEmptyNode()); }
-  llvm::Value *codegen(CodeGenerator *g) const { return ptr->codegen(g); };
+  llvm::Value *codegen(Codegen *g) const { return ptr->codegen(g); };
   void dotgen(DotGenerator *g) const { ptr->dotgen(g); }
   void sema(SemanticAnalyzer *g) { ptr->sema(g); }
   uint64_t getNodeId() const { return ptr->getNodeId(); };

@@ -18,7 +18,7 @@
   Scope &getScope() { return scope; };                                                             \
   const uint64_t nodeId{curNodeId++};                                                              \
   uint64_t getNodeId() const { return nodeId; };                                                   \
-  llvm::Value *codegen(CodeGenerator *g) const { return g->generate(*this); };                     \
+  llvm::Value *codegen(Codegen *g) const { return g->generate(*this); };                     \
   void dotgen(DotGenerator *g) const { return g->generate(*this); };                               \
   void sema(SemanticAnalyzer *g) { return g->analyze(*this); };                                    \
   bool isEqual(const CLASS &other) const;

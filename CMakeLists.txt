@@ -27,6 +27,7 @@ target_link_libraries(unzig_lib PRIVATE LLVM)
 
 add_executable(unzig src/unzig_cmd.cpp)
 target_link_libraries(unzig unzig_lib)
+install(TARGETS unzig)
 
 # tests
 add_subdirectory(third_party/Catch2)
