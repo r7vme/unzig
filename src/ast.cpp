@@ -9,7 +9,7 @@ bool BinExprNode::isEqual(const BinExprNode &other) const {
 }
 
 bool VarDeclNode::isEqual(const VarDeclNode &other) const {
-  return name == other.name && type == other.type && initExpr == other.initExpr;
+  return name == other.name && typeName == other.typeName && initExpr == other.initExpr;
 }
 
 bool FnDefNode::isEqual(const FnDefNode &other) const {

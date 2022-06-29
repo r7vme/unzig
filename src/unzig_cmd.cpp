@@ -24,6 +24,7 @@
 
 #include "ast.hpp"
 #include "codegen.hpp"
+#include "context.hpp"
 #include "parser.hpp"
 #include "sema.hpp"
 #include "source.hpp"
@@ -86,13 +87,15 @@ int main(int argc, char **argv) {
     std::exit(EXIT_FAILURE);
   }
 
-  Codegen codegen(createCodegenContext(source));
+  auto cc = createCompilerContext(source);
+
+  Codegen codegen(cc);
   auto code = ast.codegen(&codegen);
   if (!code) {
     std::cerr << "unzig: unable to generate code" << std::endl;
     std::exit(EXIT_FAILURE);
   }
-  codegen.getLLVMModule().print(llFile, nullptr);
+  cc->llvmModule.print(llFile, nullptr);
 
   auto llcCmd = std::string("llc -filetype=obj ") + llFileName;
   if (std::system(llcCmd.c_str()) != 0) {

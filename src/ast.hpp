@@ -120,14 +120,15 @@ struct FnDefNode {
 
 struct VarDeclNode {
   const std::string name;
-  const UzType type;
+  const std::string typeName;
   AstNode initExpr;
 
+  UzType type;
   Symbol symbol{nullptr};
 
-  VarDeclNode(const std::string &name, const UzType &type, const AstNode initExpr,
+  VarDeclNode(const std::string &name, const std::string &typeName, const AstNode initExpr,
               const size_t sourcePos)
-      : name(name), type(type), initExpr(initExpr), sourcePos(sourcePos) {}
+      : name(name), typeName(typeName), initExpr(initExpr), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(VarDeclNode)
 };
 

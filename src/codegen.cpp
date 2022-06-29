@@ -26,9 +26,9 @@ Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
   switch (uzType.id) {
   case UzTypeId::Void:
     return Type::getVoidTy(ctxt);
-  case UzTypeId::Int32:
+  case UzTypeId::Int:
     return Type::getInt32Ty(ctxt);
-  case UzTypeId::Float32:
+  case UzTypeId::Float:
     return Type::getFloatTy(ctxt);
   default:
     assert(false);

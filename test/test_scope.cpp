@@ -5,7 +5,7 @@
 #include "types.hpp"
 
 TEST_CASE("test parent scope lookup", "[scope]") {
-  UzType type({UzTypeId::Int32});
+  UzType type({UzTypeId::Int});
   auto parent = createScope(nullptr);
   auto scope = createScope(parent);
 

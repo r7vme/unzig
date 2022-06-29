@@ -198,11 +198,6 @@ AstNode parseVarDecl(ParserCtxt &ctxt) {
   if (typeExprToken.id != TokenId::Identifier)
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), errorMsg);
 
-  auto varType = toUzType(typeExprToken.value);
-  if (!varType)
-    fatalSyntaxError(ctxt, ctxt.getPrevCursor(),
-                     std::string("unknown type ") + typeExprToken.value);
-
   // optional
   AstNode initExpr = EmptyNode();
   auto equalToken = ctxt.getToken();
@@ -218,7 +213,7 @@ AstNode parseVarDecl(ParserCtxt &ctxt) {
   if (semicolonToken.id != TokenId::Semicolon)
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected semicolon");
 
-  return VarDeclNode(varIdentifierToken.value, varType.value(), initExpr, kwVarToken.position);
+  return VarDeclNode(varIdentifierToken.value, typeExprToken.value, initExpr, kwVarToken.position);
 }
 
 // ReturnSt <- KEYWORD_return Expr? SEMICOLON

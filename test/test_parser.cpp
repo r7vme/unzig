@@ -134,7 +134,7 @@ TEST_CASE("VarDecl 'var y: i32 = 123;'", "[parser]") {
 
   AstNode expectedAST = VarDeclNode(
     "y",
-    UzType{UzTypeId::Int32},
+    "i32",
     IntegerExprNode("123", 0), 0
   );
   // clang-format on
@@ -193,7 +193,7 @@ TEST_CASE("block of statements", "[parser]") {
   // clang-format on
 
   auto varDecl =
-      VarDeclNode("x", UzType{UzTypeId::Int32}, IntegerExprNode("1", 0), 0);
+      VarDeclNode("x", "i32", IntegerExprNode("1", 0), 0);
   std::vector<AstNode> statements{
       varDecl,
       ReturnStNode(IntegerExprNode("1", 0), 0),
