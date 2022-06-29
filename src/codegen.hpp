@@ -5,6 +5,7 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
+#include <memory>
 
 class FloatExprNode;
 class IntegerExprNode;
@@ -19,19 +20,30 @@ class VarExprNode;
 class FnCallExprNode;
 class EmptyNode;
 
-class Codegen {
-  const Source source;
+struct CodegenContextObject {
+  Source source;
   llvm::LLVMContext llvmCtxt;
   llvm::Module llvmModule;
   llvm::IRBuilder<> llvmIRBuilder;
-
   llvm::Function *curFunc;
 
-public:
-  Codegen(const Source source)
+  CodegenContextObject(const Source source)
       : source(source), llvmCtxt(), llvmModule("unzig", llvmCtxt), llvmIRBuilder(llvmCtxt) {}
-  const llvm::Module &getLLVMModule() const { return llvmModule; };
+};
 
+using CodegenContext = std::shared_ptr<CodegenContextObject>;
+
+inline CodegenContext createCodegenContext(const Source source) {
+  return std::make_shared<CodegenContextObject>(source);
+}
+
+class Codegen {
+  CodegenContext cc;
+
+public:
+  Codegen(const CodegenContext cc) : cc(cc){};
+
+  const llvm::Module &getLLVMModule() const { return cc->llvmModule; };
   void fatalCodegenError(const std::string &msg, const size_t sourcePos);
 
   llvm::Value *generate(const FloatExprNode &astNode);
