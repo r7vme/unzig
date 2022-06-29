@@ -72,7 +72,9 @@ int main(int argc, char **argv) {
 
   auto tokens = tokenize(source);
   auto ast = parse(tokens, source);
-  SemanticAnalyzer sema;
+
+  auto cc = createCompilerContext(source);
+  SemanticAnalyzer sema(cc);
   ast.sema(&sema);
 
   // AST graph
@@ -86,8 +88,6 @@ int main(int argc, char **argv) {
     std::cerr << "png generation failed" << std::endl;
     std::exit(EXIT_FAILURE);
   }
-
-  auto cc = createCompilerContext(source);
 
   Codegen codegen(cc);
   auto code = ast.codegen(&codegen);

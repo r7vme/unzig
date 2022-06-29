@@ -1,5 +1,6 @@
 #pragma once
 
+#include "context.hpp"
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -18,7 +19,11 @@ class FnCallExprNode;
 class EmptyNode;
 
 class SemanticAnalyzer {
+  CompilerContext cc;
+
 public:
+  SemanticAnalyzer(const CompilerContext cc) : cc(cc){};
+
   void fatalSemaError(const std::string &msg);
   void analyze(FloatExprNode &astNode);
   void analyze(IntegerExprNode &astNode);
