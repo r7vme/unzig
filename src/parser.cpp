@@ -3,6 +3,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <map>
 
 #include "ast.hpp"
 #include "parser.hpp"
@@ -311,16 +312,11 @@ AstNode parseFnDef(ParserCtxt &ctxt) {
   if (typeExprToken.id != TokenId::Identifier)
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), errorMsg);
 
-  auto fnReturnType = toUzType(typeExprToken.value);
-  if (!fnReturnType)
-    fatalSyntaxError(ctxt, ctxt.getPrevCursor(),
-                     std::string("unknown type ") + typeExprToken.value);
-
   auto fnBody = parseBlock(ctxt);
   if (!fnBody)
     fatalSyntaxError(ctxt, ctxt.getCursor(), errorMsg);
 
-  return FnDefNode(fnIdentifierToken.value, fnReturnType.value(), fnBody, kwFnToken.position);
+  return FnDefNode(fnIdentifierToken.value, typeExprToken.value, fnBody, kwFnToken.position);
 }
 
 // TopLevelDecl <- FnDef

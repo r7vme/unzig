@@ -18,7 +18,7 @@
   Scope &getScope() { return scope; };                                                             \
   const uint64_t nodeId{curNodeId++};                                                              \
   uint64_t getNodeId() const { return nodeId; };                                                   \
-  llvm::Value *codegen(Codegen *g) const { return g->generate(*this); };                     \
+  llvm::Value *codegen(Codegen *g) const { return g->generate(*this); };                           \
   void dotgen(DotGenerator *g) const { return g->generate(*this); };                               \
   void sema(SemanticAnalyzer *g) { return g->analyze(*this); };                                    \
   bool isEqual(const CLASS &other) const;
@@ -109,12 +109,14 @@ struct BlockNode {
 
 struct FnDefNode {
   const std::string name;
-  const UzType returnType;
+  const std::string returnTypeName;
   AstNode body;
 
-  FnDefNode(const std::string &name, const UzType &returnType, const AstNode body,
+  UzType returnType;
+
+  FnDefNode(const std::string &name, const std::string &returnTypeName, const AstNode body,
             const size_t sourcePos)
-      : name(name), returnType(returnType), body(body), sourcePos(sourcePos) {}
+      : name(name), returnTypeName(returnTypeName), body(body), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(FnDefNode)
 };
 

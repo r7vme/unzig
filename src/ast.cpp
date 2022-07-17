@@ -13,7 +13,7 @@ bool VarDeclNode::isEqual(const VarDeclNode &other) const {
 }
 
 bool FnDefNode::isEqual(const FnDefNode &other) const {
-  return name == other.name && returnType == other.returnType && body == other.body;
+  return name == other.name && returnTypeName == other.returnTypeName && body == other.body;
 }
 
 bool BlockNode::isEqual(const BlockNode &other) const { return statements == other.statements; }

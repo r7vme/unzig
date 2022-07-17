@@ -159,7 +159,7 @@ TEST_CASE("FnDef 'fn main() void {};'", "[parser]") {
   // clang-format on
   //
   std::vector<AstNode> declarations;
-  declarations.push_back(FnDefNode("main", UzType{UzTypeId::Void},
+  declarations.push_back(FnDefNode("main", "void",
                                    BlockNode(std::vector<AstNode>(), 0), 0));
   auto expectedAST = RootNode(declarations, 0);
 

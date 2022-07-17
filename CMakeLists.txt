@@ -16,6 +16,7 @@ add_library(unzig_lib
   src/ast.cpp
   src/parser.cpp
   src/codegen.cpp
+  src/context.cpp
   src/dotgen.cpp
   src/tokenizer.cpp
   src/types.cpp
