@@ -31,7 +31,7 @@ class AstNode {
       return (typeid(*this) == typeid(other)) &&
              obj.isEqual(static_cast<const Wrapper<T> &>(other).obj);
     };
-    bool isEmptyNode() const { return obj.isEmptyNode(); };
+    bool isEmptyNode() const override { return obj.isEmptyNode(); };
     llvm::Value *codegen(Codegen *g) const override { return obj.codegen(g); };
     void dotgen(DotGenerator *g) const override { obj.dotgen(g); };
     void sema(SemanticAnalyzer *g) override { obj.sema(g); };

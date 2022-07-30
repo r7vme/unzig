@@ -19,7 +19,6 @@ add_library(unzig_lib
   src/context.cpp
   src/dotgen.cpp
   src/tokenizer.cpp
-  src/types.cpp
   src/sema.cpp
   src/scope.cpp
   src/source.cpp

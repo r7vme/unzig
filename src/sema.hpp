@@ -1,6 +1,7 @@
 #pragma once
 
 #include "context.hpp"
+#include <cstddef>
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -24,7 +25,7 @@ class SemanticAnalyzer {
 public:
   SemanticAnalyzer(const CompilerContext cc) : cc(cc){};
 
-  void fatalSemaError(const std::string &msg);
+  void fatalSemaError(const std::string &msg, const size_t sourcePos);
   void analyze(FloatExprNode &astNode);
   void analyze(IntegerExprNode &astNode);
   void analyze(BinExprNode &astNode);

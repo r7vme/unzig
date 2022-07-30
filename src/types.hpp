@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <variant>
 
-enum class UzTypeId { Void, Int, Float, SIZE };
+enum class UzTypeId { Void, Int, Float, INVALID };
 
 struct UzTypeInt {
   uint32_t bitNum;
@@ -19,14 +19,37 @@ struct UzTypeFloat {
 using AnyUzType = std::variant<UzTypeInt, UzTypeFloat>;
 
 struct UzType {
-  UzTypeId id;
+  UzTypeId id{UzTypeId::INVALID};
   std::string name;
-
   AnyUzType type;
 };
 
-bool operator==(const UzType &lhs, const UzType &rhs);
+struct TypeTable {
+  std::unordered_map<std::string, UzType> table;
 
-std::optional<UzType> toUzType(const std::string &input);
+  std::optional<UzType> findType(const std::string &name) {
+    auto it = table.find(name);
+    if (it != table.end()) {
+      return it->second;
+    }
+    return std::nullopt;
+  }
 
-using TypeTable = std::unordered_map<std::string, UzType>;
+  void addType(const UzType& type)
+  {
+    table.insert({type.name, type});
+  }
+};
+
+inline void addBuiltInTypes(TypeTable &t) {
+  t.addType({
+      .id = UzTypeId::Int,
+      .name = "i32",
+      .type = UzTypeInt{32, false},
+  });
+  t.addType({
+      .id = UzTypeId::Float,
+      .name = "f32",
+      .type = UzTypeInt{32, false},
+  });
+}

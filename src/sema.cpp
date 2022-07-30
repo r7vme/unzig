@@ -3,8 +3,9 @@
 #include "scope.hpp"
 #include "symbol.hpp"
 
-void SemanticAnalyzer::fatalSemaError(const std::string &msg) {
-  std::cerr << msg << std::endl;
+void SemanticAnalyzer::fatalSemaError(const std::string &msg, const size_t sourcePos) {
+  auto hightlightedLine = cc->source->getHightlightedPosition(sourcePos);
+  std::cerr << "Semantic error: " << msg << '\n' << hightlightedLine << std::endl;
   std::exit(EXIT_FAILURE);
 }
 
@@ -21,7 +22,13 @@ void SemanticAnalyzer::analyze(RootNode &astNode) {
 
 void SemanticAnalyzer::analyze(VarDeclNode &astNode) {
   if (astNode.scope->lookupSymbol(astNode.name)) {
-    fatalSemaError("redifinition of the symbol");
+    fatalSemaError("redifinition of the symbol", astNode.sourcePos);
+  }
+
+  if (auto type = cc->typeTable.findType(astNode.typeName)) {
+    astNode.type = type.value();
+  } else {
+    fatalSemaError(std::string("unknown return type ") + astNode.typeName, astNode.sourcePos);
   }
 
   astNode.symbol =
@@ -33,8 +40,15 @@ void SemanticAnalyzer::analyze(VarDeclNode &astNode) {
 
 void SemanticAnalyzer::analyze(FnDefNode &astNode) {
   if (astNode.scope->lookupSymbol(astNode.name)) {
-    fatalSemaError("redifinition of the symbol");
+    fatalSemaError("redifinition of the symbol", astNode.sourcePos);
   }
+
+  if (auto type = cc->typeTable.findType(astNode.returnTypeName)) {
+    astNode.returnType = type.value();
+  } else {
+    fatalSemaError(std::string("unknown return type ") + astNode.returnTypeName, astNode.sourcePos);
+  }
+
   astNode.scope->insertSymbol(
       createSymbol(SymbolType::Fn, astNode.name, astNode.returnType, astNode.scope->isGlobal));
 
@@ -54,7 +68,7 @@ void SemanticAnalyzer::analyze(BlockNode &astNode) {
 void SemanticAnalyzer::analyze(AssignStNode &astNode) {
   auto symbol = astNode.scope->lookupSymbol(astNode.varName);
   if (!symbol || symbol.value()->symbolType != SymbolType::Var) {
-    fatalSemaError("undeclared variable");
+    fatalSemaError("undeclared variable", astNode.sourcePos);
   }
   astNode.varSymbol = symbol.value();
   astNode.expr.setScope(astNode.scope);
@@ -69,7 +83,7 @@ void SemanticAnalyzer::analyze(ReturnStNode &astNode) {
 void SemanticAnalyzer::analyze(VarExprNode &astNode) {
   auto symbol = astNode.scope->lookupSymbol(astNode.name);
   if (!symbol || symbol.value()->symbolType != SymbolType::Var) {
-    fatalSemaError("undeclared variable");
+    fatalSemaError("undeclared variable", astNode.sourcePos);
   }
 
   astNode.varSymbol = symbol.value();
@@ -78,7 +92,7 @@ void SemanticAnalyzer::analyze(VarExprNode &astNode) {
 void SemanticAnalyzer::analyze(FnCallExprNode &astNode) {
   auto symbol = astNode.scope->lookupSymbol(astNode.callee);
   if (!symbol || symbol.value()->symbolType != SymbolType::Fn) {
-    fatalSemaError("undeclared function");
+    fatalSemaError("undeclared function", astNode.sourcePos);
   }
 }
 
