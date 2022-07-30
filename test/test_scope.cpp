@@ -5,7 +5,11 @@
 #include "types.hpp"
 
 TEST_CASE("test parent scope lookup", "[scope]") {
-  UzType type({UzTypeId::Int});
+  UzType type = std::make_shared<UzTypeObject>(UzTypeObject{
+      .id = UzTypeId::Int,
+      .name = "i32",
+      .type = IntParams{32, false},
+      });
   auto parent = createScope(nullptr);
   auto scope = createScope(parent);
 

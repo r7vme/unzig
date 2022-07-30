@@ -23,18 +23,18 @@ using llvm::Type;
 using llvm::Value;
 
 Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
-  switch (uzType.id) {
-  case UzTypeId::Void:
+  if (uzType->id == UzTypeId::Void) {
     return Type::getVoidTy(ctxt);
-  case UzTypeId::Int:
-    return Type::getInt32Ty(ctxt);
-  case UzTypeId::Float:
-    return Type::getFloatTy(ctxt);
-  default:
+  } else if (uzType->id == UzTypeId::Int) {
+    auto type = std::get<IntParams>(uzType->type);
+    if (type.bitNum == 32) {
+      return Type::getInt32Ty(ctxt);
+    }
     assert(false);
+  } else if (uzType->id == UzTypeId::Float) {
+    return Type::getFloatTy(ctxt);
   }
   assert(false);
-  return nullptr;
 }
 
 void Codegen::fatalCodegenError(const std::string &msg, const size_t sourcePos) {
@@ -92,7 +92,7 @@ Value *Codegen::generate(const VarExprNode &astNode) {
     fatalCodegenError("unable to find a variable instruction", astNode.sourcePos);
   }
   return cc->llvmIRBuilder.CreateLoad(toLLVMType(astNode.varSymbol->dataType, cc->llvmCtxt),
-                                  astNode.varSymbol->allocaInst, astNode.name);
+                                      astNode.varSymbol->allocaInst, astNode.name);
 }
 
 Value *Codegen::generate(const FnCallExprNode &astNode) {

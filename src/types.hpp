@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -7,22 +8,24 @@
 
 enum class UzTypeId { Void, Int, Float, INVALID };
 
-struct UzTypeInt {
+struct IntParams {
   uint32_t bitNum;
   bool isSigned;
 };
 
-struct UzTypeFloat {
+struct FloatParams {
   uint32_t bitNum;
 };
 
-using AnyUzType = std::variant<UzTypeInt, UzTypeFloat>;
+using TypeParams = std::variant<IntParams, FloatParams>;
 
-struct UzType {
+struct UzTypeObject {
   UzTypeId id{UzTypeId::INVALID};
   std::string name;
-  AnyUzType type;
+  TypeParams type;
 };
+
+using UzType = std::shared_ptr<UzTypeObject>;
 
 struct TypeTable {
   std::unordered_map<std::string, UzType> table;
@@ -37,19 +40,19 @@ struct TypeTable {
 
   void addType(const UzType& type)
   {
-    table.insert({type.name, type});
+    table.insert({type->name, type});
   }
 };
 
 inline void addBuiltInTypes(TypeTable &t) {
-  t.addType({
+  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
       .id = UzTypeId::Int,
       .name = "i32",
-      .type = UzTypeInt{32, false},
-  });
-  t.addType({
+      .type = IntParams{32, false},
+  }));
+  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
       .id = UzTypeId::Float,
       .name = "f32",
-      .type = UzTypeInt{32, false},
-  });
+      .type = FloatParams{32},
+  }));
 }
