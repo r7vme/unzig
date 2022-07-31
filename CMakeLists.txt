@@ -41,3 +41,9 @@ add_executable(tests
   test/test_source.cpp
 )
 target_link_libraries(tests PRIVATE unzig_lib Catch2::Catch2WithMain)
+
+include(cmake/unzig.cmake)
+unzig_build_executables(
+  spec/syntax.uz
+  test/test_unzig/test_main.uz
+)

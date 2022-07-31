@@ -8,6 +8,6 @@ cmake --build build --parallel 16
 sudo cmake --build build --target install
 # run tests
 ./build/tests
-# test example
-cp spec/syntax.uz build
-./build/unzig build/syntax.uz
+
+# create cmake macro to run unzig tests
+./build/test_main
