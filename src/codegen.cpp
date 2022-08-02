@@ -27,10 +27,18 @@ Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
     return Type::getVoidTy(ctxt);
   } else if (uzType->id == UzTypeId::Int) {
     auto type = std::get<IntParams>(uzType->type);
-    if (type.bitNum == 32) {
+    switch (type.bitNum) {
+    case 64:
+      return Type::getInt64Ty(ctxt);
+    case 32:
       return Type::getInt32Ty(ctxt);
+    case 16:
+      return Type::getInt16Ty(ctxt);
+    case 8:
+      return Type::getInt8Ty(ctxt);
+    default:
+      assert(false);
     }
-    assert(false);
   } else if (uzType->id == UzTypeId::Float) {
     return Type::getFloatTy(ctxt);
   }

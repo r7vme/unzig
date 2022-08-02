@@ -47,6 +47,11 @@ struct TypeTable {
 inline void addBuiltInTypes(TypeTable &t) {
   t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
       .id = UzTypeId::Int,
+      .name = "bool",
+      .type = IntParams{32, false},
+  }));
+  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
+      .id = UzTypeId::Int,
       .name = "i32",
       .type = IntParams{32, false},
   }));
