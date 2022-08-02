@@ -9,8 +9,9 @@ fn foo() u64 {
   return 1;
 }
 
+// comment
 pub fn main() void {
-  var x: u64 = foo();
+  var x: u64 = foo(); // TODO(foo): bar
   var y: u64 = 123;
   y = 1 + 2;
 }

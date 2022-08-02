@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <iterator>
+#include <llvm-14/llvm/IR/CallingConv.h>
 #include <map>
 #include <string>
 #include <vector>
@@ -38,13 +39,15 @@
   case PLUS: \
   case RBRACE: \
   case RPAREN: \
-  case SEMICOLON: \
-  case SLASH
+  case SEMICOLON
 
-#define WHITESPACE \
-       ' ': \
-  case '\r': \
+#define NEWLINE \
+       '\r': \
   case '\n'
+
+#define SKIP \
+       ' ': \
+  case NEWLINE
 
 #define DIGIT \
          '0': \
@@ -118,7 +121,8 @@
 
 #define KNOWN_CHARS \
   SINGLE_CHAR_TOKENS: \
-  case WHITESPACE: \
+  case SLASH: \
+  case SKIP: \
   case ALPHA: \
   case DOT: \
   case DIGIT
@@ -128,6 +132,7 @@ enum class TokenizeState {
   Begin,
   Identifier,
   Number,
+  Comment,
 };
 
 static std::map<std::string, TokenId> keywordsNameMap{
@@ -151,7 +156,7 @@ static std::map<char, TokenId> specialCharsNameMap{
     {SEMICOLON, TokenId::Semicolon},
     {SLASH, TokenId::Slash},
 };
-// clang-format on
+// clang-forzzmat on
 
 static std::string getTokenIdName(TokenId id) {
   // clang-format off
@@ -255,7 +260,16 @@ std::vector<Token> tokenize(const Source source) {
     case TokenizeState::Begin:
       identifierStr.clear();
       switch (c) {
-      case WHITESPACE:
+      case SKIP:
+        break;
+      case SLASH:
+        if (in[i + 1] == SLASH)
+        {
+          state = TokenizeState::Comment;
+          ++i;
+        } else {
+          tokens.push_back(Token{getSpecialCharTokenId(c), "", i});
+        }
         break;
       case SINGLE_CHAR_TOKENS:
         tokens.push_back(Token{getSpecialCharTokenId(c), "", i});
@@ -304,6 +318,14 @@ std::vector<Token> tokenize(const Source source) {
         break;
       }
       break;
+    case TokenizeState::Comment:
+      switch (c) {
+      case NEWLINE:
+        state = TokenizeState::Begin;
+        break;
+      default:
+        break;
+      }
     default:;
     }
   }
