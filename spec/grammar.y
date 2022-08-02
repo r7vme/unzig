@@ -41,7 +41,8 @@ dec <- [0-9]
 
 dec_int <- dec*
 
-skip <- [ \n]*
+comment <- '//' [^\n]*
+skip <- ([ \n] / comment)*
 
 FLOAT <- dec_int "." dec_int skip
 INTEGER <- dec_int skip
