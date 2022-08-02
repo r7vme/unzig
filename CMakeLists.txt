@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(unzig)
 
+include(CTest)
+include(cmake/unzig.cmake)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Debug)
@@ -27,23 +30,24 @@ target_link_libraries(unzig_lib PRIVATE LLVM)
 
 add_executable(unzig src/unzig_cmd.cpp)
 target_link_libraries(unzig unzig_lib)
+
+if(BUILD_TESTING)
+  # unit tests
+  add_subdirectory(third_party/Catch2)
+  add_executable(unit_tests
+    test/test_tokenizer.cpp
+    test/test_parser.cpp
+    test/test_codegen.cpp
+    test/test_sema.cpp
+    test/test_scope.cpp
+    test/test_dotgen.cpp
+    test/test_source.cpp
+  )
+  target_link_libraries(unit_tests PRIVATE unzig_lib Catch2::Catch2WithMain)
+  catch_discover_tests(unit_tests)
+
+  # integration tests
+  unzig_add_test(test_unzig_main test/test_unzig_main.uz)
+endif()
+
 install(TARGETS unzig)
-
-# tests
-add_subdirectory(third_party/Catch2)
-add_executable(tests
-  test/test_tokenizer.cpp
-  test/test_parser.cpp
-  test/test_codegen.cpp
-  test/test_sema.cpp
-  test/test_scope.cpp
-  test/test_dotgen.cpp
-  test/test_source.cpp
-)
-target_link_libraries(tests PRIVATE unzig_lib Catch2::Catch2WithMain)
-
-include(cmake/unzig.cmake)
-unzig_build_executables(
-  spec/syntax.uz
-  test/test_unzig/test_main.uz
-)

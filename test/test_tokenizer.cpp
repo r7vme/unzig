@@ -3,7 +3,7 @@
 #include "source.hpp"
 #include "tokenizer.hpp"
 
-TEST_CASE("function + main", "[tokenizer]") {
+TEST_CASE("function and main", "[tokenizer]") {
   std::string raw = R"(
 fn foo() u64 {
   return 1;

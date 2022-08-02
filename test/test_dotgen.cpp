@@ -9,7 +9,7 @@
 
 namespace fs = std::filesystem;
 
-TEST_CASE("generates valid .dot graph", "[dotgen]") {
+TEST_CASE("generates valid dot graph", "[dotgen]") {
   auto source = std::make_shared<SourceObject>(codeExample);
 
   INFO("checking if dot is intalled");

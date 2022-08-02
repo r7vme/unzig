@@ -18,7 +18,8 @@ AstNode parseFnDef(ParserCtxt &ctxt);
 AstNode parseBlock(ParserCtxt &ctxt);
 AstNode parseRoot(ParserCtxt &ctxt);
 
-TEST_CASE("BinOpRhsExpr inverted operation priority - 1 + 2 * 3", "[parser]") {
+TEST_CASE("BinOpRhsExpr inverted operation priority", "[parser]") {
+  // 1 + 2 * 3
   // clang-format off
   Tokens inputTokens = {
     Token{TokenId::IntegerLiteral, "1", 0},
@@ -45,7 +46,8 @@ TEST_CASE("BinOpRhsExpr inverted operation priority - 1 + 2 * 3", "[parser]") {
   REQUIRE(AST == expectedAST);
 }
 
-TEST_CASE("BinOpRhsExpr - 1 * 2 + 3", "[parser]") {
+TEST_CASE("BinOpRhsExpr can be parsed", "[parser]") {
+  // 1 * 2 + 3
   // clang-format off
   Tokens inputTokens = {
     Token{TokenId::IntegerLiteral, "1", 0},
@@ -71,7 +73,8 @@ TEST_CASE("BinOpRhsExpr - 1 * 2 + 3", "[parser]") {
   REQUIRE(AST == expectedAST);
 }
 
-TEST_CASE("GroupedExpr - 3 * (2 + 1)", "[parser]") {
+TEST_CASE("GroupedExpr can be parsed", "[parser]") {
+  // 3 * (2 + 1)
   // clang-format off
   Tokens inputTokens = {
     Token{TokenId::IntegerLiteral, "3", 0},
@@ -119,7 +122,8 @@ TEST_CASE("floating point numbers expr", "[parser]") {
   REQUIRE(AST);
 }
 
-TEST_CASE("VarDecl 'var y: i32 = 123;'", "[parser]") {
+TEST_CASE("VarDecl can be parsed", "[parser]") {
+  // var y: i32 = 123;
   // clang-format off
   Tokens inputTokens = {
     Token{TokenId::KwVar, "", 0},
@@ -144,7 +148,8 @@ TEST_CASE("VarDecl 'var y: i32 = 123;'", "[parser]") {
   REQUIRE(AST == expectedAST);
 }
 
-TEST_CASE("FnDef 'fn main() void {};'", "[parser]") {
+TEST_CASE("FnDef can be parsed", "[parser]") {
+  // fn main() void {};
   // clang-format off
   Tokens inputTokens = {
     Token{TokenId::KwFn, "", 0},
@@ -205,7 +210,8 @@ TEST_CASE("block of statements", "[parser]") {
   REQUIRE(AST == expectedAST);
 }
 
-TEST_CASE("VarExpr 'x + 2'", "[parser]") {
+TEST_CASE("VarExpr can be parsed", "[parser]") {
+  // x + 2
   // clang-format off
   Tokens inputTokens = {
     Token{TokenId::Identifier, "x", 0},
@@ -225,7 +231,8 @@ TEST_CASE("VarExpr 'x + 2'", "[parser]") {
   REQUIRE(AST == expectedAST);
 }
 
-TEST_CASE("FnCallExpr 'f() + 2'", "[parser]") {
+TEST_CASE("FnCallExpr can be parsed", "[parser]") {
+  // f() + 2
   // clang-format off
   Tokens inputTokens = {
     Token{TokenId::Identifier, "f", 0},
