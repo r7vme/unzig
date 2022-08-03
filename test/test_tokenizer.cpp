@@ -91,3 +91,34 @@ TEST_CASE("last char is part of identifier or number", "[tokenizer]") {
 TEST_CASE("empty string", "[tokenizer]") {
   REQUIRE(tokenize(std::make_shared<SourceObject>("")) == Tokens{Token{TokenId::Eof, "", 0}});
 }
+
+TEST_CASE("if statement", "[tokenizer]") {
+  std::string raw = R"(
+if (a) {
+} else if (b) {
+} else {
+}
+)";
+  auto s = std::make_shared<SourceObject>(raw);
+  Tokens expectedTokens = {
+      Token{TokenId::KwIf, "", 0},
+      Token{TokenId::LParen, "", 0},
+      Token{TokenId::Identifier, "a", 0},
+      Token{TokenId::RParen, "", 0},
+      Token{TokenId::LBrace, "", 0},
+      Token{TokenId::RBrace, "", 0},
+      Token{TokenId::KwElse, "", 0},
+      Token{TokenId::KwIf, "", 0},
+      Token{TokenId::LParen, "", 0},
+      Token{TokenId::Identifier, "b", 0},
+      Token{TokenId::RParen, "", 0},
+      Token{TokenId::LBrace, "", 0},
+      Token{TokenId::RBrace, "", 0},
+      Token{TokenId::KwElse, "", 0},
+      Token{TokenId::LBrace, "", 0},
+      Token{TokenId::RBrace, "", 0},
+      Token{TokenId::Eof, "", 0},
+  };
+  auto actualTokens = tokenize(s);
+  REQUIRE(actualTokens == expectedTokens);
+}

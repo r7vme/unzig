@@ -28,6 +28,8 @@
 #define KW_PUB "pub"
 #define KW_RETURN "return"
 #define KW_VAR "var"
+#define KW_IF "if"
+#define KW_ELSE "else"
 
 #define SINGLE_CHAR_TOKENS \
   ASTERISK: \
@@ -140,6 +142,8 @@ static std::map<std::string, TokenId> keywordsNameMap{
     {KW_PUB, TokenId::KwPub},
     {KW_RETURN, TokenId::KwReturn},
     {KW_VAR, TokenId::KwVar},
+    {KW_IF, TokenId::KwIf},
+    {KW_ELSE, TokenId::KwElse},
 };
 
 // clang-format off
@@ -180,6 +184,8 @@ static std::string getTokenIdName(TokenId id) {
   case TokenId::KwPub: return "KwPub";
   case TokenId::KwReturn: return "KwReturn";
   case TokenId::KwVar: return "KwVar";
+  case TokenId::KwIf: return "KwIf";
+  case TokenId::KwElse: return "KwElse";
   default: assert(false);
   }
   // clang-format on
