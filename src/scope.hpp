@@ -11,7 +11,7 @@
 class ScopeObject;
 using Scope = std::shared_ptr<ScopeObject>;
 
-Scope createScope(const Scope parent);
+Scope createChildScope(const Scope parent);
 
 class ScopeObject {
   using SymbolTable = std::unordered_map<std::string, Symbol>;

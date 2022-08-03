@@ -1,6 +1,7 @@
 #pragma once
 
 #include "context.hpp"
+
 #include <llvm/IR/Function.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
@@ -16,6 +17,7 @@ class BlockNode;
 class RootNode;
 class AssignStNode;
 class ReturnStNode;
+class IfStNode;
 class VarExprNode;
 class FnCallExprNode;
 class EmptyNode;
@@ -37,6 +39,7 @@ public:
   llvm::Value *generate(const RootNode &astNode);
   llvm::Value *generate(const AssignStNode &astNode);
   llvm::Value *generate(const ReturnStNode &astNode);
+  llvm::Value *generate(const IfStNode &astNode);
   llvm::Value *generate(const VarExprNode &astNode);
   llvm::Value *generate(const FnCallExprNode &astNode);
   llvm::Value *generate(const EmptyNode &astNode);

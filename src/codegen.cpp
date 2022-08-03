@@ -161,6 +161,10 @@ Value *Codegen::generate(const ReturnStNode &astNode) {
   return returnValue;
 }
 
+Value *Codegen::generate(const IfStNode &astNode) {
+  return nullptr;
+}
+
 Value *Codegen::generate(const EmptyNode &astNode) { return nullptr; }
 
 Value *Codegen::generate(const RootNode &astNode) {

@@ -10,7 +10,7 @@ void SemanticAnalyzer::fatalSemaError(const std::string &msg, const size_t sourc
 }
 
 void SemanticAnalyzer::analyze(RootNode &astNode) {
-  auto globalScope = createScope(nullptr);
+  auto globalScope = createChildScope(nullptr);
   globalScope->isGlobal = true;
   astNode.setScope(globalScope);
 
@@ -53,7 +53,7 @@ void SemanticAnalyzer::analyze(FnDefNode &astNode) {
       createSymbol(SymbolType::Fn, astNode.name, astNode.returnType, astNode.scope->isGlobal));
 
   // new scope
-  auto blockScope = createScope(astNode.scope);
+  auto blockScope = createChildScope(astNode.scope);
   astNode.body.setScope(blockScope);
   astNode.body.sema(this);
 }
@@ -78,6 +78,19 @@ void SemanticAnalyzer::analyze(AssignStNode &astNode) {
 void SemanticAnalyzer::analyze(ReturnStNode &astNode) {
   astNode.expr.setScope(astNode.scope);
   astNode.expr.sema(this);
+}
+
+void SemanticAnalyzer::analyze(IfStNode &astNode) {
+  astNode.condition.setScope(astNode.scope);
+  astNode.condition.sema(this);
+
+  auto blockScope = createChildScope(astNode.scope);
+  astNode.block.setScope(blockScope);
+  astNode.block.sema(this);
+
+  auto elseScope = createChildScope(astNode.scope);
+  astNode.elseStatement.setScope(elseScope);
+  astNode.elseStatement.sema(this);
 }
 
 void SemanticAnalyzer::analyze(VarExprNode &astNode) {

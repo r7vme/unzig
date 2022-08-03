@@ -10,8 +10,8 @@ TEST_CASE("test parent scope lookup", "[scope]") {
       .name = "i32",
       .type = IntParams{32, false},
       });
-  auto parent = createScope(nullptr);
-  auto scope = createScope(parent);
+  auto parent = createChildScope(nullptr);
+  auto scope = createChildScope(parent);
 
   parent->insertSymbol(createSymbol(SymbolType::Var, "s1", type, false));
   scope->insertSymbol(createSymbol(SymbolType::Var, "s2", type, false));

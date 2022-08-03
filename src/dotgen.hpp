@@ -11,6 +11,7 @@ class BlockNode;
 class RootNode;
 class AssignStNode;
 class ReturnStNode;
+class IfStNode;
 class VarExprNode;
 class FnCallExprNode;
 class EmptyNode;
@@ -29,6 +30,7 @@ public:
   void generate(const RootNode &astNode);
   void generate(const AssignStNode &astNode);
   void generate(const ReturnStNode &astNode);
+  void generate(const IfStNode &astNode);
   void generate(const VarExprNode &astNode);
   void generate(const FnCallExprNode &astNode);
   void generate(const EmptyNode &astNode);

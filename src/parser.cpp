@@ -1,14 +1,16 @@
 #include <cstdlib>
 #include <iostream>
+#include <map>
 #include <optional>
 #include <string>
 #include <vector>
-#include <map>
 
 #include "ast.hpp"
 #include "parser.hpp"
 #include "types.hpp"
 
+AstNode parseStatement(ParserCtxt &ctxt);
+AstNode parseBlock(ParserCtxt &ctxt);
 AstNode parseBinOpRhsExpr(ParserCtxt &ctxt, AstNode lhs);
 AstNode parsePrimaryExpr(ParserCtxt &ctxt);
 AstNode parseGroupedExpr(ParserCtxt &ctxt);
@@ -217,6 +219,45 @@ AstNode parseVarDecl(ParserCtxt &ctxt) {
   return VarDeclNode(varIdentifierToken.value, typeExprToken.value, initExpr, kwVarToken.position);
 }
 
+// IfSt <- KEYWORD_if LPAREN Expr RPAREN Block ( KEYWORD_else Statement )?
+AstNode parseIfSt(ParserCtxt &ctxt) {
+  const auto mark = ctxt.getCursor();
+
+  auto kwIfToken = ctxt.getTokenAndAdvance();
+  if (kwIfToken.id != TokenId::KwIf)
+    return resetToken(ctxt, mark);
+
+  const std::string errMsg = "unable to parse if statement";
+  auto lParenToken = ctxt.getTokenAndAdvance();
+  if (lParenToken.id != TokenId::LParen)
+    fatalSyntaxError(ctxt, mark, errMsg);
+
+  auto condition = parseExpr(ctxt);
+  if (!condition)
+    fatalSyntaxError(ctxt, mark, errMsg);
+
+  auto rParenToken = ctxt.getTokenAndAdvance();
+  if (rParenToken.id != TokenId::RParen)
+    fatalSyntaxError(ctxt, mark, errMsg);
+
+  auto block = parseBlock(ctxt);
+  if (!block)
+    fatalSyntaxError(ctxt, mark, errMsg);
+
+  AstNode elseStatement = EmptyNode();
+
+  auto kwElseToken = ctxt.getTokenAndAdvance();
+  if (kwElseToken.id == TokenId::KwElse) {
+    if (auto block = parseStatement(ctxt)) {
+      elseStatement = block;
+    } else {
+      fatalSyntaxError(ctxt, mark, errMsg);
+    }
+  }
+
+  return IfStNode(condition, block, elseStatement, kwIfToken.position);
+}
+
 // ReturnSt <- KEYWORD_return Expr? SEMICOLON
 AstNode parseReturnSt(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
@@ -255,15 +296,21 @@ AstNode parseAssignSt(ParserCtxt &ctxt) {
 }
 
 // Statement <- VarDecl
+//           / IfSt
 //           / AssignSt
 //           / ReturnSt
+//           / Block
 AstNode parseStatement(ParserCtxt &ctxt) {
   if (auto varDecl = parseVarDecl(ctxt))
     return varDecl;
+  if (auto ifSt = parseIfSt(ctxt))
+    return ifSt;
   if (auto assighSt = parseAssignSt(ctxt))
     return assighSt;
   if (auto returnSt = parseReturnSt(ctxt))
     return returnSt;
+  if (auto block = parseBlock(ctxt))
+    return block;
   return EmptyNode();
 }
 

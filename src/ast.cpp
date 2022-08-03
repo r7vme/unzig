@@ -26,6 +26,11 @@ bool AssignStNode::isEqual(const AssignStNode &other) const {
 
 bool ReturnStNode::isEqual(const ReturnStNode &other) const { return expr == other.expr; }
 
+bool IfStNode::isEqual(const IfStNode &other) const {
+  return condition == other.condition && block == other.block &&
+         elseStatement == other.elseStatement;
+}
+
 bool VarExprNode::isEqual(const VarExprNode &other) const { return name == other.name; }
 
 bool FnCallExprNode::isEqual(const FnCallExprNode &other) const { return callee == other.callee; }

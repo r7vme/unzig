@@ -99,6 +99,18 @@ struct ReturnStNode {
   AST_NODE_MEMBERS(ReturnStNode)
 };
 
+struct IfStNode {
+  AstNode condition;
+  AstNode block;
+  AstNode elseStatement;
+
+  IfStNode(const AstNode condition, const AstNode block, const AstNode elseStatement,
+           const size_t sourcePos)
+      : condition(condition), block(block), elseStatement(elseStatement),
+        sourcePos(sourcePos) {}
+  AST_NODE_MEMBERS(IfStNode)
+};
+
 struct BlockNode {
   std::vector<AstNode> statements;
 

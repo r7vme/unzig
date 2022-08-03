@@ -13,6 +13,6 @@ std::optional<Symbol> ScopeObject::lookupSymbol(const std::string &name) const {
   return std::nullopt;
 }
 
-Scope createScope(const Scope parent) { return std::make_shared<ScopeObject>(parent); }
+Scope createChildScope(const Scope parent) { return std::make_shared<ScopeObject>(parent); }
 
 ScopeObject::ScopeObject(const Scope parent) : parent(parent) {}

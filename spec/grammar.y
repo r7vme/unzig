@@ -18,7 +18,7 @@ Statement <- VarDecl
           / AssignSt
           / ReturnSt
           / Block
-IfSt <- IfPrefix Block ( KEYWORD_else Statement )?
+IfSt <- KEYWORD_if LPAREN Expr RPAREN Block ( KEYWORD_else Statement )?
 AssignSt <- IDENTIFIER AssignOp Expr SEMICOLON
 ReturnSt <- KEYWORD_return Expr? SEMICOLON
 
@@ -39,9 +39,6 @@ TypeExpr <- IDENTIFIER
 # Operators
 AssignOp <- EQUAL
 BinOp <- PLUS / MINUS / ASTERISK / SLASH
-
-# Control Flow
-IfPrefix <- KEYWORD_if LPAREN Expr RPAREN
 
 # Tokens
 eof <- !.
