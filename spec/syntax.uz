@@ -1,13 +1,1 @@
-fn foo() i32 {
-    return 1;
-}
-
-fn main() i32 {
-    // comment
-    var x: i32 = foo(); // comment
-    var y: i32 = 123 + (1 * x);
-    y = 1;
-    var z: f32 = 1.0;
-
-    return 0;
-}
+../test/test_unzig_main.uz
