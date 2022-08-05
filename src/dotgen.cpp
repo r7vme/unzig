@@ -114,14 +114,14 @@ void DotGenerator::generate(const IfStNode &astNode) {
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
 
-  astNode.condition.dotgen(this);
-  output.append(nodeId + "->" + getNodeId(astNode.condition) + "\n");
+  astNode.ifCondition.dotgen(this);
+  output.append(nodeId + "->" + getNodeId(astNode.ifCondition) + "\n");
 
-  astNode.block.dotgen(this);
-  output.append(nodeId + "->" + getNodeId(astNode.block) + "\n");
+  astNode.thenBlock.dotgen(this);
+  output.append(nodeId + "->" + getNodeId(astNode.thenBlock) + "\n");
 
-  astNode.elseStatement.dotgen(this);
-  output.append(nodeId + "->" + getNodeId(astNode.elseStatement) + "\n");
+  astNode.elseBlock.dotgen(this);
+  output.append(nodeId + "->" + getNodeId(astNode.elseBlock) + "\n");
 }
 
 void DotGenerator::generate(const VarExprNode &astNode) {

@@ -11,9 +11,9 @@ fn main() i32 {
     var a: bool = 0;
     var b: bool = 1;
 
-    if (a) {
+    if (1) {
       z = 1.0;
-    } else if (b) {
+    } else if (1) {
       z = 2.0;
     } else {
       z = 3.0;

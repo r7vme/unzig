@@ -27,8 +27,8 @@ bool AssignStNode::isEqual(const AssignStNode &other) const {
 bool ReturnStNode::isEqual(const ReturnStNode &other) const { return expr == other.expr; }
 
 bool IfStNode::isEqual(const IfStNode &other) const {
-  return condition == other.condition && block == other.block &&
-         elseStatement == other.elseStatement;
+  return ifCondition == other.ifCondition && thenBlock == other.thenBlock &&
+         elseBlock == other.elseBlock;
 }
 
 bool VarExprNode::isEqual(const VarExprNode &other) const { return name == other.name; }

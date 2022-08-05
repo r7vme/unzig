@@ -81,16 +81,16 @@ void SemanticAnalyzer::analyze(ReturnStNode &astNode) {
 }
 
 void SemanticAnalyzer::analyze(IfStNode &astNode) {
-  astNode.condition.setScope(astNode.scope);
-  astNode.condition.sema(this);
+  astNode.ifCondition.setScope(astNode.scope);
+  astNode.ifCondition.sema(this);
 
   auto blockScope = createChildScope(astNode.scope);
-  astNode.block.setScope(blockScope);
-  astNode.block.sema(this);
+  astNode.thenBlock.setScope(blockScope);
+  astNode.thenBlock.sema(this);
 
   auto elseScope = createChildScope(astNode.scope);
-  astNode.elseStatement.setScope(elseScope);
-  astNode.elseStatement.sema(this);
+  astNode.elseBlock.setScope(elseScope);
+  astNode.elseBlock.sema(this);
 }
 
 void SemanticAnalyzer::analyze(VarExprNode &astNode) {

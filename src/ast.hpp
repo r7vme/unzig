@@ -100,13 +100,13 @@ struct ReturnStNode {
 };
 
 struct IfStNode {
-  AstNode condition;
-  AstNode block;
-  AstNode elseStatement;
+  AstNode ifCondition;
+  AstNode thenBlock;
+  AstNode elseBlock;
 
   IfStNode(const AstNode condition, const AstNode block, const AstNode elseStatement,
            const size_t sourcePos)
-      : condition(condition), block(block), elseStatement(elseStatement),
+      : ifCondition(condition), thenBlock(block), elseBlock(elseStatement),
         sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(IfStNode)
 };
