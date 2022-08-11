@@ -14,9 +14,9 @@ fn main() i32 {
     // empty block
     {}
 
-    if (1) {
+    if (0.0) {
       z = 1.0;
-    } else if (0) {
+    } else if (z) {
       z = 2.0;
     } else {
       z = 3.0;

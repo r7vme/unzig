@@ -58,11 +58,12 @@ Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
   assert(false);
 }
 
-Value *convertToI1(CompilerContext cc, Value* value) {
+Value *convertToI1(CompilerContext cc, Value *value) {
   auto type = value->getType();
-
   if (type->isIntegerTy()) {
     return cc->ir.CreateICmpNE(value, ConstantInt::get(type, 0));
+  } else if (type->isFloatingPointTy()) {
+    return cc->ir.CreateFCmpUNE(value, ConstantFP::get(type, 0.0));
   }
   assert(false);
   return nullptr;
