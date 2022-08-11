@@ -23,7 +23,11 @@ AssignSt <- IDENTIFIER AssignOp Expr SEMICOLON
 ReturnSt <- KEYWORD_return Expr? SEMICOLON
 
 # Expression Level
-Expr <- PrimaryExpr BinOpRhsExpr
+Expr <- BoolOrExpr
+BoolOrExpr <- BoolAndExpr (KEYWORD_or BoolAndExpr)*
+BoolAndExpr <- CompareExpr (KEYWORD_and CompareExpr)*
+CompareExpr <- BinaryExpr (CompareOp BinaryExpr)?
+BinaryExpr <- PrimaryExpr BinOpRhsExpr
 BinOpRhsExpr <- (BinOp PrimaryExpr)*
 PrimaryExpr <- GroupedExpr
             / FnCallExpr
@@ -41,7 +45,16 @@ TypeExpr <- IDENTIFIER
 
 # Operators
 AssignOp <- EQUAL
+
 BinOp <- PLUS / MINUS / ASTERISK / SLASH
+
+CompareOp
+    <- EQUALEQUAL
+     / EXCLAMATIONMARKEQUAL
+     / LARROW
+     / RARROW
+     / LARROWEQUAL
+     / RARROWEQUAL
 
 # Tokens
 eof <- !.
@@ -86,6 +99,8 @@ KEYWORD_if          <- 'if'          end_of_word
 KEYWORD_else        <- 'else'        end_of_word
 KEYWORD_true        <- 'true'        end_of_word
 KEYWORD_false       <- 'false'       end_of_word
+KEYWORD_and         <- 'and'         end_of_word
+KEYWORD_or          <- 'or'          end_of_word
 
 keyword <- KEYWORD_fn
         / KEYWORD_pub
