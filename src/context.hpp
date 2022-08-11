@@ -1,4 +1,5 @@
 #pragma once
+
 #include "source.hpp"
 #include "types.hpp"
 #include <llvm/IR/Function.h>
@@ -11,13 +12,12 @@
 struct CompilerContextObject {
   llvm::LLVMContext llvmCtxt;
   llvm::Module llvmModule;
-  llvm::IRBuilder<> llvmIRBuilder;
+  llvm::IRBuilder<> ir;
 
-  llvm::Function *curFunc;
   Source source;
   TypeTable typeTable;
 
-  CompilerContextObject() : llvmCtxt(), llvmModule("unzig", llvmCtxt), llvmIRBuilder(llvmCtxt) {}
+  CompilerContextObject() : llvmCtxt(), llvmModule("unzig", llvmCtxt), ir(llvmCtxt) {}
 };
 
 using CompilerContext = std::shared_ptr<CompilerContextObject>;

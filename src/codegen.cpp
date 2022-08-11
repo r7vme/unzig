@@ -1,6 +1,7 @@
 #include "codegen.hpp"
 #include "ast.hpp"
 #include "ast_node.hpp"
+#include "context.hpp"
 #include "types.hpp"
 #include <cstdint>
 #include <llvm/ADT/APFloat.h>
@@ -12,7 +13,6 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Value.h>
-#include <optional>
 
 using llvm::BasicBlock;
 using llvm::ConstantFP;
@@ -20,9 +20,10 @@ using llvm::ConstantInt;
 using llvm::Function;
 using llvm::FunctionType;
 using llvm::LLVMContext;
-using llvm::PHINode;
 using llvm::Type;
 using llvm::Value;
+
+Function *getCurrentFunc(CompilerContext cc) { return cc->ir.GetInsertBlock()->getParent(); }
 
 Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
   if (uzType->id == UzTypeId::Void) {
@@ -42,9 +43,29 @@ Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
       assert(false);
     }
   } else if (uzType->id == UzTypeId::Float) {
-    return Type::getFloatTy(ctxt);
+    auto type = std::get<FloatParams>(uzType->type);
+    switch (type.bitNum) {
+    case 64:
+      return Type::getDoubleTy(ctxt);
+    case 32:
+      return Type::getFloatTy(ctxt);
+    case 16:
+      return Type::getHalfTy(ctxt);
+    default:
+      assert(false);
+    }
   }
   assert(false);
+}
+
+Value *convertToI1(CompilerContext cc, Value* value) {
+  auto type = value->getType();
+
+  if (type->isIntegerTy()) {
+    return cc->ir.CreateICmpNE(value, ConstantInt::get(type, 0));
+  }
+  assert(false);
+  return nullptr;
 }
 
 void Codegen::fatalCodegenError(const std::string &msg, const size_t sourcePos) {
@@ -63,21 +84,21 @@ Value *Codegen::generate(const IntegerExprNode &astNode) {
 }
 
 Value *Codegen::generate(const BinExprNode &astNode) {
-  auto *l = astNode.lhs.codegen(this);
-  auto *r = astNode.rhs.codegen(this);
+  auto l = astNode.lhs.codegen(this);
+  auto r = astNode.rhs.codegen(this);
   if (!l || !r) {
     return nullptr;
   }
 
   switch (astNode.type) {
   case BinOpType::ADD:
-    return cc->llvmIRBuilder.CreateAdd(l, r);
+    return cc->ir.CreateAdd(l, r);
   case BinOpType::SUB:
-    return cc->llvmIRBuilder.CreateSub(l, r);
+    return cc->ir.CreateSub(l, r);
   case BinOpType::MUL:
-    return cc->llvmIRBuilder.CreateMul(l, r);
+    return cc->ir.CreateMul(l, r);
   case BinOpType::DIV:
-    return cc->llvmIRBuilder.CreateSDiv(l, r);
+    return cc->ir.CreateSDiv(l, r);
   }
 
   return nullptr;
@@ -85,32 +106,33 @@ Value *Codegen::generate(const BinExprNode &astNode) {
 
 Value *Codegen::generate(const VarDeclNode &astNode) {
   // TODO: global variables
-  auto *llvmType = toLLVMType(astNode.type, cc->llvmCtxt);
-  auto *initValue = astNode.initExpr.codegen(this);
+  auto llvmType = toLLVMType(astNode.type, cc->llvmCtxt);
+  auto initValue = astNode.initExpr.codegen(this);
   if (!initValue) {
     fatalCodegenError("variable must be initialized", astNode.sourcePos);
   }
-  llvm::IRBuilder<> TmpB(&cc->curFunc->getEntryBlock(), cc->curFunc->getEntryBlock().begin());
-  auto *alloca = TmpB.CreateAlloca(llvmType, nullptr, astNode.name);
+  llvm::IRBuilder<> TmpB(&getCurrentFunc(cc)->getEntryBlock(),
+                         getCurrentFunc(cc)->getEntryBlock().begin());
+  auto alloca = TmpB.CreateAlloca(llvmType, nullptr, astNode.name);
   astNode.symbol->allocaInst = alloca;
 
-  return cc->llvmIRBuilder.CreateStore(initValue, alloca);
+  return cc->ir.CreateStore(initValue, alloca);
 }
 
 Value *Codegen::generate(const VarExprNode &astNode) {
   if (!astNode.varSymbol->allocaInst) {
     fatalCodegenError("unable to find a variable instruction", astNode.sourcePos);
   }
-  return cc->llvmIRBuilder.CreateLoad(toLLVMType(astNode.varSymbol->dataType, cc->llvmCtxt),
-                                      astNode.varSymbol->allocaInst, astNode.name);
+  return cc->ir.CreateLoad(toLLVMType(astNode.varSymbol->dataType, cc->llvmCtxt),
+                           astNode.varSymbol->allocaInst, astNode.name);
 }
 
 Value *Codegen::generate(const FnCallExprNode &astNode) {
-  auto *callee = cc->llvmModule.getFunction(astNode.callee);
+  auto callee = cc->llvmModule.getFunction(astNode.callee);
   if (!callee) {
     fatalCodegenError("function not declared", astNode.sourcePos);
   }
-  auto *call = cc->llvmIRBuilder.CreateCall(callee);
+  auto call = cc->ir.CreateCall(callee);
   if (!call) {
     fatalCodegenError("unable to generate a function call", astNode.sourcePos);
   }
@@ -119,12 +141,11 @@ Value *Codegen::generate(const FnCallExprNode &astNode) {
 
 Value *Codegen::generate(const FnDefNode &astNode) {
   auto funcName = astNode.name;
-  auto *funcReturnType = toLLVMType(astNode.returnType, cc->llvmCtxt);
-  auto *funcType = FunctionType::get(funcReturnType, false);
-  auto *func = Function::Create(funcType, Function::ExternalLinkage, funcName, cc->llvmModule);
-  cc->curFunc = func;
-  BasicBlock *bb = BasicBlock::Create(cc->llvmCtxt, "entry", cc->curFunc);
-  cc->llvmIRBuilder.SetInsertPoint(bb);
+  auto funcReturnType = toLLVMType(astNode.returnType, cc->llvmCtxt);
+  auto funcType = FunctionType::get(funcReturnType, false);
+  auto func = Function::Create(funcType, Function::ExternalLinkage, funcName, cc->llvmModule);
+  BasicBlock *bb = BasicBlock::Create(cc->llvmCtxt, "entry", func);
+  cc->ir.SetInsertPoint(bb);
 
   if (!astNode.body.codegen(this)) {
     fatalCodegenError("unable to generate a function body", astNode.sourcePos);
@@ -133,13 +154,12 @@ Value *Codegen::generate(const FnDefNode &astNode) {
 }
 
 Value *Codegen::generate(const BlockNode &astNode) {
-  Value * ret = nullptr;
   for (auto &s : astNode.statements) {
-    if (!(ret = s.codegen(this))) {
+    if (!(s.codegen(this))) {
       fatalCodegenError("unable to generate a block statement", astNode.sourcePos);
     }
   }
-  return ret;
+  return cc->ir.GetInsertBlock();
 }
 
 Value *Codegen::generate(const AssignStNode &astNode) {
@@ -147,16 +167,16 @@ Value *Codegen::generate(const AssignStNode &astNode) {
     fatalCodegenError("unable to find a variable instruction", astNode.sourcePos);
   }
 
-  auto *exprValue = astNode.expr.codegen(this);
+  auto exprValue = astNode.expr.codegen(this);
   if (!exprValue) {
     fatalCodegenError("unable to generate an assignment expression", astNode.sourcePos);
   }
 
-  return cc->llvmIRBuilder.CreateStore(exprValue, astNode.varSymbol->allocaInst);
+  return cc->ir.CreateStore(exprValue, astNode.varSymbol->allocaInst);
 }
 
 Value *Codegen::generate(const ReturnStNode &astNode) {
-  auto *returnValue = cc->llvmIRBuilder.CreateRet(astNode.expr.codegen(this));
+  auto returnValue = cc->ir.CreateRet(astNode.expr.codegen(this));
   if (!returnValue) {
     fatalCodegenError("unable to generate a return value", astNode.sourcePos);
   }
@@ -164,40 +184,35 @@ Value *Codegen::generate(const ReturnStNode &astNode) {
 }
 
 Value *Codegen::generate(const IfStNode &astNode) {
-  //  auto *ifCondition = astNode.ifCondition.codegen(this);
-  //  if (!ifCondition) {
-  //    fatalCodegenError("unable to generate if statement code", astNode.sourcePos);
-  //  }
+  auto ifCondition = astNode.ifCondition.codegen(this);
+  if (!ifCondition) {
+    fatalCodegenError("unable to generate if condition", astNode.sourcePos);
+  }
 
-  // stub condition
-  auto *val1 = ConstantInt::get(Type::getInt32Ty(cc->llvmCtxt), 0);
-  auto *val2 = ConstantInt::get(Type::getInt32Ty(cc->llvmCtxt), 0);
-  auto *ifCondition = cc->llvmIRBuilder.CreateICmpNE(val1, val2);
+  auto thenBB = BasicBlock::Create(cc->llvmCtxt, "", getCurrentFunc(cc));
+  auto elseBB = BasicBlock::Create(cc->llvmCtxt, "", getCurrentFunc(cc));
+  auto mergeBB = BasicBlock::Create(cc->llvmCtxt, "", getCurrentFunc(cc));
+  cc->ir.CreateCondBr(convertToI1(cc, ifCondition), thenBB, elseBB);
 
-  auto *thenBB = BasicBlock::Create(cc->llvmCtxt, "", cc->curFunc);
-  auto *elseBB = BasicBlock::Create(cc->llvmCtxt, "", cc->curFunc);
-  auto *mergeBB = BasicBlock::Create(cc->llvmCtxt, "", cc->curFunc);
-  cc->llvmIRBuilder.CreateCondBr(ifCondition, thenBB, elseBB);
-
-  cc->llvmIRBuilder.SetInsertPoint(thenBB);
-  auto *thenBlock = astNode.thenBlock.codegen(this);
+  cc->ir.SetInsertPoint(thenBB);
+  auto thenBlock = astNode.thenBlock.codegen(this);
   if (!thenBlock) {
-    fatalCodegenError("unable to generate if statement code 1", astNode.sourcePos);
+    fatalCodegenError("unable to generate then block", astNode.sourcePos);
   }
-  cc->llvmIRBuilder.CreateBr(mergeBB);
+  cc->ir.CreateBr(mergeBB);
 
-  cc->llvmIRBuilder.SetInsertPoint(elseBB);
-  auto *elseBlock = astNode.elseBlock.codegen(this);
+  cc->ir.SetInsertPoint(elseBB);
+  auto elseBlock = astNode.elseBlock.codegen(this);
   if (!elseBlock) {
-    fatalCodegenError("unable to generate if statement code 2", astNode.sourcePos);
+    fatalCodegenError("unable to generate else block", astNode.sourcePos);
   }
-  cc->llvmIRBuilder.CreateBr(mergeBB);
+  cc->ir.CreateBr(mergeBB);
 
-  cc->llvmIRBuilder.SetInsertPoint(mergeBB);
-  return cc->llvmIRBuilder.GetInsertBlock();
+  cc->ir.SetInsertPoint(mergeBB);
+  return cc->ir.GetInsertBlock();
 }
 
-Value *Codegen::generate(const EmptyNode &astNode) { return nullptr; }
+Value *Codegen::generate(const EmptyNode &astNode) { return cc->ir.GetInsertBlock(); }
 
 Value *Codegen::generate(const RootNode &astNode) {
   for (auto &decl : astNode.declarations) {

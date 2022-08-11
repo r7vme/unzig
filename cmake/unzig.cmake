@@ -13,8 +13,8 @@ macro(unzig_add_executable target path)
     COMMAND cp ${orig_source_path} ${source_path}
     COMMAND ${unzig_exe} ${source_path}
   )
-  add_custom_target(${target} ALL DEPENDS ${output_file})
-  add_dependencies(${target} unzig)
+  add_custom_target(${target}_unzig_executable ALL DEPENDS ${output_file})
+  add_dependencies(${target}_unzig_executable unzig)
 endmacro()
 
 macro(unzig_add_test target path)

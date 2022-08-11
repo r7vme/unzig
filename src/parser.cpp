@@ -246,8 +246,9 @@ AstNode parseIfSt(ParserCtxt &ctxt) {
 
   AstNode elseStatement = EmptyNode();
 
-  auto kwElseToken = ctxt.getTokenAndAdvance();
+  auto kwElseToken = ctxt.getToken();
   if (kwElseToken.id == TokenId::KwElse) {
+    ctxt.skipToken();
     if (auto block = parseStatement(ctxt)) {
       elseStatement = block;
     } else {
