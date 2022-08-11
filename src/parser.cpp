@@ -14,6 +14,7 @@ AstNode parseBlock(ParserCtxt &ctxt);
 AstNode parseBinOpRhsExpr(ParserCtxt &ctxt, AstNode lhs);
 AstNode parsePrimaryExpr(ParserCtxt &ctxt);
 AstNode parseGroupedExpr(ParserCtxt &ctxt);
+AstNode parseBoolExpr(ParserCtxt &ctxt);
 AstNode parseNumberExpr(ParserCtxt &ctxt);
 AstNode parseExpr(ParserCtxt &ctxt);
 AstNode parseVarDecl(ParserCtxt &ctxt);
@@ -60,6 +61,23 @@ std::optional<BinOpType> mayBeToBinOpType(const Token &token) {
   default:
     return std::nullopt;
   }
+}
+
+// BoolExpr <- KEYWORD_true
+//          / KEYWORD_false
+AstNode parseBoolExpr(ParserCtxt &ctxt) {
+  const auto mark = ctxt.getCursor();
+
+  auto token = ctxt.getTokenAndAdvance();
+  switch (token.id) {
+  case (TokenId::KwTrue):
+    return BoolExprNode(true, token.position);
+  case (TokenId::KwFalse):
+    return BoolExprNode(false, token.position);
+  default:
+    return resetToken(ctxt, mark);
+  }
+  assert(false);
 }
 
 // NumberExpr <- FLOAT / INTEGER
@@ -142,6 +160,8 @@ AstNode parsePrimaryExpr(ParserCtxt &ctxt) {
   if (auto expr = parseFnCallExpr(ctxt))
     return expr;
   if (auto expr = parseVarExpr(ctxt))
+    return expr;
+  if (auto expr = parseBoolExpr(ctxt))
     return expr;
   if (auto expr = parseNumberExpr(ctxt))
     return expr;

@@ -9,6 +9,7 @@
 
 class FloatExprNode;
 class IntegerExprNode;
+class BoolExprNode;
 class BinExprNode;
 class VarDeclNode;
 class FnDefNode;
@@ -30,6 +31,7 @@ public:
   void fatalSemaError(const std::string &msg, const size_t sourcePos);
   void analyze(FloatExprNode &astNode);
   void analyze(IntegerExprNode &astNode);
+  void analyze(BoolExprNode &astNode);
   void analyze(BinExprNode &astNode);
   void analyze(VarDeclNode &astNode);
   void analyze(FnDefNode &astNode);

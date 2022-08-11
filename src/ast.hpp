@@ -72,6 +72,14 @@ struct IntegerExprNode {
   AST_NODE_MEMBERS(IntegerExprNode)
 };
 
+struct BoolExprNode {
+  const bool value;
+
+  BoolExprNode(const bool value, const size_t sourcePos)
+      : value(value), sourcePos(sourcePos) {}
+  AST_NODE_MEMBERS(BoolExprNode)
+};
+
 struct BinExprNode {
   BinOpType type;
   AstNode lhs, rhs;

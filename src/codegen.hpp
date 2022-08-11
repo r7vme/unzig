@@ -10,6 +10,7 @@
 
 class FloatExprNode;
 class IntegerExprNode;
+class BoolExprNode;
 class BinExprNode;
 class VarDeclNode;
 class FnDefNode;
@@ -32,6 +33,7 @@ public:
 
   llvm::Value *generate(const FloatExprNode &astNode);
   llvm::Value *generate(const IntegerExprNode &astNode);
+  llvm::Value *generate(const BoolExprNode &astNode);
   llvm::Value *generate(const BinExprNode &astNode);
   llvm::Value *generate(const VarDeclNode &astNode);
   llvm::Value *generate(const FnDefNode &astNode);

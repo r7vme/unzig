@@ -4,6 +4,7 @@
 
 class FloatExprNode;
 class IntegerExprNode;
+class BoolExprNode;
 class BinExprNode;
 class VarDeclNode;
 class FnDefNode;
@@ -23,6 +24,7 @@ public:
   std::string getDotOutput();
   void generate(const FloatExprNode &astNode);
   void generate(const IntegerExprNode &astNode);
+  void generate(const BoolExprNode &astNode);
   void generate(const BinExprNode &astNode);
   void generate(const VarDeclNode &astNode);
   void generate(const FnDefNode &astNode);

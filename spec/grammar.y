@@ -28,12 +28,15 @@ BinOpRhsExpr <- (BinOp PrimaryExpr)*
 PrimaryExpr <- GroupedExpr
             / FnCallExpr
             / VarExpr
+            / BoolExpr
             / NumberExpr
 GroupedExpr <- LPAREN Expr RPAREN
 FnCallExpr <- IDENTIFIER LPAREN RPAREN
 VarExpr <- IDENTIFIER
 NumberExpr <- FLOAT
            / INTEGER
+BoolExpr <- KEYWORD_true
+         / KEYWORD_false
 TypeExpr <- IDENTIFIER
 
 # Operators
@@ -55,17 +58,24 @@ IDENTIFIER
     <- !keyword [A-Za-z_] [A-Za-z0-9_]* skip
 
 
-ASTERISK             <- '*'      ![*%=]    skip
+ASTERISK             <- '*'                skip
 COLON                <- ':'                skip
-EQUAL                <- '='      ![>=]     skip
+EQUAL                <- '='      ![=]      skip
+EQUALEQUAL           <- '=='               skip
 LBRACE               <- '{'                skip
 LPAREN               <- '('                skip
-MINUS                <- '-'      ![%=>]    skip
-PLUS                 <- '+'      ![%+=]    skip
+MINUS                <- '-'                skip
+PLUS                 <- '+'                skip
 RBRACE               <- '}'                skip
 RPAREN               <- ')'                skip
 SEMICOLON            <- ';'                skip
-SLASH                <- '/'      ![=]      skip
+SLASH                <- '/'                skip
+RARROW               <- '>'      ![=]      skip
+RARROWEQUAL          <- '>='               skip
+LARROW               <- '<'      ![=]      skip
+LARROWEQUAL          <- '<='               skip
+EXCLAMATIONMARK      <- '!'      ![=]      skip
+EXCLAMATIONMARKEQUAL <- '!='               skip
 
 end_of_word <- ![a-zA-Z0-9_] skip
 KEYWORD_fn          <- 'fn'          end_of_word
@@ -74,6 +84,8 @@ KEYWORD_return      <- 'return'      end_of_word
 KEYWORD_var         <- 'var'         end_of_word
 KEYWORD_if          <- 'if'          end_of_word
 KEYWORD_else        <- 'else'        end_of_word
+KEYWORD_true        <- 'true'        end_of_word
+KEYWORD_false       <- 'false'       end_of_word
 
 keyword <- KEYWORD_fn
         / KEYWORD_pub

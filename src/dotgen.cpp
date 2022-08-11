@@ -22,6 +22,13 @@ void DotGenerator::generate(const IntegerExprNode &astNode) {
   output.append(nodeId + "[label=\"" + text + "\"]\n");
 }
 
+void DotGenerator::generate(const BoolExprNode &astNode) {
+  std::stringstream ss;
+  ss << "BoolExpr\\n" << astNode.value;
+  const auto nodeId = getNodeId(astNode);
+  output.append(nodeId + "[label=\"" + ss.str() + "\"]\n");
+}
+
 void DotGenerator::generate(const BinExprNode &astNode) {
   std::string binOpType;
   switch (astNode.type) {

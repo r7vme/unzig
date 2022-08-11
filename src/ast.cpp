@@ -1,5 +1,7 @@
 #include "ast.hpp"
 
+bool BoolExprNode::isEqual(const BoolExprNode &other) const { return value == other.value; }
+
 bool IntegerExprNode::isEqual(const IntegerExprNode &other) const { return value == other.value; }
 
 bool FloatExprNode::isEqual(const FloatExprNode &other) const { return value == other.value; }

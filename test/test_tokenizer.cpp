@@ -14,6 +14,7 @@ pub fn main() void {
   var x: u64 = foo(); // TODO(foo): bar
   var y: u64 = 123;
   y = 1 + 2;
+  var b: bool = true;
 }
 )";
   auto s = std::make_shared<SourceObject>(raw);
@@ -65,6 +66,14 @@ pub fn main() void {
       Token{TokenId::IntegerLiteral, "1", 0},
       Token{TokenId::Plus, "", 0},
       Token{TokenId::IntegerLiteral, "2", 0},
+      Token{TokenId::Semicolon, "", 0},
+      // line 4
+      Token{TokenId::KwVar, "", 0},
+      Token{TokenId::Identifier, "b", 0},
+      Token{TokenId::Colon, "", 0},
+      Token{TokenId::Identifier, "bool", 0},
+      Token{TokenId::Equal, "", 0},
+      Token{TokenId::KwTrue, "", 0},
       Token{TokenId::Semicolon, "", 0},
       // end main block
       Token{TokenId::RBrace, "", 0},

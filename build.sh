@@ -1,5 +1,8 @@
 #!/bin/bash
 set -e
+
+./spec/validate.sh
+
 export CC=$(which clang)
 export CXX=$(which clang++)
 [ -d build ] || mkdir build

@@ -84,6 +84,10 @@ Value *Codegen::generate(const IntegerExprNode &astNode) {
   return ConstantInt::get(Type::getInt32Ty(cc->llvmCtxt), astNode.value, decimal);
 }
 
+Value *Codegen::generate(const BoolExprNode &astNode) {
+  return ConstantInt::get(Type::getInt32Ty(cc->llvmCtxt), (astNode.value) ? 1 : 0);
+}
+
 Value *Codegen::generate(const BinExprNode &astNode) {
   auto l = astNode.lhs.codegen(this);
   auto r = astNode.rhs.codegen(this);
