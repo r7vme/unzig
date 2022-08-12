@@ -146,7 +146,7 @@ if (a) {
 
 TEST_CASE("binary operators", "[tokenizer]") {
   std::string raw = R"(
-1 > 1 < 1
+1 > 1 < 1 <= 1 >= 1 != 1 == 1
 )";
   auto s = std::make_shared<SourceObject>(raw);
   Tokens expectedTokens = {
@@ -154,6 +154,14 @@ TEST_CASE("binary operators", "[tokenizer]") {
       Token{TokenId::RArrow, "", 0},
       Token{TokenId::IntegerLiteral, "1", 0},
       Token{TokenId::LArrow, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::LArrowEqual, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::RArrowEqual, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::ExclamationMarkEqual, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::EqualEqual, "", 0},
       Token{TokenId::IntegerLiteral, "1", 0},
       Token{TokenId::Eof, "", 0},
   };

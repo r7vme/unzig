@@ -4,12 +4,14 @@
 #include <iterator>
 #include <llvm-14/llvm/IR/CallingConv.h>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include "tokenizer.hpp"
 
 // clang-format off
+// single char tokens
 #define ASTERISK '*'
 #define COLON ':'
 #define EQUAL '='
@@ -23,9 +25,12 @@
 #define SLASH '/'
 #define RARROW '>'
 #define LARROW '<'
+#define EXCLAMATIONMARK '!'
+
+// two char tokens
+#define EQUALEQUAL "=="
 #define RARROWEQUAL ">="
 #define LARROWEQUAL "<="
-#define EXCLAMATIONMARK '!'
 #define EXCLAMATIONMARKEQUAL "!="
 
 #define DOT '.'
@@ -41,7 +46,7 @@
 #define KW_AND "and"
 #define KW_OR "or"
 
-#define SINGLE_CHAR_TOKENS \
+#define SPECIAL_CHARS \
   ASTERISK: \
   case COLON: \
   case EQUAL: \
@@ -54,6 +59,7 @@
   case EXCLAMATIONMARK: \
   case RARROW: \
   case LARROW: \
+  case SLASH: \
   case SEMICOLON
 
 #define NEWLINE \
@@ -135,8 +141,7 @@
   case DIGIT
 
 #define KNOWN_CHARS \
-  SINGLE_CHAR_TOKENS: \
-  case SLASH: \
+  SPECIAL_CHARS: \
   case SKIP: \
   case ALPHA: \
   case DOT: \
@@ -150,7 +155,8 @@ enum class TokenizeState {
   Comment,
 };
 
-static std::map<std::string, TokenId> keywordsNameMap{
+// clang-format off
+static std::map<std::string, TokenId> keywordTokenIds{
     {KW_FN, TokenId::KwFn},
     {KW_PUB, TokenId::KwPub},
     {KW_RETURN, TokenId::KwReturn},
@@ -163,8 +169,14 @@ static std::map<std::string, TokenId> keywordsNameMap{
     {KW_OR, TokenId::KwOr},
 };
 
-// clang-format off
-static std::map<char, TokenId> specialCharsNameMap{
+static std::map<std::string, TokenId> twoCharsTokenIds{
+    {EQUALEQUAL, TokenId::EqualEqual},
+    {RARROWEQUAL, TokenId::RArrowEqual},
+    {LARROWEQUAL, TokenId::LArrowEqual},
+    {EXCLAMATIONMARKEQUAL, TokenId::ExclamationMarkEqual},
+};
+
+static std::map<char, TokenId> singleCharTokenIds{
     {ASTERISK, TokenId::Asterisk},
     {COLON, TokenId::Colon},
     {EQUAL, TokenId::Equal},
@@ -180,7 +192,7 @@ static std::map<char, TokenId> specialCharsNameMap{
     {LARROW, TokenId::LArrow},
     {EXCLAMATIONMARK, TokenId::ExclamationMark},
 };
-// clang-forzzmat on
+// clang-format on
 
 static std::string getTokenIdName(TokenId id) {
   // clang-format off
@@ -204,6 +216,7 @@ static std::string getTokenIdName(TokenId id) {
   case TokenId::RArrow: return "RArrow";
   case TokenId::RArrowEqual: return "RArrowEqual";
   case TokenId::LArrowEqual: return "LArrowEqual";
+  case TokenId::EqualEqual: return "EqualEqual";
   case TokenId::ExclamationMark: return "ExclamationMark";
   case TokenId::ExclamationMarkEqual: return "ExclamationMarkEqual";
   case TokenId::KwFn: return "KwFn";
@@ -235,21 +248,33 @@ void fatalLexerError(const std::string &msg) {
 }
 
 bool isKeyword(const std::string &s) {
-  auto search = keywordsNameMap.find(s);
-  return (search != keywordsNameMap.end());
+  auto search = keywordTokenIds.find(s);
+  return (search != keywordTokenIds.end());
 }
 
 TokenId getKeywordTokenId(const std::string &s) {
-  auto search = keywordsNameMap.find(s);
-  if (search == keywordsNameMap.end()) {
+  auto search = keywordTokenIds.find(s);
+  if (search == keywordTokenIds.end()) {
     fatalLexerError(std::string("unknown token ") + s);
   }
   return search->second;
 }
 
-TokenId getSpecialCharTokenId(char c) {
-  auto search = specialCharsNameMap.find(c);
-  if (search == specialCharsNameMap.end()) {
+std::optional<TokenId> getTwoCharsTokenId(const std::string &s, const size_t position) {
+  if ((position + 2) > s.size()) {
+    return std::nullopt;
+  }
+
+  auto search = twoCharsTokenIds.find(s.substr(position, 2));
+  if (search == twoCharsTokenIds.end()) {
+    return std::nullopt;
+  }
+  return search->second;
+}
+
+TokenId getSingleCharTokenId(const char c) {
+  auto search = singleCharTokenIds.find(c);
+  if (search == singleCharTokenIds.end()) {
     fatalLexerError(std::string("unknown special char ") + c);
   }
   return search->second;
@@ -298,17 +323,16 @@ std::vector<Token> tokenize(const Source source) {
       switch (c) {
       case SKIP:
         break;
-      case SLASH:
-        if (in[i + 1] == SLASH)
-        {
+      case SPECIAL_CHARS:
+        if (in[i + 1] == SLASH) {
           state = TokenizeState::Comment;
           ++i;
+        } else if (auto maybeTokenId = getTwoCharsTokenId(in, i)) {
+          tokens.push_back(Token{maybeTokenId.value(), "", i});
+          ++i;
         } else {
-          tokens.push_back(Token{getSpecialCharTokenId(c), "", i});
+          tokens.push_back(Token{getSingleCharTokenId(c), "", i});
         }
-        break;
-      case SINGLE_CHAR_TOKENS:
-        tokens.push_back(Token{getSpecialCharTokenId(c), "", i});
         break;
       case ALPHA:
         identifierStr += c;
