@@ -21,6 +21,13 @@ enum class TokenId {
   RParen,
   Semicolon,
   Slash,
+  EqualEqual,
+  ExclamationMark,
+  ExclamationMarkEqual,
+  LArrow,
+  RArrow,
+  LArrowEqual,
+  RArrowEqual,
   KwFn,
   KwPub,
   KwReturn,
@@ -28,7 +35,9 @@ enum class TokenId {
   KwIf,
   KwElse,
   KwFalse,
-  KwTrue
+  KwTrue,
+  KwAnd,
+  KwOr
 };
 
 struct Token {

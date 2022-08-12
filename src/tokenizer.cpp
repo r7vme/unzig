@@ -21,6 +21,12 @@
 #define RPAREN ')'
 #define SEMICOLON ';'
 #define SLASH '/'
+#define RARROW '>'
+#define LARROW '<'
+#define RARROWEQUAL ">="
+#define LARROWEQUAL "<="
+#define EXCLAMATIONMARK '!'
+#define EXCLAMATIONMARKEQUAL "!="
 
 #define DOT '.'
 
@@ -32,6 +38,8 @@
 #define KW_ELSE "else"
 #define KW_TRUE "true"
 #define KW_FALSE "false"
+#define KW_AND "and"
+#define KW_OR "or"
 
 #define SINGLE_CHAR_TOKENS \
   ASTERISK: \
@@ -43,6 +51,9 @@
   case PLUS: \
   case RBRACE: \
   case RPAREN: \
+  case EXCLAMATIONMARK: \
+  case RARROW: \
+  case LARROW: \
   case SEMICOLON
 
 #define NEWLINE \
@@ -148,6 +159,8 @@ static std::map<std::string, TokenId> keywordsNameMap{
     {KW_ELSE, TokenId::KwElse},
     {KW_TRUE, TokenId::KwTrue},
     {KW_FALSE, TokenId::KwFalse},
+    {KW_AND, TokenId::KwAnd},
+    {KW_OR, TokenId::KwOr},
 };
 
 // clang-format off
@@ -163,6 +176,9 @@ static std::map<char, TokenId> specialCharsNameMap{
     {RPAREN, TokenId::RParen},
     {SEMICOLON, TokenId::Semicolon},
     {SLASH, TokenId::Slash},
+    {RARROW, TokenId::RArrow},
+    {LARROW, TokenId::LArrow},
+    {EXCLAMATIONMARK, TokenId::ExclamationMark},
 };
 // clang-forzzmat on
 
@@ -184,6 +200,12 @@ static std::string getTokenIdName(TokenId id) {
   case TokenId::RParen: return "RParen";
   case TokenId::Semicolon: return "Semicolon";
   case TokenId::Slash: return "Slash";
+  case TokenId::LArrow: return "LArrow";
+  case TokenId::RArrow: return "RArrow";
+  case TokenId::RArrowEqual: return "RArrowEqual";
+  case TokenId::LArrowEqual: return "LArrowEqual";
+  case TokenId::ExclamationMark: return "ExclamationMark";
+  case TokenId::ExclamationMarkEqual: return "ExclamationMarkEqual";
   case TokenId::KwFn: return "KwFn";
   case TokenId::KwPub: return "KwPub";
   case TokenId::KwReturn: return "KwReturn";
@@ -192,6 +214,8 @@ static std::string getTokenIdName(TokenId id) {
   case TokenId::KwElse: return "KwElse";
   case TokenId::KwTrue: return "KwTrue";
   case TokenId::KwFalse: return "KwFalse";
+  case TokenId::KwAnd: return "KwAnd";
+  case TokenId::KwOr: return "KwOr";
   default: assert(false);
   }
   // clang-format on

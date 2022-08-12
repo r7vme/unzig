@@ -14,7 +14,8 @@ pub fn main() void {
   var x: u64 = foo(); // TODO(foo): bar
   var y: u64 = 123;
   y = 1 + 2;
-  var b: bool = true;
+  var b: bool = true and false or false;
+  b = 1 < 1;
 }
 )";
   auto s = std::make_shared<SourceObject>(raw);
@@ -74,6 +75,17 @@ pub fn main() void {
       Token{TokenId::Identifier, "bool", 0},
       Token{TokenId::Equal, "", 0},
       Token{TokenId::KwTrue, "", 0},
+      Token{TokenId::KwAnd, "", 0},
+      Token{TokenId::KwFalse, "", 0},
+      Token{TokenId::KwOr, "", 0},
+      Token{TokenId::KwFalse, "", 0},
+      Token{TokenId::Semicolon, "", 0},
+      // line 5
+      Token{TokenId::Identifier, "b", 0},
+      Token{TokenId::Equal, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::LArrow, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0},
       Token{TokenId::Semicolon, "", 0},
       // end main block
       Token{TokenId::RBrace, "", 0},
@@ -126,6 +138,41 @@ if (a) {
       Token{TokenId::KwElse, "", 0},
       Token{TokenId::LBrace, "", 0},
       Token{TokenId::RBrace, "", 0},
+      Token{TokenId::Eof, "", 0},
+  };
+  auto actualTokens = tokenize(s);
+  REQUIRE(actualTokens == expectedTokens);
+}
+
+TEST_CASE("binary operators", "[tokenizer]") {
+  std::string raw = R"(
+1 > 1 < 1
+)";
+  auto s = std::make_shared<SourceObject>(raw);
+  Tokens expectedTokens = {
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::RArrow, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::LArrow, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::Eof, "", 0},
+  };
+  auto actualTokens = tokenize(s);
+  REQUIRE(actualTokens == expectedTokens);
+}
+
+TEST_CASE("logical operators", "[tokenizer]") {
+  std::string raw = R"(
+1 and 1 or !1
+)";
+  auto s = std::make_shared<SourceObject>(raw);
+  Tokens expectedTokens = {
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::KwAnd, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::KwOr, "", 0},
+      Token{TokenId::ExclamationMark, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0},
       Token{TokenId::Eof, "", 0},
   };
   auto actualTokens = tokenize(s);
