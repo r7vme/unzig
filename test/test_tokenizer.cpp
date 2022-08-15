@@ -113,6 +113,13 @@ TEST_CASE("empty string", "[tokenizer]") {
   REQUIRE(tokenize(std::make_shared<SourceObject>("")) == Tokens{Token{TokenId::Eof, "", 0}});
 }
 
+TEST_CASE("slash", "[tokenizer]") {
+  REQUIRE(tokenize(std::make_shared<SourceObject>("/")) == Tokens{
+                                                               Token{TokenId::Slash, "", 0},
+                                                               Token{TokenId::Eof, "", 0},
+                                                           });
+}
+
 TEST_CASE("if statement", "[tokenizer]") {
   std::string raw = R"(
 if (a) {
@@ -122,22 +129,14 @@ if (a) {
 )";
   auto s = std::make_shared<SourceObject>(raw);
   Tokens expectedTokens = {
-      Token{TokenId::KwIf, "", 0},
-      Token{TokenId::LParen, "", 0},
-      Token{TokenId::Identifier, "a", 0},
-      Token{TokenId::RParen, "", 0},
-      Token{TokenId::LBrace, "", 0},
-      Token{TokenId::RBrace, "", 0},
-      Token{TokenId::KwElse, "", 0},
-      Token{TokenId::KwIf, "", 0},
-      Token{TokenId::LParen, "", 0},
-      Token{TokenId::Identifier, "b", 0},
-      Token{TokenId::RParen, "", 0},
-      Token{TokenId::LBrace, "", 0},
-      Token{TokenId::RBrace, "", 0},
-      Token{TokenId::KwElse, "", 0},
-      Token{TokenId::LBrace, "", 0},
-      Token{TokenId::RBrace, "", 0},
+      Token{TokenId::KwIf, "", 0},        Token{TokenId::LParen, "", 0},
+      Token{TokenId::Identifier, "a", 0}, Token{TokenId::RParen, "", 0},
+      Token{TokenId::LBrace, "", 0},      Token{TokenId::RBrace, "", 0},
+      Token{TokenId::KwElse, "", 0},      Token{TokenId::KwIf, "", 0},
+      Token{TokenId::LParen, "", 0},      Token{TokenId::Identifier, "b", 0},
+      Token{TokenId::RParen, "", 0},      Token{TokenId::LBrace, "", 0},
+      Token{TokenId::RBrace, "", 0},      Token{TokenId::KwElse, "", 0},
+      Token{TokenId::LBrace, "", 0},      Token{TokenId::RBrace, "", 0},
       Token{TokenId::Eof, "", 0},
   };
   auto actualTokens = tokenize(s);
@@ -150,20 +149,13 @@ TEST_CASE("binary operators", "[tokenizer]") {
 )";
   auto s = std::make_shared<SourceObject>(raw);
   Tokens expectedTokens = {
-      Token{TokenId::IntegerLiteral, "1", 0},
-      Token{TokenId::RArrow, "", 0},
-      Token{TokenId::IntegerLiteral, "1", 0},
-      Token{TokenId::LArrow, "", 0},
-      Token{TokenId::IntegerLiteral, "1", 0},
-      Token{TokenId::LArrowEqual, "", 0},
-      Token{TokenId::IntegerLiteral, "1", 0},
-      Token{TokenId::RArrowEqual, "", 0},
-      Token{TokenId::IntegerLiteral, "1", 0},
-      Token{TokenId::ExclamationMarkEqual, "", 0},
-      Token{TokenId::IntegerLiteral, "1", 0},
-      Token{TokenId::EqualEqual, "", 0},
-      Token{TokenId::IntegerLiteral, "1", 0},
-      Token{TokenId::Eof, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0}, Token{TokenId::RArrow, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0}, Token{TokenId::LArrow, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0}, Token{TokenId::LArrowEqual, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0}, Token{TokenId::RArrowEqual, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0}, Token{TokenId::ExclamationMarkEqual, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0}, Token{TokenId::EqualEqual, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0}, Token{TokenId::Eof, "", 0},
   };
   auto actualTokens = tokenize(s);
   REQUIRE(actualTokens == expectedTokens);

@@ -260,12 +260,8 @@ TokenId getKeywordTokenId(const std::string &s) {
   return search->second;
 }
 
-std::optional<TokenId> getTwoCharsTokenId(const std::string &s, const size_t position) {
-  if ((position + 2) > s.size()) {
-    return std::nullopt;
-  }
-
-  auto search = twoCharsTokenIds.find(s.substr(position, 2));
+std::optional<TokenId> getTwoCharsTokenId(const char c1, const char c2) {
+  auto search = twoCharsTokenIds.find(std::string() + c1 + c2);
   if (search == twoCharsTokenIds.end()) {
     return std::nullopt;
   }
@@ -310,7 +306,7 @@ std::vector<Token> tokenize(const Source source) {
       c = ' '; // extra whitespace lets wrap a token that can be in
                // progress
     } else {
-      c = in[i];
+      c = in.at(i);
     }
 
     if (!isKnownChar(c)) {
@@ -324,15 +320,18 @@ std::vector<Token> tokenize(const Source source) {
       case SKIP:
         break;
       case SPECIAL_CHARS:
-        if (in[i + 1] == SLASH) {
-          state = TokenizeState::Comment;
-          ++i;
-        } else if (auto maybeTokenId = getTwoCharsTokenId(in, i)) {
-          tokens.push_back(Token{maybeTokenId.value(), "", i});
-          ++i;
-        } else {
-          tokens.push_back(Token{getSingleCharTokenId(c), "", i});
+        if ((i + 1) < in.size()) {
+          if (in.at(i + 1) == SLASH) {
+            state = TokenizeState::Comment;
+            ++i;
+            break;
+          } else if (auto maybeTokenId = getTwoCharsTokenId(c, in.at(i + 1))) {
+            tokens.push_back(Token{maybeTokenId.value(), "", i});
+            ++i;
+            break;
+          }
         }
+        tokens.push_back(Token{getSingleCharTokenId(c), "", i});
         break;
       case ALPHA:
         identifierStr += c;
