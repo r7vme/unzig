@@ -1,5 +1,5 @@
 # Adapted from https://github.com/ziglang/zig-spec
-# that is distributed under MIT License Copyright (c) 2018 Zig Programming Language
+# which is distributed under MIT License Copyright (c) 2018 Zig Programming Language
 Root <- skip TopLevelDeclarations eof
 
 # Top level
@@ -28,12 +28,14 @@ BoolOrExpr <- BoolAndExpr (KEYWORD_or BoolAndExpr)*
 BoolAndExpr <- CompareExpr (KEYWORD_and CompareExpr)*
 CompareExpr <- BinaryExpr (CompareOp BinaryExpr)?
 BinaryExpr <- PrimaryExpr BinOpRhsExpr
-BinOpRhsExpr <- (BinOp PrimaryExpr)*
+BinOpRhsExpr <- (BinOp PrefixExpr)*
+PrefixExpr <- PrefixOp* PrimaryExpr
 PrimaryExpr <- GroupedExpr
             / FnCallExpr
             / VarExpr
             / BoolExpr
             / NumberExpr
+
 GroupedExpr <- LPAREN Expr RPAREN
 FnCallExpr <- IDENTIFIER LPAREN RPAREN
 VarExpr <- IDENTIFIER
@@ -55,6 +57,8 @@ CompareOp
      / RARROW
      / LARROWEQUAL
      / RARROWEQUAL
+
+PrefixOp <- EXCLAMATIONMARK
 
 # Tokens
 eof <- !.

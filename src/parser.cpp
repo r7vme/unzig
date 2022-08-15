@@ -11,6 +11,11 @@
 
 AstNode parseStatement(ParserCtxt &ctxt);
 AstNode parseBlock(ParserCtxt &ctxt);
+AstNode parseBoolOrExpr(ParserCtxt &ctxt);
+AstNode parseBoolAndExpr(ParserCtxt &ctxt);
+AstNode parseCompareExpr(ParserCtxt &ctxt);
+AstNode parseBinaryExpr(ParserCtxt &ctxt);
+AstNode parsePrefixExpr(ParserCtxt &ctxt);
 AstNode parseBinOpRhsExpr(ParserCtxt &ctxt, AstNode lhs);
 AstNode parsePrimaryExpr(ParserCtxt &ctxt);
 AstNode parseGroupedExpr(ParserCtxt &ctxt);
@@ -192,7 +197,35 @@ AstNode parseBinOpRhsExpr(ParserCtxt &ctxt, AstNode lhs) {
   }
 }
 
-// Expr <- PrimaryExpr BinOpRhsExpr
+// BoolOrExpr <- BoolAndExpr (KEYWORD_or BoolAndExpr)*
+AstNode parseBoolOrExpr(ParserCtxt &ctxt) {
+  return parseBoolAndExpr(ctxt);
+}
+
+// BoolAndExpr <- CompareExpr (KEYWORD_and CompareExpr)*
+AstNode parseBoolAndExpr(ParserCtxt &ctxt) {
+  return parseCompareExpr(ctxt);
+}
+
+// CompareExpr <- BinaryExpr (CompareOp BinaryExpr)?
+AstNode parseCompareExpr(ParserCtxt &ctxt) {
+  return parseBinaryExpr(ctxt);
+}
+
+// BinaryExpr <- PrimaryExpr BinOpRhsExpr
+AstNode parseBinaryExpr(ParserCtxt &ctxt) {
+  if (auto lhs = parsePrimaryExpr(ctxt)) {
+    return parseBinOpRhsExpr(ctxt, lhs);
+  }
+  return EmptyNode();
+}
+
+// PrefixExpr <- PrefixOp* PrimaryExpr
+AstNode parsePrefixExpr(ParserCtxt &ctxt) {
+  return parsePrimaryExpr(ctxt);
+}
+
+// Expr <- BoolOrExpr
 AstNode parseExpr(ParserCtxt &ctxt) {
   if (auto lhs = parsePrimaryExpr(ctxt)) {
     return parseBinOpRhsExpr(ctxt, lhs);
