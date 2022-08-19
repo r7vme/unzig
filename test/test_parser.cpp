@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <memory>
 
 #include <catch2/catch_test_macros.hpp>
@@ -164,8 +165,7 @@ TEST_CASE("FnDef can be parsed", "[parser]") {
   // clang-format on
   //
   std::vector<AstNode> declarations;
-  declarations.push_back(FnDefNode("main", "void",
-                                   BlockNode(std::vector<AstNode>(), 0), 0));
+  declarations.push_back(FnDefNode("main", "void", BlockNode(std::vector<AstNode>(), 0), 0));
   auto expectedAST = RootNode(declarations, 0);
 
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
@@ -197,8 +197,7 @@ TEST_CASE("block of statements", "[parser]") {
   };
   // clang-format on
 
-  auto varDecl =
-      VarDeclNode("x", "i32", IntegerExprNode("1", 0), 0);
+  auto varDecl = VarDeclNode("x", "i32", IntegerExprNode("1", 0), 0);
   std::vector<AstNode> statements{
       varDecl,
       ReturnStNode(IntegerExprNode("1", 0), 0),
@@ -248,6 +247,47 @@ TEST_CASE("FnCallExpr can be parsed", "[parser]") {
     FnCallExprNode("f", 0),
     IntegerExprNode("2", 0), 0
     );
+  // clang-format on
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
+  auto AST = parseExpr(ctxt);
+  REQUIRE(AST == expectedAST);
+}
+
+TEST_CASE("PrefixExpr", "[parser]") {
+  // !2
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::ExclamationMark, "", 0},
+    Token{TokenId::IntegerLiteral, "2", 0},
+    Token{TokenId::Eof, "", 0}
+  };
+
+  AstNode expectedAST = PrefixExprNode(
+      {PrefixOpType::NOT},
+      IntegerExprNode("2", 0),
+      0
+  );
+  // clang-format on
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
+  auto AST = parseExpr(ctxt);
+  REQUIRE(AST == expectedAST);
+}
+
+TEST_CASE("PrefixExpr multiple operators", "[parser]") {
+  // !!2
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::ExclamationMark, "", 0},
+    Token{TokenId::ExclamationMark, "", 0},
+    Token{TokenId::IntegerLiteral, "2", 0},
+    Token{TokenId::Eof, "", 0}
+  };
+
+  AstNode expectedAST = PrefixExprNode(
+      {PrefixOpType::NOT, PrefixOpType::NOT},
+      IntegerExprNode("2", 0),
+      0
+  );
   // clang-format on
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
   auto AST = parseExpr(ctxt);

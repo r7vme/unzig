@@ -93,8 +93,8 @@ struct PrefixExprNode {
   std::vector<PrefixOpType> operators;
   AstNode expr;
 
-  PrefixExprNode(const std::vector<PrefixOpType> operators, const AstNode expr)
-      : operators(operators), expr(expr) {}
+  PrefixExprNode(const std::vector<PrefixOpType> operators, const AstNode expr, const size_t sourcePos)
+      : operators(operators), expr(expr), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(PrefixExprNode)
 };
 

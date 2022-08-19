@@ -216,9 +216,9 @@ AstNode parseBoolAndExpr(ParserCtxt &ctxt) { return parseCompareExpr(ctxt); }
 // CompareExpr <- BinaryExpr (CompareOp BinaryExpr)?
 AstNode parseCompareExpr(ParserCtxt &ctxt) { return parseBinaryExpr(ctxt); }
 
-// BinaryExpr <- PrimaryExpr BinOpRhsExpr
+// BinaryExpr <- PrefixExpr BinOpRhsExpr
 AstNode parseBinaryExpr(ParserCtxt &ctxt) {
-  if (auto lhs = parsePrimaryExpr(ctxt)) {
+  if (auto lhs = parsePrefixExpr(ctxt)) {
     return parseBinOpRhsExpr(ctxt, lhs);
   }
   return EmptyNode();
@@ -228,17 +228,24 @@ AstNode parseBinaryExpr(ParserCtxt &ctxt) {
 AstNode parsePrefixExpr(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
+  size_t tokenPos = ctxt.getToken().position;
   std::vector<PrefixOpType> operators;
   while (auto prefixOp = maybeToPrefixOpType(ctxt.getToken())) {
     operators.push_back(prefixOp.value());
     ctxt.skipToken();
   }
 
-  if (auto expr = parsePrimaryExpr(ctxt)) {
-    return PrefixExprNode(operators, expr);
+  auto expr = parsePrimaryExpr(ctxt);
+  if (!expr) {
+    return resetToken(ctxt, mark);
   }
 
-  return resetToken(ctxt, mark);
+  if (operators.size() == 0)
+  {
+    return expr;
+  }
+
+  return PrefixExprNode(operators, expr, tokenPos);
 }
 
 // Expr <- BoolOrExpr

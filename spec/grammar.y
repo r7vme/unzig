@@ -27,7 +27,7 @@ Expr <- BoolOrExpr
 BoolOrExpr <- BoolAndExpr (KEYWORD_or BoolAndExpr)*
 BoolAndExpr <- CompareExpr (KEYWORD_and CompareExpr)*
 CompareExpr <- BinaryExpr (CompareOp BinaryExpr)?
-BinaryExpr <- PrimaryExpr BinOpRhsExpr
+BinaryExpr <- PrefixExpr BinOpRhsExpr
 BinOpRhsExpr <- (BinOp PrefixExpr)*
 PrefixExpr <- PrefixOp* PrimaryExpr
 PrimaryExpr <- GroupedExpr
