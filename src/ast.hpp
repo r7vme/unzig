@@ -32,6 +32,7 @@
 
 static uint64_t curNodeId{0};
 enum BinOpType { ADD, SUB, MUL, DIV };
+enum PrefixOpType { NOT };
 using MayBeAstNode = std::optional<AstNode>;
 
 struct EmptyNode {
@@ -75,8 +76,7 @@ struct IntegerExprNode {
 struct BoolExprNode {
   const bool value;
 
-  BoolExprNode(const bool value, const size_t sourcePos)
-      : value(value), sourcePos(sourcePos) {}
+  BoolExprNode(const bool value, const size_t sourcePos) : value(value), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(BoolExprNode)
 };
 
@@ -87,6 +87,15 @@ struct BinExprNode {
   BinExprNode(const BinOpType type, const AstNode lhs, const AstNode rhs, const size_t sourcePos)
       : type(type), lhs(lhs), rhs(rhs), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(BinExprNode)
+};
+
+struct PrefixExprNode {
+  std::vector<PrefixOpType> operations;
+  AstNode expr;
+
+  PrefixExprNode(const std::vector<PrefixOpType> operations, const AstNode expr)
+      : operations(operations), expr(expr) {}
+  AST_NODE_MEMBERS(PrefixExprNode)
 };
 
 struct AssignStNode {
@@ -114,8 +123,7 @@ struct IfStNode {
 
   IfStNode(const AstNode condition, const AstNode block, const AstNode elseStatement,
            const size_t sourcePos)
-      : ifCondition(condition), thenBlock(block), elseBlock(elseStatement),
-        sourcePos(sourcePos) {}
+      : ifCondition(condition), thenBlock(block), elseBlock(elseStatement), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(IfStNode)
 };
 

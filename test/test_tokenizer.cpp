@@ -163,7 +163,7 @@ TEST_CASE("binary operators", "[tokenizer]") {
 
 TEST_CASE("logical operators", "[tokenizer]") {
   std::string raw = R"(
-1 and 1 or !1
+1 and 1 or !1 or !!1
 )";
   auto s = std::make_shared<SourceObject>(raw);
   Tokens expectedTokens = {
@@ -171,6 +171,10 @@ TEST_CASE("logical operators", "[tokenizer]") {
       Token{TokenId::KwAnd, "", 0},
       Token{TokenId::IntegerLiteral, "1", 0},
       Token{TokenId::KwOr, "", 0},
+      Token{TokenId::ExclamationMark, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::KwOr, "", 0},
+      Token{TokenId::ExclamationMark, "", 0},
       Token{TokenId::ExclamationMark, "", 0},
       Token{TokenId::IntegerLiteral, "1", 0},
       Token{TokenId::Eof, "", 0},

@@ -11,6 +11,7 @@
 class FloatExprNode;
 class IntegerExprNode;
 class BoolExprNode;
+class PrefixExprNode;
 class BinExprNode;
 class VarDeclNode;
 class FnDefNode;
@@ -28,12 +29,12 @@ class Codegen {
 
 public:
   Codegen(const CompilerContext cc) : cc(cc){};
-
   void fatalCodegenError(const std::string &msg, const size_t sourcePos);
 
   llvm::Value *generate(const FloatExprNode &astNode);
   llvm::Value *generate(const IntegerExprNode &astNode);
   llvm::Value *generate(const BoolExprNode &astNode);
+  llvm::Value *generate(const PrefixExprNode &astNode);
   llvm::Value *generate(const BinExprNode &astNode);
   llvm::Value *generate(const VarDeclNode &astNode);
   llvm::Value *generate(const FnDefNode &astNode);

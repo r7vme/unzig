@@ -227,10 +227,7 @@ AstNode parsePrefixExpr(ParserCtxt &ctxt) {
 
 // Expr <- BoolOrExpr
 AstNode parseExpr(ParserCtxt &ctxt) {
-  if (auto lhs = parsePrimaryExpr(ctxt)) {
-    return parseBinOpRhsExpr(ctxt, lhs);
-  }
-  return EmptyNode();
+  return parseBoolOrExpr(ctxt);
 }
 
 // VarDecl <- KEYWORD_var IDENTIFIER COLON TypeExpr (AssignOp Expr)? SEMICOLON
