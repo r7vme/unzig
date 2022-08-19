@@ -121,3 +121,4 @@ void SemanticAnalyzer::analyze(FloatExprNode &astNode) {}
 void SemanticAnalyzer::analyze(IntegerExprNode &astNode) {}
 void SemanticAnalyzer::analyze(BoolExprNode &astNode) {}
 void SemanticAnalyzer::analyze(EmptyNode &astNode) {}
+void SemanticAnalyzer::analyze(PrefixExprNode &astNode) {}

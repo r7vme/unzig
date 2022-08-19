@@ -23,7 +23,8 @@ AstNode parseBoolExpr(ParserCtxt &ctxt);
 AstNode parseNumberExpr(ParserCtxt &ctxt);
 AstNode parseExpr(ParserCtxt &ctxt);
 AstNode parseVarDecl(ParserCtxt &ctxt);
-std::optional<BinOpType> mayBeToBinOpType(const Token &token);
+std::optional<BinOpType> maybeToBinOpType(const Token &token);
+std::optional<PrefixOpType> maybeToPrefixOpType(const Token &token);
 
 AstNode resetToken(ParserCtxt &ctxt, const size_t resetMark) {
   ctxt.resetCursor(resetMark);
@@ -53,7 +54,7 @@ static const std::map<BinOpType, uint32_t> binOpPrec{
     {BinOpType::DIV, 20},
 };
 
-std::optional<BinOpType> mayBeToBinOpType(const Token &token) {
+std::optional<BinOpType> maybeToBinOpType(const Token &token) {
   switch (token.id) {
   case TokenId::Asterisk:
     return BinOpType::MUL;
@@ -63,6 +64,15 @@ std::optional<BinOpType> mayBeToBinOpType(const Token &token) {
     return BinOpType::ADD;
   case TokenId::Minus:
     return BinOpType::SUB;
+  default:
+    return std::nullopt;
+  }
+}
+
+std::optional<PrefixOpType> maybeToPrefixOpType(const Token &token) {
+  switch (token.id) {
+  case TokenId::ExclamationMark:
+    return PrefixOpType::NOT;
   default:
     return std::nullopt;
   }
@@ -173,22 +183,22 @@ AstNode parsePrimaryExpr(ParserCtxt &ctxt) {
   return EmptyNode();
 }
 
-// BinOpRhsExpr <- (BinOp PrimaryExpr)*
+// BinOpRhsExpr <- (BinOp PrefixExpr)*
 AstNode parseBinOpRhsExpr(ParserCtxt &ctxt, AstNode lhs) {
   while (true) {
     auto binOpToken = ctxt.getToken();
-    auto binOp = mayBeToBinOpType(binOpToken);
+    auto binOp = maybeToBinOpType(binOpToken);
     if (!binOp) {
       return lhs;
     }
     ctxt.skipToken();
 
-    auto rhs = parsePrimaryExpr(ctxt);
+    auto rhs = parsePrefixExpr(ctxt);
     if (!rhs) {
-      fatalSyntaxError(ctxt, ctxt.getCursor(), "expected primary expression");
+      fatalSyntaxError(ctxt, ctxt.getCursor(), "expected expression");
     }
 
-    auto nextBinOp = mayBeToBinOpType(ctxt.getToken());
+    auto nextBinOp = maybeToBinOpType(ctxt.getToken());
     if ((nextBinOp) && (binOpPrec.at(nextBinOp.value()) > binOpPrec.at(binOp.value()))) {
       rhs = parseBinOpRhsExpr(ctxt, rhs);
     }
@@ -198,19 +208,13 @@ AstNode parseBinOpRhsExpr(ParserCtxt &ctxt, AstNode lhs) {
 }
 
 // BoolOrExpr <- BoolAndExpr (KEYWORD_or BoolAndExpr)*
-AstNode parseBoolOrExpr(ParserCtxt &ctxt) {
-  return parseBoolAndExpr(ctxt);
-}
+AstNode parseBoolOrExpr(ParserCtxt &ctxt) { return parseBoolAndExpr(ctxt); }
 
 // BoolAndExpr <- CompareExpr (KEYWORD_and CompareExpr)*
-AstNode parseBoolAndExpr(ParserCtxt &ctxt) {
-  return parseCompareExpr(ctxt);
-}
+AstNode parseBoolAndExpr(ParserCtxt &ctxt) { return parseCompareExpr(ctxt); }
 
 // CompareExpr <- BinaryExpr (CompareOp BinaryExpr)?
-AstNode parseCompareExpr(ParserCtxt &ctxt) {
-  return parseBinaryExpr(ctxt);
-}
+AstNode parseCompareExpr(ParserCtxt &ctxt) { return parseBinaryExpr(ctxt); }
 
 // BinaryExpr <- PrimaryExpr BinOpRhsExpr
 AstNode parseBinaryExpr(ParserCtxt &ctxt) {
@@ -222,13 +226,23 @@ AstNode parseBinaryExpr(ParserCtxt &ctxt) {
 
 // PrefixExpr <- PrefixOp* PrimaryExpr
 AstNode parsePrefixExpr(ParserCtxt &ctxt) {
-  return parsePrimaryExpr(ctxt);
+  const auto mark = ctxt.getCursor();
+
+  std::vector<PrefixOpType> operators;
+  while (auto prefixOp = maybeToPrefixOpType(ctxt.getToken())) {
+    operators.push_back(prefixOp.value());
+    ctxt.skipToken();
+  }
+
+  if (auto expr = parsePrimaryExpr(ctxt)) {
+    return PrefixExprNode(operators, expr);
+  }
+
+  return resetToken(ctxt, mark);
 }
 
 // Expr <- BoolOrExpr
-AstNode parseExpr(ParserCtxt &ctxt) {
-  return parseBoolOrExpr(ctxt);
-}
+AstNode parseExpr(ParserCtxt &ctxt) { return parseBoolOrExpr(ctxt); }
 
 // VarDecl <- KEYWORD_var IDENTIFIER COLON TypeExpr (AssignOp Expr)? SEMICOLON
 AstNode parseVarDecl(ParserCtxt &ctxt) {

@@ -148,3 +148,21 @@ void DotGenerator::generate(const EmptyNode &astNode) {
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
 }
+
+void DotGenerator::generate(const PrefixExprNode &astNode) {
+  std::string operatorsStr;
+  for (auto op : astNode.operators) {
+    switch (op) {
+    case PrefixOpType::NOT:
+      operatorsStr += "!";
+      break;
+    }
+  }
+  const auto text = std::string("PrefixExpr\\n") + operatorsStr;
+  const auto nodeId = getNodeId(astNode);
+  output.append(nodeId + "[label=\"" + text + "\"]\n");
+
+  // expr
+  astNode.expr.dotgen(this);
+  output.append(nodeId + "->" + getNodeId(astNode.expr) + "\n");
+}

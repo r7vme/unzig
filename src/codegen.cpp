@@ -218,6 +218,7 @@ Value *Codegen::generate(const IfStNode &astNode) {
 }
 
 Value *Codegen::generate(const EmptyNode &astNode) { return cc->ir.GetInsertBlock(); }
+Value *Codegen::generate(const PrefixExprNode &astNode) { return cc->ir.GetInsertBlock(); }
 
 Value *Codegen::generate(const RootNode &astNode) {
   for (auto &decl : astNode.declarations) {

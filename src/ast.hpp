@@ -90,11 +90,11 @@ struct BinExprNode {
 };
 
 struct PrefixExprNode {
-  std::vector<PrefixOpType> operations;
+  std::vector<PrefixOpType> operators;
   AstNode expr;
 
-  PrefixExprNode(const std::vector<PrefixOpType> operations, const AstNode expr)
-      : operations(operations), expr(expr) {}
+  PrefixExprNode(const std::vector<PrefixOpType> operators, const AstNode expr)
+      : operators(operators), expr(expr) {}
   AST_NODE_MEMBERS(PrefixExprNode)
 };
 

@@ -1,7 +1,7 @@
 #include "ast.hpp"
 
 bool PrefixExprNode::isEqual(const PrefixExprNode &other) const {
-  return operations == other.operations && expr == other.expr;
+  return operators == other.operators && expr == other.expr;
 }
 
 bool BoolExprNode::isEqual(const BoolExprNode &other) const { return value == other.value; }
