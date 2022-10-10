@@ -23,6 +23,13 @@ using llvm::LLVMContext;
 using llvm::Type;
 using llvm::Value;
 
+Value *createCmpEQToZero(CompilerContext cc, Value *value);
+Value *createCmpNEToZero(CompilerContext cc, Value *value);
+Value *createLogicalNegation(CompilerContext cc, Value *value);
+Value *convertToIfCondition(CompilerContext cc, Value *value);
+Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt);
+Function *getCurrentFunc(CompilerContext cc);
+
 Function *getCurrentFunc(CompilerContext cc) { return cc->ir.GetInsertBlock()->getParent(); }
 
 Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
@@ -58,7 +65,18 @@ Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
   assert(false);
 }
 
-Value *convertToI1(CompilerContext cc, Value *value) {
+Value *createCmpEQToZero(CompilerContext cc, Value *value) {
+  auto type = value->getType();
+  if (type->isIntegerTy()) {
+    return cc->ir.CreateICmpEQ(value, ConstantInt::get(type, 0));
+  } else if (type->isFloatingPointTy()) {
+    return cc->ir.CreateFCmpOEQ(value, ConstantFP::get(type, 0.0));
+  }
+  assert(false);
+  return nullptr;
+}
+
+Value *createCmpNEToZero(CompilerContext cc, Value *value) {
   auto type = value->getType();
   if (type->isIntegerTy()) {
     return cc->ir.CreateICmpNE(value, ConstantInt::get(type, 0));
@@ -67,6 +85,14 @@ Value *convertToI1(CompilerContext cc, Value *value) {
   }
   assert(false);
   return nullptr;
+}
+
+Value *createLogicalNegation(CompilerContext cc, Value *value) {
+  return createCmpEQToZero(cc, value);
+}
+
+Value *convertToIfCondition(CompilerContext cc, Value *value) {
+  return createCmpNEToZero(cc, value);
 }
 
 void Codegen::fatalCodegenError(const std::string &msg, const size_t sourcePos) {
@@ -197,7 +223,7 @@ Value *Codegen::generate(const IfStNode &astNode) {
   auto thenBB = BasicBlock::Create(cc->llvmCtxt, "", getCurrentFunc(cc));
   auto elseBB = BasicBlock::Create(cc->llvmCtxt, "", getCurrentFunc(cc));
   auto mergeBB = BasicBlock::Create(cc->llvmCtxt, "", getCurrentFunc(cc));
-  cc->ir.CreateCondBr(convertToI1(cc, ifCondition), thenBB, elseBB);
+  cc->ir.CreateCondBr(convertToIfCondition(cc, ifCondition), thenBB, elseBB);
 
   cc->ir.SetInsertPoint(thenBB);
   auto thenBlock = astNode.thenBlock.codegen(this);
@@ -218,6 +244,7 @@ Value *Codegen::generate(const IfStNode &astNode) {
 }
 
 Value *Codegen::generate(const EmptyNode &astNode) { return cc->ir.GetInsertBlock(); }
+
 Value *Codegen::generate(const PrefixExprNode &astNode) { return cc->ir.GetInsertBlock(); }
 
 Value *Codegen::generate(const RootNode &astNode) {
