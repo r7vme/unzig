@@ -2,7 +2,7 @@
 set -e
 
 ./spec/validate.sh
-./codegen/generate.py
+#./codegen/generate.py
 
 export CC=$(which clang)
 export CXX=$(which clang++)

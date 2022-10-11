@@ -16,7 +16,7 @@ fn main() i32 {
     var z: f32 = 1.0;
     if (1) {
       z = 1.0;
-    } else if (z) {
+    } else if (!!z) {
       z = 2.0;
     } else {
       z = 3.0;

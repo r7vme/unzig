@@ -3,6 +3,7 @@
 #include "ast_node.hpp"
 #include "context.hpp"
 #include "types.hpp"
+#include <cassert>
 #include <cstdint>
 #include <llvm/ADT/APFloat.h>
 #include <llvm/IR/BasicBlock.h>
@@ -151,6 +152,7 @@ Value *Codegen::generate(const VarDeclNode &astNode) {
 }
 
 Value *Codegen::generate(const VarExprNode &astNode) {
+  assert(astNode.varSymbol);
   if (!astNode.varSymbol->allocaInst) {
     fatalCodegenError("unable to find a variable instruction", astNode.sourcePos);
   }
@@ -245,7 +247,21 @@ Value *Codegen::generate(const IfStNode &astNode) {
 
 Value *Codegen::generate(const EmptyNode &astNode) { return cc->ir.GetInsertBlock(); }
 
-Value *Codegen::generate(const PrefixExprNode &astNode) { return cc->ir.GetInsertBlock(); }
+Value *Codegen::generate(const PrefixExprNode &astNode) {
+  auto value = astNode.expr.codegen(this);
+  if (!value) {
+    fatalCodegenError("code generation for the prefix node failed", astNode.sourcePos);
+  }
+
+  for (auto op : astNode.operators) {
+    switch (op) {
+    case PrefixOpType::NOT:
+      value = createLogicalNegation(cc, value);
+    }
+  }
+
+  return value;
+}
 
 Value *Codegen::generate(const RootNode &astNode) {
   for (auto &decl : astNode.declarations) {
