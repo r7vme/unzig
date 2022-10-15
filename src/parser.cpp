@@ -14,8 +14,6 @@ AstNode parseStatement(ParserCtxt &ctxt);
 AstNode parseBlock(ParserCtxt &ctxt);
 AstNode parseOrExpr(ParserCtxt &ctxt);
 AstNode parseAndExpr(ParserCtxt &ctxt);
-AstNode parseAndExpr(ParserCtxt &ctxt);
-AstNode parseOrExpr(ParserCtxt &ctxt);
 AstNode parseCompareExpr(ParserCtxt &ctxt);
 AstNode parseBinaryExpr(ParserCtxt &ctxt);
 AstNode parsePrefixExpr(ParserCtxt &ctxt);
