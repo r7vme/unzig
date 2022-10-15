@@ -23,9 +23,9 @@ AssignSt <- IDENTIFIER AssignOp Expr SEMICOLON
 ReturnSt <- KEYWORD_return Expr? SEMICOLON
 
 # Expression Level
-Expr <- BoolOrExpr
-BoolOrExpr <- BoolAndExpr (KEYWORD_or BoolAndExpr)*
-BoolAndExpr <- CompareExpr (KEYWORD_and CompareExpr)*
+Expr <- OrExpr
+OrExpr <- AndExpr (KEYWORD_or AndExpr)*
+AndExpr <- CompareExpr (KEYWORD_and CompareExpr)*
 CompareExpr <- BinaryExpr (CompareOp BinaryExpr)?
 BinaryExpr <- PrefixExpr BinOpRhsExpr
 BinOpRhsExpr <- (BinOp PrefixExpr)*

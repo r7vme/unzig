@@ -16,6 +16,8 @@ ast_nodes = [
     'FloatExprNode',
     'IntegerExprNode',
     'BoolExprNode',
+    'OrExprNode',
+    'AndExprNode',
     'PrefixExprNode',
     'BinExprNode',
     'VarDeclNode',

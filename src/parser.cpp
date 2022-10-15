@@ -7,12 +7,15 @@
 
 #include "ast.hpp"
 #include "parser.hpp"
+#include "tokenizer.hpp"
 #include "types.hpp"
 
 AstNode parseStatement(ParserCtxt &ctxt);
 AstNode parseBlock(ParserCtxt &ctxt);
-AstNode parseBoolOrExpr(ParserCtxt &ctxt);
-AstNode parseBoolAndExpr(ParserCtxt &ctxt);
+AstNode parseOrExpr(ParserCtxt &ctxt);
+AstNode parseAndExpr(ParserCtxt &ctxt);
+AstNode parseAndExpr(ParserCtxt &ctxt);
+AstNode parseOrExpr(ParserCtxt &ctxt);
 AstNode parseCompareExpr(ParserCtxt &ctxt);
 AstNode parseBinaryExpr(ParserCtxt &ctxt);
 AstNode parsePrefixExpr(ParserCtxt &ctxt);
@@ -208,10 +211,60 @@ AstNode parseBinOpRhsExpr(ParserCtxt &ctxt, AstNode lhs) {
 }
 
 // BoolOrExpr <- BoolAndExpr (KEYWORD_or BoolAndExpr)*
-AstNode parseBoolOrExpr(ParserCtxt &ctxt) { return parseBoolAndExpr(ctxt); }
+AstNode parseOrExpr(ParserCtxt &ctxt) {
+  const auto mark = ctxt.getCursor();
+  size_t tokenPos = ctxt.getToken().position;
+
+  auto firstExpr = parseAndExpr(ctxt);
+  if (!firstExpr) {
+    return resetToken(ctxt, mark);
+  }
+
+  std::vector<AstNode> expressions;
+  expressions.push_back(firstExpr);
+  while (ctxt.getToken().id == TokenId::KwOr) {
+    ctxt.skipToken();
+    if (auto expr = parseAndExpr(ctxt)) {
+      expressions.push_back(expr);
+    } else {
+      return resetToken(ctxt, mark);
+    }
+  }
+
+  if (expressions.size() == 1) {
+    return firstExpr;
+  }
+
+  return OrExprNode(expressions, tokenPos);
+}
 
 // BoolAndExpr <- CompareExpr (KEYWORD_and CompareExpr)*
-AstNode parseBoolAndExpr(ParserCtxt &ctxt) { return parseCompareExpr(ctxt); }
+AstNode parseAndExpr(ParserCtxt &ctxt) {
+  const auto mark = ctxt.getCursor();
+  size_t tokenPos = ctxt.getToken().position;
+
+  auto firstExpr = parseCompareExpr(ctxt);
+  if (!firstExpr) {
+    return resetToken(ctxt, mark);
+  }
+
+  std::vector<AstNode> expressions;
+  expressions.push_back(firstExpr);
+  while (ctxt.getToken().id == TokenId::KwAnd) {
+    ctxt.skipToken();
+    if (auto expr = parseCompareExpr(ctxt)) {
+      expressions.push_back(expr);
+    } else {
+      return resetToken(ctxt, mark);
+    }
+  }
+
+  if (expressions.size() == 1) {
+    return firstExpr;
+  }
+
+  return AndExprNode(expressions, tokenPos);
+}
 
 // CompareExpr <- BinaryExpr (CompareOp BinaryExpr)?
 AstNode parseCompareExpr(ParserCtxt &ctxt) { return parseBinaryExpr(ctxt); }
@@ -240,8 +293,7 @@ AstNode parsePrefixExpr(ParserCtxt &ctxt) {
     return resetToken(ctxt, mark);
   }
 
-  if (operators.size() == 0)
-  {
+  if (operators.size() == 0) {
     return expr;
   }
 
@@ -249,7 +301,7 @@ AstNode parsePrefixExpr(ParserCtxt &ctxt) {
 }
 
 // Expr <- BoolOrExpr
-AstNode parseExpr(ParserCtxt &ctxt) { return parseBoolOrExpr(ctxt); }
+AstNode parseExpr(ParserCtxt &ctxt) { return parseOrExpr(ctxt); }
 
 // VarDecl <- KEYWORD_var IDENTIFIER COLON TypeExpr (AssignOp Expr)? SEMICOLON
 AstNode parseVarDecl(ParserCtxt &ctxt) {

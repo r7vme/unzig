@@ -11,6 +11,8 @@
 class FloatExprNode;
 class IntegerExprNode;
 class BoolExprNode;
+class OrExprNode;
+class AndExprNode;
 class PrefixExprNode;
 class BinExprNode;
 class VarDeclNode;
@@ -34,6 +36,8 @@ public:
   void analyze(FloatExprNode &astNode);
   void analyze(IntegerExprNode &astNode);
   void analyze(BoolExprNode &astNode);
+  void analyze(OrExprNode &astNode);
+  void analyze(AndExprNode &astNode);
   void analyze(PrefixExprNode &astNode);
   void analyze(BinExprNode &astNode);
   void analyze(VarDeclNode &astNode);

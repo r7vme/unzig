@@ -1,5 +1,5 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <memory>
 
 #include <catch2/catch_test_macros.hpp>
@@ -286,6 +286,44 @@ TEST_CASE("PrefixExpr multiple operators", "[parser]") {
   AstNode expectedAST = PrefixExprNode(
       {PrefixOpType::NOT, PrefixOpType::NOT},
       IntegerExprNode("2", 0),
+      0
+  );
+  // clang-format on
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
+  auto AST = parseExpr(ctxt);
+  REQUIRE(AST == expectedAST);
+}
+
+TEST_CASE("AndExpr", "[parser]") {
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::IntegerLiteral, "1", 0},
+    Token{TokenId::KwAnd, "", 0},
+    Token{TokenId::IntegerLiteral, "1", 0},
+    Token{TokenId::Eof, "", 0}
+  };
+
+  AstNode expectedAST = AndExprNode(
+      {IntegerExprNode("1", 0), IntegerExprNode("1", 0)},
+      0
+  );
+  // clang-format on
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
+  auto AST = parseExpr(ctxt);
+  REQUIRE(AST == expectedAST);
+}
+
+TEST_CASE("OrExpr", "[parser]") {
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::IntegerLiteral, "1", 0},
+    Token{TokenId::KwOr, "", 0},
+    Token{TokenId::IntegerLiteral, "1", 0},
+    Token{TokenId::Eof, "", 0}
+  };
+
+  AstNode expectedAST = OrExprNode(
+      {IntegerExprNode("1", 0), IntegerExprNode("1", 0)},
       0
   );
   // clang-format on

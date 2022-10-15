@@ -1,0 +1,7 @@
+fn main() i32 {
+    var ret: i32 = 1;
+    if (!0) {
+      ret = 0;
+    }
+    return ret;
+}

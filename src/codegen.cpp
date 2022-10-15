@@ -246,6 +246,8 @@ Value *Codegen::generate(const IfStNode &astNode) {
 }
 
 Value *Codegen::generate(const EmptyNode &astNode) { return cc->ir.GetInsertBlock(); }
+Value *Codegen::generate(const OrExprNode &astNode) { return cc->ir.GetInsertBlock(); }
+Value *Codegen::generate(const AndExprNode &astNode) { return cc->ir.GetInsertBlock(); }
 
 Value *Codegen::generate(const PrefixExprNode &astNode) {
   auto value = astNode.expr.codegen(this);

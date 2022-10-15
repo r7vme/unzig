@@ -42,3 +42,9 @@ bool VarExprNode::isEqual(const VarExprNode &other) const { return name == other
 bool FnCallExprNode::isEqual(const FnCallExprNode &other) const { return callee == other.callee; }
 
 bool EmptyNode::isEqual(const EmptyNode &other) const { return true; }
+
+bool OrExprNode::isEqual(const OrExprNode &other) const { return expressions == other.expressions; }
+
+bool AndExprNode::isEqual(const AndExprNode &other) const {
+  return expressions == other.expressions;
+}

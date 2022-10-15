@@ -6,6 +6,8 @@
 class FloatExprNode;
 class IntegerExprNode;
 class BoolExprNode;
+class OrExprNode;
+class AndExprNode;
 class PrefixExprNode;
 class BinExprNode;
 class VarDeclNode;
@@ -28,6 +30,8 @@ public:
   void generate(const FloatExprNode &astNode);
   void generate(const IntegerExprNode &astNode);
   void generate(const BoolExprNode &astNode);
+  void generate(const OrExprNode &astNode);
+  void generate(const AndExprNode &astNode);
   void generate(const PrefixExprNode &astNode);
   void generate(const BinExprNode &astNode);
   void generate(const VarDeclNode &astNode);

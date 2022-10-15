@@ -2,6 +2,9 @@ zig-cache
 build
 .cache
 .gdb_history
+*.dot
+*.ll
+*.png
 
 # Prerequisites
 *.d

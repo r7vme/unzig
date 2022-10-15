@@ -47,7 +47,9 @@ if(BUILD_TESTING)
   catch_discover_tests(unit_tests)
 
   # integration tests
-  unzig_add_test(test_unzig_main test/test_unzig_main.uz)
+  #  unzig_add_test(test_unzig_main test/test_unzig_main.uz)
+  #unzig_add_test(test_unzig_prefix test/test_unzig_prefix.uz)
+  unzig_add_test(test_unzig_bool_ops test/test_unzig_bool_ops.uz)
 endif()
 
 install(TARGETS unzig)

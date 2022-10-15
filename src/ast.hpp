@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -89,11 +90,28 @@ struct BinExprNode {
   AST_NODE_MEMBERS(BinExprNode)
 };
 
+struct OrExprNode {
+  std::vector<AstNode> expressions;
+
+  OrExprNode(const std::vector<AstNode> expressions, const size_t sourcePos)
+      : expressions(expressions), sourcePos(sourcePos) {}
+  AST_NODE_MEMBERS(OrExprNode)
+};
+
+struct AndExprNode {
+  std::vector<AstNode> expressions;
+
+  AndExprNode(const std::vector<AstNode> expressions, const size_t sourcePos)
+      : expressions(expressions), sourcePos(sourcePos) {}
+  AST_NODE_MEMBERS(AndExprNode)
+};
+
 struct PrefixExprNode {
   std::vector<PrefixOpType> operators;
   AstNode expr;
 
-  PrefixExprNode(const std::vector<PrefixOpType> operators, const AstNode expr, const size_t sourcePos)
+  PrefixExprNode(const std::vector<PrefixOpType> operators, const AstNode expr,
+                 const size_t sourcePos)
       : operators(operators), expr(expr), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(PrefixExprNode)
 };

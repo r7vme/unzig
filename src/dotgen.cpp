@@ -149,6 +149,28 @@ void DotGenerator::generate(const EmptyNode &astNode) {
   output.append(nodeId + "[label=\"" + text + "\"]\n");
 }
 
+void DotGenerator::generate(const OrExprNode &astNode) {
+  const auto text = std::string("OrExpr\\n");
+  const auto nodeId = getNodeId(astNode);
+  output.append(nodeId + "[label=\"" + text + "\"]\n");
+
+  for (auto &d : astNode.expressions) {
+    d.dotgen(this);
+    output.append(nodeId + "->" + getNodeId(d) + "\n");
+  }
+}
+
+void DotGenerator::generate(const AndExprNode &astNode) {
+  const auto text = std::string("AndExpr\\n");
+  const auto nodeId = getNodeId(astNode);
+  output.append(nodeId + "[label=\"" + text + "\"]\n");
+
+  for (auto &d : astNode.expressions) {
+    d.dotgen(this);
+    output.append(nodeId + "->" + getNodeId(d) + "\n");
+  }
+}
+
 void DotGenerator::generate(const PrefixExprNode &astNode) {
   std::string operatorsStr;
   for (auto op : astNode.operators) {
