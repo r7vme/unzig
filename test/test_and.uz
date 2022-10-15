@@ -1,6 +1,6 @@
 fn main() i32 {
     var ret: i32 = 1;
-    if (1) {
+    if (1 and 1) {
       ret = 0;
     }
     return ret;

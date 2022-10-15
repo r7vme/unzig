@@ -245,9 +245,52 @@ Value *Codegen::generate(const IfStNode &astNode) {
   return cc->ir.GetInsertBlock();
 }
 
-Value *Codegen::generate(const EmptyNode &astNode) { return cc->ir.GetInsertBlock(); }
-Value *Codegen::generate(const OrExprNode &astNode) { return cc->ir.GetInsertBlock(); }
-Value *Codegen::generate(const AndExprNode &astNode) { return cc->ir.GetInsertBlock(); }
+Value *Codegen::generate(const OrExprNode &astNode) {
+  assert(astNode.expressions.size() > 1);
+
+  Value *lhs = nullptr;
+  for (auto &node : astNode.expressions) {
+    auto value = node.codegen(this);
+    if (!value) {
+      fatalCodegenError("code generation for the OrExpr node failed", astNode.sourcePos);
+    }
+
+    if (!lhs) {
+      lhs = value;
+      continue;
+    }
+
+    lhs = cc->ir.CreateOr(lhs, value);
+    if (!lhs) {
+      fatalCodegenError("code generation for the OrExpr node failed", astNode.sourcePos);
+    }
+  }
+
+  return lhs;
+}
+Value *Codegen::generate(const AndExprNode &astNode) {
+  assert(astNode.expressions.size() > 1);
+
+  Value *lhs = nullptr;
+  for (auto &node : astNode.expressions) {
+    auto value = node.codegen(this);
+    if (!value) {
+      fatalCodegenError("code generation for the AndExpr node failed", astNode.sourcePos);
+    }
+
+    if (!lhs) {
+      lhs = value;
+      continue;
+    }
+
+    lhs = cc->ir.CreateAnd(lhs, value);
+    if (!lhs) {
+      fatalCodegenError("code generation for the AndExpr node failed", astNode.sourcePos);
+    }
+  }
+
+  return lhs;
+}
 
 Value *Codegen::generate(const PrefixExprNode &astNode) {
   auto value = astNode.expr.codegen(this);
@@ -273,3 +316,5 @@ Value *Codegen::generate(const RootNode &astNode) {
   }
   return cc->llvmModule.getFunction("main");
 }
+
+Value *Codegen::generate(const EmptyNode &astNode) { return cc->ir.GetInsertBlock(); }
