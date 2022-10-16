@@ -28,7 +28,7 @@ void SemanticAnalyzer::analyze(VarDeclNode &astNode) {
   if (auto type = cc->typeTable.findType(astNode.typeName)) {
     astNode.type = type.value();
   } else {
-    fatalSemaError(std::string("unknown return type ") + astNode.typeName, astNode.sourcePos);
+    fatalSemaError(std::string("unknown type ") + astNode.typeName, astNode.sourcePos);
   }
 
   astNode.symbol =
@@ -36,6 +36,21 @@ void SemanticAnalyzer::analyze(VarDeclNode &astNode) {
   astNode.scope->insertSymbol(astNode.symbol);
   astNode.initExpr.setScope(astNode.scope);
   astNode.initExpr.sema(this);
+}
+
+void SemanticAnalyzer::analyze(FnParamNode &astNode) {
+  if (astNode.scope->lookupSymbol(astNode.name)) {
+    fatalSemaError("redifinition of the symbol", astNode.sourcePos);
+  }
+
+  if (auto type = cc->typeTable.findType(astNode.typeName)) {
+    astNode.type = type.value();
+  } else {
+    fatalSemaError(std::string("unknown type ") + astNode.typeName, astNode.sourcePos);
+  }
+
+  auto symbol = createSymbol(SymbolType::Var, astNode.name, astNode.type, astNode.scope->isGlobal);
+  astNode.scope->insertSymbol(symbol);
 }
 
 void SemanticAnalyzer::analyze(FnDefNode &astNode) {
@@ -46,7 +61,7 @@ void SemanticAnalyzer::analyze(FnDefNode &astNode) {
   if (auto type = cc->typeTable.findType(astNode.returnTypeName)) {
     astNode.returnType = type.value();
   } else {
-    fatalSemaError(std::string("unknown return type ") + astNode.returnTypeName, astNode.sourcePos);
+    fatalSemaError(std::string("unknown type ") + astNode.returnTypeName, astNode.sourcePos);
   }
 
   astNode.scope->insertSymbol(
@@ -54,6 +69,12 @@ void SemanticAnalyzer::analyze(FnDefNode &astNode) {
 
   // new scope
   auto blockScope = createChildScope(astNode.scope);
+
+  for (auto &p : astNode.parameters) {
+    p.setScope(blockScope);
+    p.sema(this);
+  }
+
   astNode.body.setScope(blockScope);
   astNode.body.sema(this);
 }
@@ -135,8 +156,6 @@ void SemanticAnalyzer::analyze(AndExprNode &astNode) {
     expr.sema(this);
   }
 }
-
-void SemanticAnalyzer::analyze(FnParamNode &astNode) {}
 
 void SemanticAnalyzer::analyze(FloatExprNode &astNode) {}
 void SemanticAnalyzer::analyze(IntegerExprNode &astNode) {}

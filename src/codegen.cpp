@@ -5,6 +5,7 @@
 #include "types.hpp"
 #include <cassert>
 #include <cstdint>
+#include <llvm-14/llvm/IR/Argument.h>
 #include <llvm/ADT/APFloat.h>
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Constants.h>
@@ -15,6 +16,7 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Value.h>
 
+using llvm::Argument;
 using llvm::BasicBlock;
 using llvm::ConstantFP;
 using llvm::ConstantInt;
@@ -165,26 +167,53 @@ Value *Codegen::generate(const FnCallExprNode &astNode) {
   if (!callee) {
     fatalCodegenError("function not declared", astNode.sourcePos);
   }
-  // TODO: add arguments
-  auto call = cc->ir.CreateCall(callee);
+
+  std::vector<Value *> arguments;
+  for (auto &p : astNode.arguments) {
+    if (auto val = p.codegen(this)) {
+      arguments.push_back(val);
+    } else {
+      fatalCodegenError("unable to generate code a function call", astNode.sourcePos);
+    }
+  }
+
+  auto call = cc->ir.CreateCall(callee, arguments);
   if (!call) {
     fatalCodegenError("unable to generate a function call", astNode.sourcePos);
   }
   return call;
 }
 
+Value *Codegen::generate(const FnParamNode &astNode) {
+  // hacky hack to pass Type* to caller via Value*
+  return new Argument(toLLVMType(astNode.type, cc->llvmCtxt));
+}
+
 Value *Codegen::generate(const FnDefNode &astNode) {
-  auto funcName = astNode.name;
-  auto funcReturnType = toLLVMType(astNode.returnType, cc->llvmCtxt);
-  auto funcType = FunctionType::get(funcReturnType, false);
-  auto func = Function::Create(funcType, Function::ExternalLinkage, funcName, cc->llvmModule);
-  BasicBlock *bb = BasicBlock::Create(cc->llvmCtxt, "entry", func);
+  auto fnName = astNode.name;
+  auto fnReturnType = toLLVMType(astNode.returnType, cc->llvmCtxt);
+
+  std::vector<Type *> fnParamTypes;
+  for (auto &p : astNode.parameters) {
+    if (auto val = p.codegen(this)) {
+      fnParamTypes.push_back(val->getType());
+
+      // After extracting type we don't need a container
+      delete reinterpret_cast<Argument *>(val);
+    } else {
+      fatalCodegenError("unable to generate function parameters", astNode.sourcePos);
+    }
+  }
+
+  auto fnType = FunctionType::get(fnReturnType, fnParamTypes, false);
+  auto fn = Function::Create(fnType, Function::ExternalLinkage, fnName, cc->llvmModule);
+  BasicBlock *bb = BasicBlock::Create(cc->llvmCtxt, "entry", fn);
   cc->ir.SetInsertPoint(bb);
 
   if (!astNode.body.codegen(this)) {
     fatalCodegenError("unable to generate a function body", astNode.sourcePos);
   }
-  return func;
+  return fn;
 }
 
 Value *Codegen::generate(const BlockNode &astNode) {
@@ -318,5 +347,4 @@ Value *Codegen::generate(const RootNode &astNode) {
   return cc->llvmModule.getFunction("main");
 }
 
-Value *Codegen::generate(const FnParamNode &astNode) { return cc->ir.GetInsertBlock(); }
 Value *Codegen::generate(const EmptyNode &astNode) { return cc->ir.GetInsertBlock(); }
