@@ -68,10 +68,21 @@ void DotGenerator::generate(const VarDeclNode &astNode) {
   output.append(nodeId + "->" + getNodeId(astNode.initExpr) + "\n");
 }
 
+void DotGenerator::generate(const FnParamNode &astNode) {
+  const auto text = std::string("FnParam\\n") + astNode.name;
+  const auto nodeId = getNodeId(astNode);
+  output.append(nodeId + "[label=\"" + text + "\"]\n");
+}
+
 void DotGenerator::generate(const FnDefNode &astNode) {
   const auto text = std::string("FnDef\\n") + astNode.name;
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
+
+  for (auto &d : astNode.parameters) {
+    d.dotgen(this);
+    output.append(nodeId + "->" + getNodeId(d) + "\n");
+  }
 
   astNode.body.dotgen(this);
   output.append(nodeId + "->" + getNodeId(astNode.body) + "\n");
@@ -141,6 +152,11 @@ void DotGenerator::generate(const FnCallExprNode &astNode) {
   const auto text = std::string("FnCallExpr\\n") + astNode.callee;
   const auto nodeId = getNodeId(astNode);
   output.append(nodeId + "[label=\"" + text + "\"]\n");
+
+  for (auto &d : astNode.arguments) {
+    d.dotgen(this);
+    output.append(nodeId + "->" + getNodeId(d) + "\n");
+  }
 }
 
 void DotGenerator::generate(const EmptyNode &astNode) {
@@ -187,10 +203,4 @@ void DotGenerator::generate(const PrefixExprNode &astNode) {
   // expr
   astNode.expr.dotgen(this);
   output.append(nodeId + "->" + getNodeId(astNode.expr) + "\n");
-}
-
-void DotGenerator::generate(const FnParamNode &astNode) {
-  const auto text = std::string("FnParam\\n") + astNode.name;
-  const auto nodeId = getNodeId(astNode);
-  output.append(nodeId + "[label=\"" + text + "\"]\n");
 }
