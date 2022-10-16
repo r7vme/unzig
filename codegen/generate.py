@@ -22,6 +22,7 @@ ast_nodes = [
     'BinExprNode',
     'VarDeclNode',
     'FnDefNode',
+    'FnParamNode',
     'BlockNode',
     'RootNode',
     'AssignStNode',

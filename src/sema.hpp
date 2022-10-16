@@ -17,6 +17,7 @@ class PrefixExprNode;
 class BinExprNode;
 class VarDeclNode;
 class FnDefNode;
+class FnParamNode;
 class BlockNode;
 class RootNode;
 class AssignStNode;
@@ -42,6 +43,7 @@ public:
   void analyze(BinExprNode &astNode);
   void analyze(VarDeclNode &astNode);
   void analyze(FnDefNode &astNode);
+  void analyze(FnParamNode &astNode);
   void analyze(BlockNode &astNode);
   void analyze(RootNode &astNode);
   void analyze(AssignStNode &astNode);

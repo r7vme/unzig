@@ -149,7 +149,7 @@ TEST_CASE("VarDecl can be parsed", "[parser]") {
   REQUIRE(AST == expectedAST);
 }
 
-TEST_CASE("FnDef can be parsed", "[parser]") {
+TEST_CASE("FnDef", "[parser]") {
   // fn main() void {};
   // clang-format off
   Tokens inputTokens = {
@@ -165,7 +165,34 @@ TEST_CASE("FnDef can be parsed", "[parser]") {
   // clang-format on
   //
   std::vector<AstNode> declarations;
-  declarations.push_back(FnDefNode("main", "void", BlockNode(std::vector<AstNode>(), 0), 0));
+  declarations.push_back(FnDefNode("main", "void", {}, BlockNode(std::vector<AstNode>(), 0), 0));
+  auto expectedAST = RootNode(declarations, 0);
+
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
+  auto AST = parseRoot(ctxt);
+  REQUIRE(AST == expectedAST);
+}
+
+TEST_CASE("FnDef with parameters", "[parser]") {
+  // fn main(a: i32) void {};
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::KwFn, "", 0},
+    Token{TokenId::Identifier, "main", 0},
+    Token{TokenId::LParen, "", 0},
+    Token{TokenId::Identifier, "a", 0},
+    Token{TokenId::Colon, "", 0},
+    Token{TokenId::Identifier, "i32", 0},
+    Token{TokenId::RParen, "", 0},
+    Token{TokenId::Identifier, "void", 0},
+    Token{TokenId::LBrace, "", 0},
+    Token{TokenId::RBrace, "", 0},
+    Token{TokenId::Eof, "", 0}
+  };
+  // clang-format on
+  //
+  std::vector<AstNode> declarations;
+  declarations.push_back(FnDefNode("main", "void", {FnParamNode("a", "i32", 0)}, BlockNode(std::vector<AstNode>(), 0), 0));
   auto expectedAST = RootNode(declarations, 0);
 
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
@@ -244,9 +271,29 @@ TEST_CASE("FnCallExpr can be parsed", "[parser]") {
 
   AstNode expectedAST = BinExprNode(
     BinOpType::ADD,
-    FnCallExprNode("f", 0),
+    FnCallExprNode("f", {}, 0),
     IntegerExprNode("2", 0), 0
     );
+  // clang-format on
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
+  auto AST = parseExpr(ctxt);
+  REQUIRE(AST == expectedAST);
+}
+
+TEST_CASE("FnCallExpr with arguments", "[parser]") {
+  // f(1, 2)
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::Identifier, "f", 0},
+    Token{TokenId::LParen, "", 0},
+    Token{TokenId::IntegerLiteral, "1", 0},
+    Token{TokenId::Comma, "", 0},
+    Token{TokenId::IntegerLiteral, "2", 0},
+    Token{TokenId::RParen, "", 0},
+    Token{TokenId::Eof, "", 0}
+  };
+
+  AstNode expectedAST = FnCallExprNode("f", {IntegerExprNode("1", 0), IntegerExprNode("2", 0)}, 0);
   // clang-format on
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
   auto AST = parseExpr(ctxt);

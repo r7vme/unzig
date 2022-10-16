@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "ast_node.hpp"
 #include "codegen.hpp"
@@ -39,14 +40,6 @@ using MayBeAstNode = std::optional<AstNode>;
 struct EmptyNode {
   bool isEmptyNode() const { return true; };
   COMMON_MEMBERS(EmptyNode);
-};
-
-struct FnCallExprNode {
-  const std::string callee;
-
-  FnCallExprNode(const std::string &callee, const size_t sourcePos)
-      : callee(callee), sourcePos(sourcePos) {}
-  AST_NODE_MEMBERS(FnCallExprNode);
 };
 
 struct VarExprNode {
@@ -153,17 +146,40 @@ struct BlockNode {
   AST_NODE_MEMBERS(BlockNode)
 };
 
+struct FnCallExprNode {
+  const std::string callee;
+  std::vector<AstNode> arguments;
+
+  FnCallExprNode(const std::string &callee, const std::vector<AstNode> arguments,
+                 const size_t sourcePos)
+      : callee(callee), arguments(arguments), sourcePos(sourcePos) {}
+  AST_NODE_MEMBERS(FnCallExprNode);
+};
+
 struct FnDefNode {
   const std::string name;
   const std::string returnTypeName;
+  std::vector<AstNode> parameters;
   AstNode body;
 
   UzType returnType;
 
-  FnDefNode(const std::string &name, const std::string &returnTypeName, const AstNode body,
-            const size_t sourcePos)
-      : name(name), returnTypeName(returnTypeName), body(body), sourcePos(sourcePos) {}
+  FnDefNode(const std::string &name, const std::string &returnTypeName,
+            const std::vector<AstNode> parameters, const AstNode body, const size_t sourcePos)
+      : name(name), returnTypeName(returnTypeName), parameters(parameters), body(body),
+        sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(FnDefNode)
+};
+
+struct FnParamNode {
+  const std::string name;
+  const std::string typeName;
+
+  UzType type;
+
+  FnParamNode(const std::string &name, const std::string &typeName, const size_t sourcePos)
+      : name(name), typeName(typeName), sourcePos(sourcePos) {}
+  AST_NODE_MEMBERS(FnParamNode);
 };
 
 struct VarDeclNode {

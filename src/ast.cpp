@@ -22,6 +22,10 @@ bool FnDefNode::isEqual(const FnDefNode &other) const {
   return name == other.name && returnTypeName == other.returnTypeName && body == other.body;
 }
 
+bool FnParamNode::isEqual(const FnParamNode &other) const {
+  return name == other.name && typeName == other.typeName;
+}
+
 bool BlockNode::isEqual(const BlockNode &other) const { return statements == other.statements; }
 
 bool RootNode::isEqual(const RootNode &other) const { return declarations == other.declarations; }

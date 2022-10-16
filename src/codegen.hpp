@@ -18,6 +18,7 @@ class PrefixExprNode;
 class BinExprNode;
 class VarDeclNode;
 class FnDefNode;
+class FnParamNode;
 class BlockNode;
 class RootNode;
 class AssignStNode;
@@ -43,6 +44,7 @@ public:
   llvm::Value *generate(const BinExprNode &astNode);
   llvm::Value *generate(const VarDeclNode &astNode);
   llvm::Value *generate(const FnDefNode &astNode);
+  llvm::Value *generate(const FnParamNode &astNode);
   llvm::Value *generate(const BlockNode &astNode);
   llvm::Value *generate(const RootNode &astNode);
   llvm::Value *generate(const AssignStNode &astNode);

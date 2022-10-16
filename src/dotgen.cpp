@@ -188,3 +188,9 @@ void DotGenerator::generate(const PrefixExprNode &astNode) {
   astNode.expr.dotgen(this);
   output.append(nodeId + "->" + getNodeId(astNode.expr) + "\n");
 }
+
+void DotGenerator::generate(const FnParamNode &astNode) {
+  const auto text = std::string("FnParam\\n") + astNode.name;
+  const auto nodeId = getNodeId(astNode);
+  output.append(nodeId + "[label=\"" + text + "\"]\n");
+}

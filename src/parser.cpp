@@ -24,6 +24,9 @@ AstNode parseBoolExpr(ParserCtxt &ctxt);
 AstNode parseNumberExpr(ParserCtxt &ctxt);
 AstNode parseExpr(ParserCtxt &ctxt);
 AstNode parseVarDecl(ParserCtxt &ctxt);
+AstNode parseFnDef(ParserCtxt &ctxt);
+AstNode parseFnCallExpr(ParserCtxt &ctxt);
+AstNode parseFnParam(ParserCtxt &ctxt);
 std::optional<BinOpType> maybeToBinOpType(const Token &token);
 std::optional<PrefixOpType> maybeToPrefixOpType(const Token &token);
 
@@ -144,7 +147,7 @@ AstNode parseVarExpr(ParserCtxt &ctxt) {
   return VarExprNode(token.value, token.position);
 }
 
-// FnCallExpr <- IDENTIFIER LPAREN RPAREN
+// FnCallExpr <- IDENTIFIER LPAREN ExprList RPAREN
 AstNode parseFnCallExpr(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
@@ -158,12 +161,29 @@ AstNode parseFnCallExpr(ParserCtxt &ctxt) {
     return resetToken(ctxt, mark);
   }
 
+  // ExprList
+  std::vector<AstNode> arguments;
+  {
+    if (auto firstArg = parseExpr(ctxt)) {
+      arguments.push_back(firstArg);
+      while (ctxt.getToken().id == TokenId::Comma) {
+        const auto commaMark = ctxt.getCursor();
+        ctxt.skipToken();
+        if (auto param = parseExpr(ctxt)) {
+          arguments.push_back(param);
+        } else {
+          fatalSyntaxError(ctxt, commaMark, "unable to parse function call");
+        }
+      }
+    }
+  }
+
   auto rParenToken = ctxt.getTokenAndAdvance();
   if (rParenToken.id != TokenId::RParen) {
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), "expected )");
   }
 
-  return FnCallExprNode(fnNameToken.value, fnNameToken.position);
+  return FnCallExprNode(fnNameToken.value, arguments, fnNameToken.position);
 }
 
 // PrimaryExpr <- GroupedExpr
@@ -456,7 +476,25 @@ AstNode parseBlock(ParserCtxt &ctxt) {
   return BlockNode(statements, lBraceToken.position);
 }
 
-// FnDef <- KEYWORD_fn IDENTIFIER LPAREN RPAREN TypeExpr Block
+// FnParam <- IDENTIFIER COLON TypeExpr
+AstNode parseFnParam(ParserCtxt &ctxt) {
+  const auto mark = ctxt.getCursor();
+
+  auto nameToken = ctxt.getTokenAndAdvance();
+  if (nameToken.id != TokenId::Identifier)
+    return resetToken(ctxt, mark);
+
+  if (ctxt.getTokenAndAdvance().id != TokenId::Colon)
+    return resetToken(ctxt, mark);
+
+  auto typeToken = ctxt.getTokenAndAdvance();
+  if (typeToken.id != TokenId::Identifier)
+    return resetToken(ctxt, mark);
+
+  return FnParamNode(nameToken.value, typeToken.value, nameToken.position);
+}
+
+// FnDef <- KEYWORD_fn IDENTIFIER LPAREN FnParamList RPAREN TypeExpr Block
 AstNode parseFnDef(ParserCtxt &ctxt) {
   const std::string errorMsg = "unable to parse function definition";
   const auto mark = ctxt.getCursor();
@@ -473,6 +511,22 @@ AstNode parseFnDef(ParserCtxt &ctxt) {
   if (lParenToken.id != TokenId::LParen)
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), errorMsg);
 
+  std::vector<AstNode> parameters;
+  {
+    if (auto firstParam = parseFnParam(ctxt)) {
+      parameters.push_back(firstParam);
+      while (ctxt.getToken().id == TokenId::Comma) {
+        const auto commaMark = ctxt.getCursor();
+        ctxt.skipToken();
+        if (auto param = parseFnParam(ctxt)) {
+          parameters.push_back(param);
+        } else {
+          fatalSyntaxError(ctxt, commaMark, errorMsg);
+        }
+      }
+    }
+  }
+
   auto rParenToken = ctxt.getTokenAndAdvance();
   if (rParenToken.id != TokenId::RParen)
     fatalSyntaxError(ctxt, ctxt.getPrevCursor(), errorMsg);
@@ -485,7 +539,8 @@ AstNode parseFnDef(ParserCtxt &ctxt) {
   if (!fnBody)
     fatalSyntaxError(ctxt, ctxt.getCursor(), errorMsg);
 
-  return FnDefNode(fnIdentifierToken.value, typeExprToken.value, fnBody, kwFnToken.position);
+  return FnDefNode(fnIdentifierToken.value, typeExprToken.value, parameters, fnBody,
+                   kwFnToken.position);
 }
 
 // TopLevelDecl <- FnDef

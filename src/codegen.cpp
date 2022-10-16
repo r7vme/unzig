@@ -165,6 +165,7 @@ Value *Codegen::generate(const FnCallExprNode &astNode) {
   if (!callee) {
     fatalCodegenError("function not declared", astNode.sourcePos);
   }
+  // TODO: add arguments
   auto call = cc->ir.CreateCall(callee);
   if (!call) {
     fatalCodegenError("unable to generate a function call", astNode.sourcePos);
@@ -317,4 +318,5 @@ Value *Codegen::generate(const RootNode &astNode) {
   return cc->llvmModule.getFunction("main");
 }
 
+Value *Codegen::generate(const FnParamNode &astNode) { return cc->ir.GetInsertBlock(); }
 Value *Codegen::generate(const EmptyNode &astNode) { return cc->ir.GetInsertBlock(); }

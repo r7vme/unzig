@@ -3,6 +3,5 @@ fn foo(a: i32) i32 {
 }
 
 fn main() i32 {
-    var ret: i32 = foo(0);
-    return ret;
+    return 0;
 }

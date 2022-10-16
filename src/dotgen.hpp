@@ -12,6 +12,7 @@ class PrefixExprNode;
 class BinExprNode;
 class VarDeclNode;
 class FnDefNode;
+class FnParamNode;
 class BlockNode;
 class RootNode;
 class AssignStNode;
@@ -36,6 +37,7 @@ public:
   void generate(const BinExprNode &astNode);
   void generate(const VarDeclNode &astNode);
   void generate(const FnDefNode &astNode);
+  void generate(const FnParamNode &astNode);
   void generate(const BlockNode &astNode);
   void generate(const RootNode &astNode);
   void generate(const AssignStNode &astNode);
