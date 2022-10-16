@@ -7,7 +7,7 @@ TopLevelDeclarations <- TopLevelDecl TopLevelDeclarations*
 TopLevelDecl <- FnDef
              / VarDecl
 
-FnDef <- KEYWORD_fn IDENTIFIER LPAREN RPAREN TypeExpr Block
+FnDef <- KEYWORD_fn IDENTIFIER LPAREN FnParamList RPAREN TypeExpr Block
 
 VarDecl <- KEYWORD_var IDENTIFIER COLON TypeExpr (AssignOp Expr)? SEMICOLON
 
@@ -45,6 +45,10 @@ BoolExpr <- KEYWORD_true
          / KEYWORD_false
 TypeExpr <- IDENTIFIER
 
+# Function Level
+FnParamList <- (FnParam COMMA)* FnParam?
+FnParam <- IDENTIFIER COLON TypeExpr
+
 # Operators
 AssignOp <- EQUAL
 
@@ -77,6 +81,7 @@ IDENTIFIER
 
 ASTERISK             <- '*'                skip
 COLON                <- ':'                skip
+COMMA                <- ','                skip
 EQUAL                <- '='      ![=]      skip
 EQUALEQUAL           <- '=='               skip
 LBRACE               <- '{'                skip
