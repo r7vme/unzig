@@ -1,0 +1,8 @@
+fn foo(a: i32) i32 {
+    return a;
+}
+
+fn main() i32 {
+    var ret: i32 = foo(0);
+    return ret;
+}

@@ -14,6 +14,7 @@
 // single char tokens
 #define ASTERISK '*'
 #define COLON ':'
+#define COMMA ','
 #define EQUAL '='
 #define LBRACE '{'
 #define LPAREN '('
@@ -49,6 +50,7 @@
 #define SPECIAL_CHARS \
   ASTERISK: \
   case COLON: \
+  case COMMA: \
   case EQUAL: \
   case LBRACE: \
   case LPAREN: \
@@ -179,6 +181,7 @@ static std::map<std::string, TokenId> twoCharsTokenIds{
 static std::map<char, TokenId> singleCharTokenIds{
     {ASTERISK, TokenId::Asterisk},
     {COLON, TokenId::Colon},
+    {COMMA, TokenId::Comma},
     {EQUAL, TokenId::Equal},
     {LBRACE, TokenId::LBrace},
     {LPAREN, TokenId::LParen},
@@ -203,6 +206,7 @@ static std::string getTokenIdName(TokenId id) {
   case TokenId::Identifier: return "Identifier";
   case TokenId::Asterisk: return "Asterisk";
   case TokenId::Colon: return "Colon";
+  case TokenId::Comma: return "Comma";
   case TokenId::Equal: return "Equal";
   case TokenId::LBrace: return "LBrace";
   case TokenId::LParen: return "LParen";

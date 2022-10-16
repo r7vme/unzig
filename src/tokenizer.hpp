@@ -12,6 +12,7 @@ enum class TokenId {
   Identifier,
   Asterisk,
   Colon,
+  Comma,
   Equal,
   LBrace,
   LParen,

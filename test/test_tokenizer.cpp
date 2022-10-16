@@ -182,3 +182,20 @@ TEST_CASE("logical operators", "[tokenizer]") {
   auto actualTokens = tokenize(s);
   REQUIRE(actualTokens == expectedTokens);
 }
+
+TEST_CASE("function arguments", "[tokenizer]") {
+  std::string raw = R"(
+1, 1, 1
+)";
+  auto s = std::make_shared<SourceObject>(raw);
+  Tokens expectedTokens = {
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::Comma, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::Comma, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::Eof, "", 0},
+  };
+  auto actualTokens = tokenize(s);
+  REQUIRE(actualTokens == expectedTokens);
+}
