@@ -37,7 +37,7 @@ PrimaryExpr <- GroupedExpr
             / NumberExpr
 
 GroupedExpr <- LPAREN Expr RPAREN
-FnCallExpr <- IDENTIFIER LPAREN RPAREN
+FnCallExpr <- IDENTIFIER LPAREN ExprList RPAREN
 VarExpr <- IDENTIFIER
 NumberExpr <- FLOAT
            / INTEGER
@@ -45,7 +45,9 @@ BoolExpr <- KEYWORD_true
          / KEYWORD_false
 TypeExpr <- IDENTIFIER
 
-# Function Level
+ExprList <- (Expr COMMA)* Expr?
+
+# Function specific
 FnParamList <- (FnParam COMMA)* FnParam?
 FnParam <- IDENTIFIER COLON TypeExpr
 
