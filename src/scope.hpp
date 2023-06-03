@@ -1,12 +1,10 @@
 #pragma once
 
-#include <llvm/IR/Instructions.h>
+#include "symbol.hpp"
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
-
-#include "symbol.hpp"
 
 class ScopeObject;
 using Scope = std::shared_ptr<ScopeObject>;
