@@ -15,6 +15,7 @@
 #include "llvm/IR/Value.h"
 #include <cassert>
 #include <cstdint>
+#include <iostream>
 
 using llvm::Argument;
 using llvm::BasicBlock;
@@ -185,8 +186,11 @@ Value *Codegen::generate(const FnCallExprNode &astNode) {
 }
 
 Value *Codegen::generate(const FnParamNode &astNode) {
-  // hacky hack to pass Type* to caller via Value*
-  return new Argument(toLLVMType(astNode.type, cc->llvmCtxt));
+  llvm::IRBuilder<> TmpB(&getCurrentFunc(cc)->getEntryBlock(),
+                         getCurrentFunc(cc)->getEntryBlock().begin());
+  auto alloca = TmpB.CreateAlloca(toLLVMType(astNode.type, cc->llvmCtxt), nullptr, astNode.name);
+  astNode.symbol->allocaInst = alloca;
+  return alloca;
 }
 
 Value *Codegen::generate(const FnDefNode &astNode) {
@@ -194,21 +198,19 @@ Value *Codegen::generate(const FnDefNode &astNode) {
   auto fnReturnType = toLLVMType(astNode.returnType, cc->llvmCtxt);
 
   std::vector<Type *> fnParamTypes;
-  for (auto &p : astNode.parameters) {
-    if (auto val = p.codegen(this)) {
-      fnParamTypes.push_back(val->getType());
-
-      // After extracting type we don't need a container
-      delete reinterpret_cast<Argument *>(val);
-    } else {
-      fatalCodegenError("unable to generate function parameters", astNode.sourcePos);
-    }
+  for (auto &param : astNode.parameters) {
+    auto type = param.template getObject<FnParamNode>().type;
+    fnParamTypes.push_back(toLLVMType(type, cc->llvmCtxt));
   }
 
   auto fnType = FunctionType::get(fnReturnType, fnParamTypes, false);
   auto fn = Function::Create(fnType, Function::ExternalLinkage, fnName, cc->llvmModule);
   BasicBlock *bb = BasicBlock::Create(cc->llvmCtxt, "entry", fn);
   cc->ir.SetInsertPoint(bb);
+
+  for (auto &arg : fn->args()) {
+    cc->ir.CreateStore(&arg, astNode.parameters[arg.getArgNo()].codegen(this));
+  }
 
   if (!astNode.body.codegen(this)) {
     fatalCodegenError("unable to generate a function body", astNode.sourcePos);

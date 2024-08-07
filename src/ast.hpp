@@ -175,6 +175,7 @@ struct FnParamNode {
   const std::string typeName;
 
   UzType type;
+  Symbol symbol{nullptr};
 
   FnParamNode(const std::string &name, const std::string &typeName, const size_t sourcePos)
       : name(name), typeName(typeName), sourcePos(sourcePos) {}

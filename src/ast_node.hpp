@@ -38,6 +38,7 @@ class AstNode {
     uint64_t getNodeId() const override { return obj.getNodeId(); };
     void setScope(Scope newScope) override { obj.setScope(newScope); };
     Scope &getScope() override { return obj.getScope(); };
+    T getObject() { return obj; };
 
   private:
     T obj;
@@ -58,6 +59,9 @@ public:
   uint64_t getNodeId() const { return ptr->getNodeId(); };
   void setScope(Scope newScope) { ptr->setScope(newScope); };
   Scope &getScope() { return ptr->getScope(); };
+  template <typename T> T getObject() const {
+    return dynamic_cast<Wrapper<T> *>(ptr.get())->getObject();
+  };
 
 private:
   std::shared_ptr<Base> ptr;

@@ -49,8 +49,9 @@ void SemanticAnalyzer::analyze(FnParamNode &astNode) {
     fatalSemaError(std::string("unknown type ") + astNode.typeName, astNode.sourcePos);
   }
 
-  auto symbol = createSymbol(SymbolType::Var, astNode.name, astNode.type, astNode.scope->isGlobal);
-  astNode.scope->insertSymbol(symbol);
+  astNode.symbol =
+      createSymbol(SymbolType::Var, astNode.name, astNode.type, astNode.scope->isGlobal);
+  astNode.scope->insertSymbol(astNode.symbol);
 }
 
 void SemanticAnalyzer::analyze(FnDefNode &astNode) {
