@@ -17,8 +17,8 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Type.h"
 #include "llvm/Support/FileSystem.h"
-#include "llvm/TargetParser/Host.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/TargetParser/Host.h"
 
 namespace fs = std::filesystem;
 
@@ -87,18 +87,12 @@ int main(int argc, char **argv) {
   }
   cc->llvmModule.print(llFile, nullptr);
 
-  auto llcCmd = std::string("llc -filetype=obj ") + llFileName;
-  if (std::system(llcCmd.c_str()) != 0) {
-    std::cerr << "unzig: llc compilation failed" << std::endl;
+  auto compileCmd = std::string("clang -o ") + outputFile + " " + llFileName;
+  if (std::system(compileCmd.c_str()) != 0) {
+    std::cerr << "unzig: compilation failed" << std::endl;
     std::exit(EXIT_FAILURE);
   }
 
-  // linker
-  std::string linkerCmd = std::string("gcc -o ") + outputFile + " " + objFileName;
-  if (std::system(linkerCmd.c_str()) != 0) {
-    std::cerr << "unzig: linking failed" << std::endl;
-    std::exit(EXIT_FAILURE);
-  }
   std::cout << "unzig: compiled " << outputFile << std::endl;
   return EXIT_SUCCESS;
 }
