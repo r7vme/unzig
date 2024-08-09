@@ -2,6 +2,7 @@
 #include "ast.hpp"
 #include "scope.hpp"
 #include "symbol.hpp"
+#include <string>
 
 void SemanticAnalyzer::fatalSemaError(const std::string &msg, const size_t sourcePos) {
   auto hightlightedLine = cc->source->getHightlightedPosition(sourcePos);
@@ -32,7 +33,7 @@ void SemanticAnalyzer::analyze(VarDeclNode &astNode) {
   }
 
   astNode.symbol =
-      createSymbol(SymbolType::Var, astNode.name, astNode.type, astNode.scope->isGlobal);
+      createSymbol(SymbolType::Var, astNode.name, astNode.type, astNode.scope->isGlobal, 0);
   astNode.scope->insertSymbol(astNode.symbol);
   astNode.initExpr.setScope(astNode.scope);
   astNode.initExpr.sema(this);
@@ -50,7 +51,7 @@ void SemanticAnalyzer::analyze(FnParamNode &astNode) {
   }
 
   astNode.symbol =
-      createSymbol(SymbolType::Var, astNode.name, astNode.type, astNode.scope->isGlobal);
+      createSymbol(SymbolType::Var, astNode.name, astNode.type, astNode.scope->isGlobal, 0);
   astNode.scope->insertSymbol(astNode.symbol);
 }
 
@@ -65,8 +66,8 @@ void SemanticAnalyzer::analyze(FnDefNode &astNode) {
     fatalSemaError(std::string("unknown type ") + astNode.returnTypeName, astNode.sourcePos);
   }
 
-  astNode.scope->insertSymbol(
-      createSymbol(SymbolType::Fn, astNode.name, astNode.returnType, astNode.scope->isGlobal));
+  astNode.scope->insertSymbol(createSymbol(SymbolType::Fn, astNode.name, astNode.returnType,
+                                           astNode.scope->isGlobal, astNode.parameters.size()));
 
   // new scope
   auto blockScope = createChildScope(astNode.scope);
@@ -128,6 +129,12 @@ void SemanticAnalyzer::analyze(FnCallExprNode &astNode) {
   auto symbol = astNode.scope->lookupSymbol(astNode.callee);
   if (!symbol || symbol.value()->symbolType != SymbolType::Fn) {
     fatalSemaError("undeclared function", astNode.sourcePos);
+  }
+
+  if (symbol.value()->param_num != astNode.arguments.size()) {
+    fatalSemaError(std::string("wrong number of arguments. Expected ") +
+                       std::to_string(symbol.value()->param_num),
+                   astNode.sourcePos);
   }
 }
 

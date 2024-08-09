@@ -13,8 +13,8 @@ TEST_CASE("test parent scope lookup", "[scope]") {
   auto parent = createChildScope(nullptr);
   auto scope = createChildScope(parent);
 
-  parent->insertSymbol(createSymbol(SymbolType::Var, "s1", type, false));
-  scope->insertSymbol(createSymbol(SymbolType::Var, "s2", type, false));
+  parent->insertSymbol(createSymbol(SymbolType::Var, "s1", type, false, 0));
+  scope->insertSymbol(createSymbol(SymbolType::Var, "s2", type, false, 0));
 
   REQUIRE(scope->lookupSymbol("s1"));
   REQUIRE(scope->lookupSymbol("s2"));
