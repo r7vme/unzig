@@ -2,9 +2,13 @@ fn foo() i32 {
     return 1;
 }
 
+fn bar(a: i32, b: i32) i32 {
+    return a - b;
+}
+
 fn main() i32 {
     // comment
-    var x: i32 = foo(); // comment
+    var x: i32 = foo() + bar(1, 1); // comment
     var y: i32 = 123 + (1 * x);
     y = 1;
     var a: bool = 0;
