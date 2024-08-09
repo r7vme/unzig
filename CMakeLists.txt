@@ -52,6 +52,7 @@ if(BUILD_TESTING)
   unzig_add_test(test_and test/test_and.uz)
   unzig_add_test(test_or test/test_or.uz)
   unzig_add_test(test_args test/test_args.uz)
+  unzig_add_test(test_negative_numbers test/test_negative_numbers.uz)
 endif()
 
 install(TARGETS unzig)

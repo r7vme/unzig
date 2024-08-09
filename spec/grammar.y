@@ -64,7 +64,7 @@ CompareOp
      / LARROWEQUAL
      / RARROWEQUAL
 
-PrefixOp <- EXCLAMATIONMARK
+PrefixOp <- EXCLAMATIONMARK / MINUS
 
 # Tokens
 eof <- !.

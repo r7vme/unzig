@@ -33,7 +33,7 @@
 
 static uint64_t curNodeId{0};
 enum BinOpType { ADD, SUB, MUL, DIV };
-enum PrefixOpType { NOT };
+enum PrefixOpType { NOT, MINUS };
 using MayBeAstNode = std::optional<AstNode>;
 
 struct EmptyNode {

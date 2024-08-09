@@ -32,6 +32,7 @@ Value *createCmpEQToZero(CompilerContext cc, Value *value);
 Value *createCmpNEToZero(CompilerContext cc, Value *value);
 Value *createLogicalNegation(CompilerContext cc, Value *value);
 Value *convertToIfCondition(CompilerContext cc, Value *value);
+Value *createMinusValue(CompilerContext cc, Value *value);
 Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt);
 Function *getCurrentFunc(CompilerContext cc);
 
@@ -87,6 +88,17 @@ Value *createCmpNEToZero(CompilerContext cc, Value *value) {
     return cc->ir.CreateICmpNE(value, ConstantInt::get(type, 0));
   } else if (type->isFloatingPointTy()) {
     return cc->ir.CreateFCmpUNE(value, ConstantFP::get(type, 0.0));
+  }
+  assert(false);
+  return nullptr;
+}
+
+Value *createMinusValue(CompilerContext cc, Value *value) {
+  auto type = value->getType();
+  if (type->isIntegerTy()) {
+    return cc->ir.CreateMul(value, ConstantInt::get(type, -1));
+  } else if (type->isFloatingPointTy()) {
+    return cc->ir.CreateFMul(value, ConstantFP::get(type, -1.0));
   }
   assert(false);
   return nullptr;
@@ -335,6 +347,8 @@ Value *Codegen::generate(const PrefixExprNode &astNode) {
     switch (op) {
     case PrefixOpType::NOT:
       value = createLogicalNegation(cc, value);
+    case PrefixOpType::MINUS:
+      value = createMinusValue(cc, value);
     }
   }
 

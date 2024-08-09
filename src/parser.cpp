@@ -77,6 +77,8 @@ std::optional<PrefixOpType> maybeToPrefixOpType(const Token &token) {
   switch (token.id) {
   case TokenId::ExclamationMark:
     return PrefixOpType::NOT;
+  case TokenId::Minus:
+    return PrefixOpType::MINUS;
   default:
     return std::nullopt;
   }
