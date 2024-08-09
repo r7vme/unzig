@@ -1,8 +1,10 @@
 #include "dotgen.hpp"
-#include "ast.hpp"
+
 #include <iostream>
 #include <sstream>
 #include <string>
+
+#include "ast.hpp"
 
 std::string getNodeId(const AstNode &astNode) { return std::to_string(astNode.getNodeId()); }
 

@@ -1,9 +1,10 @@
 #pragma once
 
-#include "types.hpp"
-#include <llvm/IR/Instructions.h>
 #include <memory>
 #include <string>
+
+#include "types.hpp"
+#include <llvm/IR/Instructions.h>
 
 enum class SymbolType {
   Var,

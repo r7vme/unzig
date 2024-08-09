@@ -1,16 +1,16 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
+#include <string>
+#include <vector>
+
 #include "ast_node.hpp"
 #include "codegen.hpp"
 #include "dotgen.hpp"
 #include "scope.hpp"
 #include "sema.hpp"
 #include "types.hpp"
-#include <cstddef>
-#include <cstdint>
-#include <memory>
-#include <string>
-#include <vector>
 
 #define COMMON_MEMBERS(CLASS)                                                                      \
   size_t sourcePos{0};                                                                             \

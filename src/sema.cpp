@@ -1,8 +1,11 @@
 #include "sema.hpp"
+
+#include <string>
+#include <iostream>
+
 #include "ast.hpp"
 #include "scope.hpp"
 #include "symbol.hpp"
-#include <string>
 
 void SemanticAnalyzer::fatalSemaError(const std::string &msg, const size_t sourcePos) {
   auto hightlightedLine = cc->source->getHightlightedPosition(sourcePos);

@@ -1,4 +1,5 @@
 #include "source.hpp"
+
 #include <stdexcept>
 
 SourceObject::SourceObject(const std::string &rawSource) : rawSource(rawSource) {}

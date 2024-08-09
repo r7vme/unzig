@@ -1,9 +1,9 @@
 #pragma once
 
-#include "source.hpp"
-#include <cstdint>
 #include <string>
 #include <vector>
+
+#include "source.hpp"
 
 enum class TokenId {
   Eof,

@@ -1,13 +1,12 @@
+#include "tokenizer.hpp"
+
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
-#include <iterator>
 #include <map>
 #include <optional>
 #include <string>
 #include <vector>
-
-#include "tokenizer.hpp"
 
 // clang-format off
 // single char tokens

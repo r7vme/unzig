@@ -1,4 +1,5 @@
 #include "context.hpp"
+
 #include "types.hpp"
 
 CompilerContext createCompilerContext(const Source source) {

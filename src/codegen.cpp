@@ -1,4 +1,9 @@
 #include "codegen.hpp"
+
+#include <cassert>
+#include <cstdint>
+#include <iostream>
+
 #include "ast.hpp"
 #include "ast_node.hpp"
 #include "context.hpp"
@@ -13,11 +18,7 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Value.h"
-#include <cassert>
-#include <cstdint>
-#include <iostream>
 
-using llvm::Argument;
 using llvm::BasicBlock;
 using llvm::ConstantFP;
 using llvm::ConstantInt;
