@@ -1,7 +1,7 @@
 #include "sema.hpp"
 
-#include <string>
 #include <iostream>
+#include <string>
 
 #include "ast.hpp"
 #include "scope.hpp"

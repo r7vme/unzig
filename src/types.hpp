@@ -38,10 +38,7 @@ struct TypeTable {
     return std::nullopt;
   }
 
-  void addType(const UzType& type)
-  {
-    table.insert({type->name, type});
-  }
+  void addType(const UzType &type) { table.insert({type->name, type}); }
 };
 
 inline void addBuiltInTypes(TypeTable &t) {
@@ -53,7 +50,7 @@ inline void addBuiltInTypes(TypeTable &t) {
   t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
       .id = UzTypeId::Int,
       .name = "i32",
-      .type = IntParams{32, false},
+      .type = IntParams{32, true},
   }));
   t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
       .id = UzTypeId::Float,

@@ -196,6 +196,9 @@ void DotGenerator::generate(const PrefixExprNode &astNode) {
     case PrefixOpType::NOT:
       operatorsStr += "!";
       break;
+    case PrefixOpType::MINUS:
+      operatorsStr += "-";
+      break;
     }
   }
   const auto text = std::string("PrefixExpr\\n") + operatorsStr;
