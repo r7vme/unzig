@@ -1,17 +1,13 @@
-#include <fstream>
-#include <iostream>
 #include <memory>
-
-#include <catch2/catch_test_macros.hpp>
 #include <vector>
 
 #include "ast.hpp"
 #include "ast_node.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "dotgen.hpp"
 #include "parser.hpp"
 #include "source.hpp"
 #include "tokenizer.hpp"
-#include "types.hpp"
 
 AstNode parseExpr(ParserCtxt &ctxt);
 AstNode parseVarDecl(ParserCtxt &ctxt);
@@ -33,11 +29,11 @@ TEST_CASE("BinOpRhsExpr inverted operation priority", "[parser]") {
 
   auto expectedAST = BinExprNode(
     BinOpType::ADD,
-    IntegerExprNode("1", 0),
+    IntegerExprNode("1", "", 0),
     BinExprNode(
       BinOpType::MUL,
-      IntegerExprNode("2", 0),
-      IntegerExprNode("3", 0), 0
+      IntegerExprNode("2", "", 0),
+      IntegerExprNode("3", "", 0), 0
     ), 0
   );
 
@@ -63,10 +59,10 @@ TEST_CASE("BinOpRhsExpr can be parsed", "[parser]") {
     BinOpType::ADD,
     BinExprNode(
       BinOpType::MUL,
-      IntegerExprNode("1", 0),
-      IntegerExprNode("2", 0), 0
+      IntegerExprNode("1", "", 0),
+      IntegerExprNode("2", "", 0), 0
     ),
-    IntegerExprNode("3", 0), 0
+    IntegerExprNode("3", "", 0), 0
   );
   // clang-format on
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
@@ -90,11 +86,11 @@ TEST_CASE("GroupedExpr can be parsed", "[parser]") {
 
   AstNode expectedAST = BinExprNode(
     BinOpType::MUL,
-    IntegerExprNode("3", 0),
+    IntegerExprNode("3", "", 0),
     BinExprNode(
       BinOpType::ADD,
-      IntegerExprNode("2", 0),
-      IntegerExprNode("1", 0), 0
+      IntegerExprNode("2", "", 0),
+      IntegerExprNode("1", "", 0), 0
     ), 0
   );
   // clang-format on
@@ -114,8 +110,8 @@ TEST_CASE("floating point numbers expr", "[parser]") {
 
   AstNode expectedAST = BinExprNode(
     BinOpType::MUL,
-    FloatExprNode("1.0", 0),
-    FloatExprNode("2.0", 0), 0
+    FloatExprNode("1.0", "", 0),
+    FloatExprNode("2.0", "", 0), 0
   );
   // clang-format on
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
@@ -140,7 +136,7 @@ TEST_CASE("VarDecl can be parsed", "[parser]") {
   AstNode expectedAST = VarDeclNode(
     "y",
     "i32",
-    IntegerExprNode("123", 0), 0
+    IntegerExprNode("123", "", 0), 0
   );
   // clang-format on
 
@@ -192,7 +188,8 @@ TEST_CASE("FnDef with parameters", "[parser]") {
   // clang-format on
   //
   std::vector<AstNode> declarations;
-  declarations.push_back(FnDefNode("main", "void", {FnParamNode("a", "i32", 0)}, BlockNode(std::vector<AstNode>(), 0), 0));
+  declarations.push_back(FnDefNode("main", "void", {FnParamNode("a", "i32", 0)},
+                                   BlockNode(std::vector<AstNode>(), 0), 0));
   auto expectedAST = RootNode(declarations, 0);
 
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
@@ -224,10 +221,10 @@ TEST_CASE("block of statements", "[parser]") {
   };
   // clang-format on
 
-  auto varDecl = VarDeclNode("x", "i32", IntegerExprNode("1", 0), 0);
+  auto varDecl = VarDeclNode("x", "i32", IntegerExprNode("1", "", 0), 0);
   std::vector<AstNode> statements{
       varDecl,
-      ReturnStNode(IntegerExprNode("1", 0), 0),
+      ReturnStNode(IntegerExprNode("1", "", 0), 0),
   };
   auto expectedAST = BlockNode(statements, 0);
 
@@ -249,7 +246,7 @@ TEST_CASE("VarExpr can be parsed", "[parser]") {
   AstNode expectedAST = BinExprNode(
     BinOpType::ADD,
     VarExprNode("x", 0),
-    IntegerExprNode("2", 0), 0
+    IntegerExprNode("2", "",0), 0
     );
   // clang-format on
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
@@ -272,7 +269,7 @@ TEST_CASE("FnCallExpr can be parsed", "[parser]") {
   AstNode expectedAST = BinExprNode(
     BinOpType::ADD,
     FnCallExprNode("f", {}, 0),
-    IntegerExprNode("2", 0), 0
+    IntegerExprNode("2", "", 0), 0
     );
   // clang-format on
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
@@ -293,7 +290,7 @@ TEST_CASE("FnCallExpr with arguments", "[parser]") {
     Token{TokenId::Eof, "", 0}
   };
 
-  AstNode expectedAST = FnCallExprNode("f", {IntegerExprNode("1", 0), IntegerExprNode("2", 0)}, 0);
+  AstNode expectedAST = FnCallExprNode("f", {IntegerExprNode("1", "", 0), IntegerExprNode("2", "", 0)}, 0);
   // clang-format on
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
   auto AST = parseExpr(ctxt);
@@ -311,7 +308,7 @@ TEST_CASE("PrefixExpr", "[parser]") {
 
   AstNode expectedAST = PrefixExprNode(
       {PrefixOpType::NOT},
-      IntegerExprNode("2", 0),
+      IntegerExprNode("2", "", 0),
       0
   );
   // clang-format on
@@ -332,7 +329,7 @@ TEST_CASE("PrefixExpr multiple operators", "[parser]") {
 
   AstNode expectedAST = PrefixExprNode(
       {PrefixOpType::NOT, PrefixOpType::NOT},
-      IntegerExprNode("2", 0),
+      IntegerExprNode("2", "", 0),
       0
   );
   // clang-format on
@@ -351,7 +348,7 @@ TEST_CASE("AndExpr", "[parser]") {
   };
 
   AstNode expectedAST = AndExprNode(
-      {IntegerExprNode("1", 0), IntegerExprNode("1", 0)},
+      {IntegerExprNode("1", "", 0), IntegerExprNode("1", "", 0)},
       0
   );
   // clang-format on
@@ -370,11 +367,75 @@ TEST_CASE("OrExpr", "[parser]") {
   };
 
   AstNode expectedAST = OrExprNode(
-      {IntegerExprNode("1", 0), IntegerExprNode("1", 0)},
+      {IntegerExprNode("1", "", 0), IntegerExprNode("1", "", 0)},
       0
   );
   // clang-format on
   ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
   auto AST = parseExpr(ctxt);
   REQUIRE(AST == expectedAST);
+}
+
+TEST_CASE("parse integer with type", "[parser]") {
+  // 1i32
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::IntegerLiteral, "1", 0},
+    Token{TokenId::Identifier, "i32", 0},
+    Token{TokenId::Eof, "", 0}
+  };
+
+  auto expectedAST = IntegerExprNode("1", "i32", 0);
+
+  // clang-format on
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
+  auto AST = parseExpr(ctxt);
+  REQUIRE(AST);
+  REQUIRE(AST == expectedAST);
+}
+
+TEST_CASE("parse float with type", "[parser]") {
+  // 1.244f32
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::FloatLiteral, "1.244", 0},
+    Token{TokenId::Identifier, "f32", 0},
+    Token{TokenId::Eof, "", 0}
+  };
+
+  auto expectedAST = FloatExprNode("1.244", "f32", 0);
+
+  // clang-format on
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
+  auto AST = parseExpr(ctxt);
+  REQUIRE(AST);
+  REQUIRE(AST == expectedAST);
+}
+
+TEST_CASE("fails to parse unknown integer literal type", "[parser]") {
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::IntegerLiteral, "1", 0},
+    Token{TokenId::Identifier, "i32x", 0},
+    Token{TokenId::Eof, "", 0}
+  };
+
+  // clang-format on
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
+  auto AST = parseExpr(ctxt);
+  REQUIRE_FALSE(AST);
+}
+
+TEST_CASE("fails to parse unknown floating literal type", "[parser]") {
+  // clang-format off
+  Tokens inputTokens = {
+    Token{TokenId::FloatLiteral, "1", 0},
+    Token{TokenId::Identifier, "xf32", 0},
+    Token{TokenId::Eof, "", 0}
+  };
+
+  // clang-format on
+  ParserCtxt ctxt(inputTokens, std::make_shared<SourceObject>(std::string("")));
+  auto AST = parseExpr(ctxt);
+  REQUIRE_FALSE(AST);
 }

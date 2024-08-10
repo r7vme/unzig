@@ -128,7 +128,7 @@ Value *Codegen::generate(const IntegerExprNode &astNode) {
 }
 
 Value *Codegen::generate(const BoolExprNode &astNode) {
-  return ConstantInt::get(Type::getInt32Ty(cc->llvmCtxt), (astNode.value) ? 1 : 0);
+  return ConstantInt::getBool(cc->llvmCtxt, astNode.value);
 }
 
 Value *Codegen::generate(const BinExprNode &astNode) {

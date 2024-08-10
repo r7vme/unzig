@@ -189,11 +189,51 @@ TEST_CASE("function arguments", "[tokenizer]") {
 )";
   auto s = std::make_shared<SourceObject>(raw);
   Tokens expectedTokens = {
+      Token{TokenId::IntegerLiteral, "1", 0}, Token{TokenId::Comma, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0}, Token{TokenId::Comma, "", 0},
+      Token{TokenId::IntegerLiteral, "1", 0}, Token{TokenId::Eof, "", 0},
+  };
+  auto actualTokens = tokenize(s);
+  REQUIRE(actualTokens == expectedTokens);
+}
+
+TEST_CASE("number types", "[tokenizer]") {
+  std::string raw = R"(
+-1i8
+2i16
+3i32
+4i64
+1u8
+2u16
+3u32
+4u64
+-1.0f32
+2.444f64
+)";
+  auto s = std::make_shared<SourceObject>(raw);
+  Tokens expectedTokens = {
+      Token{TokenId::Minus, "", 0},
       Token{TokenId::IntegerLiteral, "1", 0},
-      Token{TokenId::Comma, "", 0},
+      Token{TokenId::Identifier, "i8", 0},
+      Token{TokenId::IntegerLiteral, "2", 0},
+      Token{TokenId::Identifier, "i16", 0},
+      Token{TokenId::IntegerLiteral, "3", 0},
+      Token{TokenId::Identifier, "i32", 0},
+      Token{TokenId::IntegerLiteral, "4", 0},
+      Token{TokenId::Identifier, "i64", 0},
       Token{TokenId::IntegerLiteral, "1", 0},
-      Token{TokenId::Comma, "", 0},
-      Token{TokenId::IntegerLiteral, "1", 0},
+      Token{TokenId::Identifier, "u8", 0},
+      Token{TokenId::IntegerLiteral, "2", 0},
+      Token{TokenId::Identifier, "u16", 0},
+      Token{TokenId::IntegerLiteral, "3", 0},
+      Token{TokenId::Identifier, "u32", 0},
+      Token{TokenId::IntegerLiteral, "4", 0},
+      Token{TokenId::Identifier, "u64", 0},
+      Token{TokenId::Minus, "", 0},
+      Token{TokenId::FloatLiteral, "1.0", 0},
+      Token{TokenId::Identifier, "f32", 0},
+      Token{TokenId::FloatLiteral, "2.444", 0},
+      Token{TokenId::Identifier, "f64", 0},
       Token{TokenId::Eof, "", 0},
   };
   auto actualTokens = tokenize(s);

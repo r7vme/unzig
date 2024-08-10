@@ -168,7 +168,31 @@ void SemanticAnalyzer::analyze(AndExprNode &astNode) {
   }
 }
 
-void SemanticAnalyzer::analyze(FloatExprNode &astNode) {}
-void SemanticAnalyzer::analyze(IntegerExprNode &astNode) {}
+void SemanticAnalyzer::analyze(FloatExprNode &astNode) {
+  auto typeName = astNode.typeName;
+  if (typeName == "") {
+    typeName = "f32";
+  }
+
+  if (auto type = cc->typeTable.findType(typeName)) {
+    astNode.type = type.value();
+  } else {
+    fatalSemaError(std::string("unknown type ") + astNode.typeName, astNode.sourcePos);
+  }
+}
+
+void SemanticAnalyzer::analyze(IntegerExprNode &astNode) {
+  auto typeName = astNode.typeName;
+  if (typeName == "") {
+    typeName = "i32";
+  }
+
+  if (auto type = cc->typeTable.findType(typeName)) {
+    astNode.type = type.value();
+  } else {
+    fatalSemaError(std::string("unknown type ") + astNode.typeName, astNode.sourcePos);
+  }
+}
+
 void SemanticAnalyzer::analyze(BoolExprNode &astNode) {}
 void SemanticAnalyzer::analyze(EmptyNode &astNode) {}

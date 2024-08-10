@@ -49,12 +49,42 @@ inline void addBuiltInTypes(TypeTable &t) {
   }));
   t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
       .id = UzTypeId::Int,
+      .name = "i8",
+      .type = IntParams{8, true},
+  }));
+  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
+      .id = UzTypeId::Int,
+      .name = "i16",
+      .type = IntParams{16, true},
+  }));
+  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
+      .id = UzTypeId::Int,
       .name = "i32",
       .type = IntParams{32, true},
+  }));
+  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
+      .id = UzTypeId::Int,
+      .name = "u8",
+      .type = IntParams{8, false},
+  }));
+  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
+      .id = UzTypeId::Int,
+      .name = "u16",
+      .type = IntParams{16, false},
+  }));
+  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
+      .id = UzTypeId::Int,
+      .name = "u32",
+      .type = IntParams{32, false},
   }));
   t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
       .id = UzTypeId::Float,
       .name = "f32",
       .type = FloatParams{32},
+  }));
+  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
+      .id = UzTypeId::Float,
+      .name = "f64",
+      .type = FloatParams{64},
   }));
 }

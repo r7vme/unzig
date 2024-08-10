@@ -9,7 +9,7 @@ fn bar(a: i32, b: i32) i32 {
 fn main() i32 {
     // comment
     var x: i32 = foo() + bar(1, 1); // comment
-    var y: i32 = 123 + (1 * x);
+    var y: i32 = 123i32 + (1 * x);
     y = 1;
     var a: bool = 0;
     var b: bool = true;

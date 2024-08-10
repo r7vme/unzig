@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <optional>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -101,16 +102,66 @@ AstNode parseBoolExpr(ParserCtxt &ctxt) {
   assert(false);
 }
 
+// FLOAT <- dec_int "." dec_int TypeExpr? skip
+AstNode parseFLOAT(ParserCtxt &ctxt) {
+  const auto mark = ctxt.getCursor();
+
+  auto token = ctxt.getTokenAndAdvance();
+  if (token.id != TokenId::FloatLiteral) {
+    return resetToken(ctxt, mark);
+  }
+
+  std::string typeName = "";
+  auto tokenTypeExpr = ctxt.getToken();
+  if (tokenTypeExpr.id == TokenId::Identifier) {
+    const std::set<std::string> integerTypes = {"f32", "f64"};
+    auto found = integerTypes.find(tokenTypeExpr.value) != integerTypes.end();
+    if (found) {
+      typeName = tokenTypeExpr.value;
+      ctxt.skipToken();
+    } else {
+      return resetToken(ctxt, mark);
+    }
+  }
+
+  return FloatExprNode(token.value, typeName, token.position);
+}
+
+// INTEGER <- dec_int TypeExpr? skip
+AstNode parseINTEGER(ParserCtxt &ctxt) {
+  const auto mark = ctxt.getCursor();
+
+  auto token = ctxt.getTokenAndAdvance();
+  if (token.id != TokenId::IntegerLiteral) {
+    return resetToken(ctxt, mark);
+  }
+
+  std::string typeName = "";
+  auto tokenTypeExpr = ctxt.getToken();
+  if (tokenTypeExpr.id == TokenId::Identifier) {
+    const std::set<std::string> integerTypes = {"i8", "i16", "i32", "i64"};
+    auto found = integerTypes.find(tokenTypeExpr.value) != integerTypes.end();
+    if (found) {
+      typeName = tokenTypeExpr.value;
+      ctxt.skipToken();
+    } else {
+      return resetToken(ctxt, mark);
+    }
+  }
+
+  return IntegerExprNode(token.value, typeName, token.position);
+}
+
 // NumberExpr <- FLOAT / INTEGER
 AstNode parseNumberExpr(ParserCtxt &ctxt) {
   const auto mark = ctxt.getCursor();
 
-  auto token = ctxt.getTokenAndAdvance();
+  auto token = ctxt.getToken();
   switch (token.id) {
   case (TokenId::IntegerLiteral):
-    return IntegerExprNode(token.value, token.position);
+    return parseINTEGER(ctxt);
   case (TokenId::FloatLiteral):
-    return FloatExprNode(token.value, token.position);
+    return parseFLOAT(ctxt);
   default:
     return resetToken(ctxt, mark);
   }

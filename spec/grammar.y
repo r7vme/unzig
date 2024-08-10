@@ -75,8 +75,8 @@ dec_int <- dec*
 comment <- '//' [^\n]*
 skip <- ([ \n] / comment)*
 
-FLOAT <- dec_int "." dec_int skip
-INTEGER <- dec_int skip
+FLOAT <- dec_int "." dec_int TypeExpr? skip
+INTEGER <- dec_int TypeExpr? skip
 IDENTIFIER
     <- !keyword [A-Za-z_] [A-Za-z0-9_]* skip
 

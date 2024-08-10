@@ -6,9 +6,13 @@ bool PrefixExprNode::isEqual(const PrefixExprNode &other) const {
 
 bool BoolExprNode::isEqual(const BoolExprNode &other) const { return value == other.value; }
 
-bool IntegerExprNode::isEqual(const IntegerExprNode &other) const { return value == other.value; }
+bool IntegerExprNode::isEqual(const IntegerExprNode &other) const {
+  return value == other.value && typeName == other.typeName;
+}
 
-bool FloatExprNode::isEqual(const FloatExprNode &other) const { return value == other.value; }
+bool FloatExprNode::isEqual(const FloatExprNode &other) const {
+  return value == other.value && typeName == other.typeName;
+}
 
 bool BinExprNode::isEqual(const BinExprNode &other) const {
   return type == other.type && lhs == other.lhs && rhs == other.rhs;

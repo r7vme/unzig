@@ -52,17 +52,23 @@ struct VarExprNode {
 
 struct FloatExprNode {
   const std::string value;
+  const std::string typeName;
 
-  FloatExprNode(const std::string &value, const size_t sourcePos)
-      : value(value), sourcePos(sourcePos) {}
+  UzType type;
+
+  FloatExprNode(const std::string &value, const std::string &typeName, const size_t sourcePos)
+      : value(value), typeName(typeName), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(FloatExprNode)
 };
 
 struct IntegerExprNode {
   const std::string value;
+  const std::string typeName;
 
-  IntegerExprNode(const std::string &value, const size_t sourcePos)
-      : value(value), sourcePos(sourcePos) {}
+  UzType type;
+
+  IntegerExprNode(const std::string &value, const std::string &typeName, const size_t sourcePos)
+      : value(value), typeName(typeName), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(IntegerExprNode)
 };
 
