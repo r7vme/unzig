@@ -7,6 +7,7 @@
 #include "dotgen.hpp"
 #include "scope.hpp"
 #include "sema.hpp"
+#include "types.hpp"
 
 // Inspired by https://www.foonathan.net/2020/01/type-erasure/
 // use std::shared_ptr to prevent copies
@@ -22,6 +23,7 @@ class AstNode {
     virtual uint64_t getNodeId() const = 0;
     virtual void setScope(Scope newScope) = 0;
     virtual Scope &getScope() = 0;
+    virtual UzTypePtr getDataType() const = 0;
   };
 
   template <typename T> class Wrapper final : public Base {
@@ -38,6 +40,7 @@ class AstNode {
     uint64_t getNodeId() const override { return obj.getNodeId(); };
     void setScope(Scope newScope) override { obj.setScope(newScope); };
     Scope &getScope() override { return obj.getScope(); };
+    UzTypePtr getDataType() const override { return obj.getDataType(); };
     T getObject() { return obj; };
 
   private:
@@ -59,6 +62,7 @@ public:
   uint64_t getNodeId() const { return ptr->getNodeId(); };
   void setScope(Scope newScope) { ptr->setScope(newScope); };
   Scope &getScope() { return ptr->getScope(); };
+  UzTypePtr getDataType() const { return ptr->getDataType(); };
   template <typename T> T getObject() const {
     return dynamic_cast<Wrapper<T> *>(ptr.get())->getObject();
   };

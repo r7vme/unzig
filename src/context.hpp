@@ -16,9 +16,11 @@ struct CompilerContextObject {
   llvm::IRBuilder<> ir;
 
   Source source;
-  TypeTable typeTable;
+  TypeTable *typeTable;
 
-  CompilerContextObject() : llvmCtxt(), llvmModule("unzig", llvmCtxt), ir(llvmCtxt) {}
+  CompilerContextObject()
+      : llvmCtxt(), llvmModule("unzig", llvmCtxt), ir(llvmCtxt),
+        typeTable(&TypeTable::getInstance()) {}
 };
 
 using CompilerContext = std::shared_ptr<CompilerContextObject>;

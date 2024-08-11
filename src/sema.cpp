@@ -1,11 +1,13 @@
 #include "sema.hpp"
 
+#include <cassert>
 #include <iostream>
 #include <string>
 
 #include "ast.hpp"
 #include "scope.hpp"
 #include "symbol.hpp"
+#include "types.hpp"
 
 void SemanticAnalyzer::fatalSemaError(const std::string &msg, const size_t sourcePos) {
   auto hightlightedLine = cc->source->getHightlightedPosition(sourcePos);
@@ -29,14 +31,14 @@ void SemanticAnalyzer::analyze(VarDeclNode &astNode) {
     fatalSemaError("redifinition of the symbol", astNode.sourcePos);
   }
 
-  if (auto type = cc->typeTable.findType(astNode.typeName)) {
-    astNode.type = type.value();
+  if (auto type = cc->typeTable->findType(astNode.typeName)) {
+    astNode.dataType = type;
   } else {
     fatalSemaError(std::string("unknown type ") + astNode.typeName, astNode.sourcePos);
   }
 
   astNode.symbol =
-      createSymbol(SymbolType::Var, astNode.name, astNode.type, astNode.scope->isGlobal, 0);
+      createSymbol(SymbolType::Var, astNode.name, astNode.dataType, astNode.scope->isGlobal, 0);
   astNode.scope->insertSymbol(astNode.symbol);
   astNode.initExpr.setScope(astNode.scope);
   astNode.initExpr.sema(this);
@@ -47,14 +49,14 @@ void SemanticAnalyzer::analyze(FnParamNode &astNode) {
     fatalSemaError("redifinition of the symbol", astNode.sourcePos);
   }
 
-  if (auto type = cc->typeTable.findType(astNode.typeName)) {
-    astNode.type = type.value();
+  if (auto type = cc->typeTable->findType(astNode.typeName)) {
+    astNode.dataType = type;
   } else {
     fatalSemaError(std::string("unknown type ") + astNode.typeName, astNode.sourcePos);
   }
 
   astNode.symbol =
-      createSymbol(SymbolType::Var, astNode.name, astNode.type, astNode.scope->isGlobal, 0);
+      createSymbol(SymbolType::Var, astNode.name, astNode.dataType, astNode.scope->isGlobal, 0);
   astNode.scope->insertSymbol(astNode.symbol);
 }
 
@@ -63,8 +65,8 @@ void SemanticAnalyzer::analyze(FnDefNode &astNode) {
     fatalSemaError("redifinition of the symbol", astNode.sourcePos);
   }
 
-  if (auto type = cc->typeTable.findType(astNode.returnTypeName)) {
-    astNode.returnType = type.value();
+  if (auto type = cc->typeTable->findType(astNode.returnTypeName)) {
+    astNode.returnType = type;
   } else {
     fatalSemaError(std::string("unknown type ") + astNode.returnTypeName, astNode.sourcePos);
   }
@@ -139,14 +141,23 @@ void SemanticAnalyzer::analyze(FnCallExprNode &astNode) {
                        std::to_string(symbol.value()->param_num),
                    astNode.sourcePos);
   }
+
+  astNode.calleeSymbol = symbol.value();
 }
 
 void SemanticAnalyzer::analyze(BinExprNode &astNode) {
   astNode.lhs.setScope(astNode.scope);
   astNode.lhs.sema(this);
-
   astNode.rhs.setScope(astNode.scope);
   astNode.rhs.sema(this);
+
+  assert(astNode.lhs.getDataType());
+  assert(astNode.rhs.getDataType());
+
+  if (astNode.lhs.getDataType() != astNode.rhs.getDataType()) {
+    fatalSemaError("types must be the same", astNode.sourcePos);
+  }
+  astNode.dataType = astNode.lhs.getDataType();
 }
 
 void SemanticAnalyzer::analyze(PrefixExprNode &astNode) {
@@ -174,8 +185,8 @@ void SemanticAnalyzer::analyze(FloatExprNode &astNode) {
     typeName = "f32";
   }
 
-  if (auto type = cc->typeTable.findType(typeName)) {
-    astNode.type = type.value();
+  if (auto type = cc->typeTable->findType(typeName)) {
+    astNode.dataType = type;
   } else {
     fatalSemaError(std::string("unknown type ") + astNode.typeName, astNode.sourcePos);
   }
@@ -187,8 +198,8 @@ void SemanticAnalyzer::analyze(IntegerExprNode &astNode) {
     typeName = "i32";
   }
 
-  if (auto type = cc->typeTable.findType(typeName)) {
-    astNode.type = type.value();
+  if (auto type = cc->typeTable->findType(typeName)) {
+    astNode.dataType = type;
   } else {
     fatalSemaError(std::string("unknown type ") + astNode.typeName, astNode.sourcePos);
   }

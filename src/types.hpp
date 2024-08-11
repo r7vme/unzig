@@ -1,90 +1,70 @@
 #pragma once
 
+#include <cassert>
 #include <memory>
-#include <optional>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
-#include <variant>
 
-enum class UzTypeId { Void, Int, Float, INVALID };
+enum class UzTypeId { VOID, I8, I16, I32, U8, U16, U32, F32, INVALID };
 
-struct IntParams {
-  uint32_t bitNum;
-  bool isSigned;
-};
-
-struct FloatParams {
-  uint32_t bitNum;
-};
-
-using TypeParams = std::variant<IntParams, FloatParams>;
-
-struct UzTypeObject {
+struct UzType {
   UzTypeId id{UzTypeId::INVALID};
-  std::string name;
-  TypeParams type;
+  // XXX: placeholder for future complex types
 };
 
-using UzType = std::shared_ptr<UzTypeObject>;
+using UzTypePtr = std::shared_ptr<const UzType>;
 
-struct TypeTable {
-  std::unordered_map<std::string, UzType> table;
+inline bool operator==(const UzTypePtr &lhs, const UzTypePtr &rhs) {
+  return lhs.get() == rhs.get();
+}
 
-  std::optional<UzType> findType(const std::string &name) {
-    auto it = table.find(name);
-    if (it != table.end()) {
-      return it->second;
-    }
-    return std::nullopt;
+inline bool isFloatType(const UzTypePtr type) {
+  assert(type);
+  return type->id == UzTypeId::F32;
+}
+
+inline bool isIntegerType(const UzTypePtr type) {
+  assert(type);
+  return type->id == UzTypeId::F32;
+}
+
+class TypeTable {
+protected:
+  TypeTable() {
+    addType("bool", UzType{.id = UzTypeId::I32});
+    addType("i8", UzType{.id = UzTypeId::I8});
+    addType("i16", UzType{.id = UzTypeId::I16});
+    addType("i32", UzType{.id = UzTypeId::I32});
+    addType("u8", UzType{.id = UzTypeId::U8});
+    addType("u16", UzType{.id = UzTypeId::U16});
+    addType("u32", UzType{.id = UzTypeId::U32});
+    addType("f32", UzType{.id = UzTypeId::F32});
   }
 
-  void addType(const UzType &type) { table.insert({type->name, type}); }
-};
+public:
+  TypeTable(const TypeTable &) = delete;
+  TypeTable &operator=(const TypeTable &) = delete;
 
-inline void addBuiltInTypes(TypeTable &t) {
-  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
-      .id = UzTypeId::Int,
-      .name = "bool",
-      .type = IntParams{32, false},
-  }));
-  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
-      .id = UzTypeId::Int,
-      .name = "i8",
-      .type = IntParams{8, true},
-  }));
-  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
-      .id = UzTypeId::Int,
-      .name = "i16",
-      .type = IntParams{16, true},
-  }));
-  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
-      .id = UzTypeId::Int,
-      .name = "i32",
-      .type = IntParams{32, true},
-  }));
-  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
-      .id = UzTypeId::Int,
-      .name = "u8",
-      .type = IntParams{8, false},
-  }));
-  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
-      .id = UzTypeId::Int,
-      .name = "u16",
-      .type = IntParams{16, false},
-  }));
-  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
-      .id = UzTypeId::Int,
-      .name = "u32",
-      .type = IntParams{32, false},
-  }));
-  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
-      .id = UzTypeId::Float,
-      .name = "f32",
-      .type = FloatParams{32},
-  }));
-  t.addType(std::make_shared<UzTypeObject>(UzTypeObject{
-      .id = UzTypeId::Float,
-      .name = "f64",
-      .type = FloatParams{64},
-  }));
-}
+  static TypeTable &getInstance() {
+    static TypeTable typeTable;
+    return typeTable;
+  }
+
+  UzTypePtr findType(const std::string &name) const {
+    auto it = table_.find(name);
+    if (it != table_.end()) {
+      return it->second;
+    }
+    return nullptr;
+  }
+
+  void addType(const std::string &name, const UzType &type) {
+    if (!table_.insert({name, std::make_shared<UzType>(type)}).second) {
+      throw std::runtime_error(std::string("type with the name ") + name + " already exists");
+    }
+  }
+
+private:
+  std::unordered_map<std::string, UzTypePtr> table_;
+};

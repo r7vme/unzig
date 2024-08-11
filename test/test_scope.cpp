@@ -1,15 +1,13 @@
-#include <catch2/catch_test_macros.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 #include "scope.hpp"
 #include "symbol.hpp"
 #include "types.hpp"
 
 TEST_CASE("test parent scope lookup", "[scope]") {
-  UzType type = std::make_shared<UzTypeObject>(UzTypeObject{
-      .id = UzTypeId::Int,
-      .name = "i32",
-      .type = IntParams{32, false},
-      });
+  UzTypePtr type = std::make_shared<UzType>(UzType{
+      .id = UzTypeId::I32,
+  });
   auto parent = createChildScope(nullptr);
   auto scope = createChildScope(parent);
 

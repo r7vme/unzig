@@ -42,6 +42,7 @@ if(BUILD_TESTING)
     test/test_scope.cpp
     test/test_dotgen.cpp
     test/test_source.cpp
+    test/test_types.cpp
   )
   target_link_libraries(unit_tests PRIVATE unzig_lib Catch2::Catch2WithMain)
   catch_discover_tests(unit_tests)

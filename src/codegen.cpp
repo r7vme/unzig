@@ -33,42 +33,29 @@ Value *createCmpNEToZero(CompilerContext cc, Value *value);
 Value *createLogicalNegation(CompilerContext cc, Value *value);
 Value *convertToIfCondition(CompilerContext cc, Value *value);
 Value *createMinusValue(CompilerContext cc, Value *value);
-Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt);
+Type *toLLVMType(const UzTypePtr &uzType, LLVMContext &ctxt);
 Function *getCurrentFunc(CompilerContext cc);
 
 Function *getCurrentFunc(CompilerContext cc) { return cc->ir.GetInsertBlock()->getParent(); }
 
-Type *toLLVMType(const UzType &uzType, LLVMContext &ctxt) {
-  if (uzType->id == UzTypeId::Void) {
+Type *toLLVMType(const UzTypePtr &uzType, LLVMContext &ctxt) {
+  switch (uzType->id) {
+  case UzTypeId::VOID:
     return Type::getVoidTy(ctxt);
-  } else if (uzType->id == UzTypeId::Int) {
-    auto type = std::get<IntParams>(uzType->type);
-    switch (type.bitNum) {
-    case 64:
-      return Type::getInt64Ty(ctxt);
-    case 32:
-      return Type::getInt32Ty(ctxt);
-    case 16:
-      return Type::getInt16Ty(ctxt);
-    case 8:
-      return Type::getInt8Ty(ctxt);
-    default:
-      assert(false);
-    }
-  } else if (uzType->id == UzTypeId::Float) {
-    auto type = std::get<FloatParams>(uzType->type);
-    switch (type.bitNum) {
-    case 64:
-      return Type::getDoubleTy(ctxt);
-    case 32:
-      return Type::getFloatTy(ctxt);
-    case 16:
-      return Type::getHalfTy(ctxt);
-    default:
-      assert(false);
-    }
+  case UzTypeId::I8:
+  case UzTypeId::U8:
+    return Type::getInt8Ty(ctxt);
+  case UzTypeId::I16:
+  case UzTypeId::U16:
+    return Type::getInt16Ty(ctxt);
+  case UzTypeId::I32:
+  case UzTypeId::U32:
+    return Type::getInt32Ty(ctxt);
+  case UzTypeId::F32:
+    return Type::getFloatTy(ctxt);
+  default:
+    assert(false);
   }
-  assert(false);
 }
 
 Value *createCmpEQToZero(CompilerContext cc, Value *value) {
@@ -132,11 +119,20 @@ Value *Codegen::generate(const BoolExprNode &astNode) {
 }
 
 Value *Codegen::generate(const BinExprNode &astNode) {
+  assert(astNode.dataType);
+
   auto l = astNode.lhs.codegen(this);
   auto r = astNode.rhs.codegen(this);
   if (!l || !r) {
     return nullptr;
   }
+
+  const auto opType = astNode.type;
+  auto llvmType = toLLVMType(astNode.dataType, cc->llvmCtxt);
+  bool isFloatType = llvmType->isFloatingPointTy();
+  bool isIntegerType = llvmType->isIntegerTy();
+
+  // TODO
 
   switch (astNode.type) {
   case BinOpType::ADD:
@@ -154,7 +150,7 @@ Value *Codegen::generate(const BinExprNode &astNode) {
 
 Value *Codegen::generate(const VarDeclNode &astNode) {
   // TODO: global variables
-  auto llvmType = toLLVMType(astNode.type, cc->llvmCtxt);
+  auto llvmType = toLLVMType(astNode.dataType, cc->llvmCtxt);
   auto initValue = astNode.initExpr.codegen(this);
   if (!initValue) {
     fatalCodegenError("variable must be initialized", astNode.sourcePos);
@@ -201,7 +197,8 @@ Value *Codegen::generate(const FnCallExprNode &astNode) {
 Value *Codegen::generate(const FnParamNode &astNode) {
   llvm::IRBuilder<> TmpB(&getCurrentFunc(cc)->getEntryBlock(),
                          getCurrentFunc(cc)->getEntryBlock().begin());
-  auto alloca = TmpB.CreateAlloca(toLLVMType(astNode.type, cc->llvmCtxt), nullptr, astNode.name);
+  auto alloca =
+      TmpB.CreateAlloca(toLLVMType(astNode.dataType, cc->llvmCtxt), nullptr, astNode.name);
   astNode.symbol->allocaInst = alloca;
   return alloca;
 }
@@ -212,7 +209,7 @@ Value *Codegen::generate(const FnDefNode &astNode) {
 
   std::vector<Type *> fnParamTypes;
   for (auto &param : astNode.parameters) {
-    auto type = param.template getObject<FnParamNode>().type;
+    auto type = param.template getObject<FnParamNode>().dataType;
     fnParamTypes.push_back(toLLVMType(type, cc->llvmCtxt));
   }
 
