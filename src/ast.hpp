@@ -124,11 +124,13 @@ struct PrefixExprNode {
   std::vector<PrefixOpType> operators;
   AstNode expr;
 
+  UzTypePtr dataType;
+
   PrefixExprNode(const std::vector<PrefixOpType> operators, const AstNode expr,
                  const size_t sourcePos)
       : operators(operators), expr(expr), sourcePos(sourcePos) {}
   AST_NODE_MEMBERS(PrefixExprNode)
-  GET_DATA_TYPE_EMPTY
+  GET_DATA_TYPE
 };
 
 struct AssignStNode {

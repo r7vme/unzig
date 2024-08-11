@@ -1,0 +1,5 @@
+fn main() i32 {
+  var x: u32 = 16u32;
+  var y: u32 = 2u32;
+  return x / y - 8u32;
+}

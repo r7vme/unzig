@@ -19,14 +19,9 @@ inline bool operator==(const UzTypePtr &lhs, const UzTypePtr &rhs) {
   return lhs.get() == rhs.get();
 }
 
-inline bool isFloatType(const UzTypePtr type) {
+inline bool isUnsignedInteger(const UzTypePtr type) {
   assert(type);
-  return type->id == UzTypeId::F32;
-}
-
-inline bool isIntegerType(const UzTypePtr type) {
-  assert(type);
-  return type->id == UzTypeId::F32;
+  return type->id == UzTypeId::U8 || type->id == UzTypeId::U16 || type->id == UzTypeId::U32;
 }
 
 class TypeTable {

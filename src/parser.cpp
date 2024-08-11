@@ -139,7 +139,7 @@ AstNode parseINTEGER(ParserCtxt &ctxt) {
   std::string typeName = "";
   auto tokenTypeExpr = ctxt.getToken();
   if (tokenTypeExpr.id == TokenId::Identifier) {
-    const std::set<std::string> integerTypes = {"i8", "i16", "i32", "i64"};
+    const std::set<std::string> integerTypes = {"i8", "i16", "i32", "u8", "u16", "u32"};
     auto found = integerTypes.find(tokenTypeExpr.value) != integerTypes.end();
     if (found) {
       typeName = tokenTypeExpr.value;

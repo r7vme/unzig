@@ -42,6 +42,10 @@ void SemanticAnalyzer::analyze(VarDeclNode &astNode) {
   astNode.scope->insertSymbol(astNode.symbol);
   astNode.initExpr.setScope(astNode.scope);
   astNode.initExpr.sema(this);
+
+  if (astNode.initExpr.getDataType() != astNode.dataType) {
+    fatalSemaError("wrong type", astNode.sourcePos);
+  }
 }
 
 void SemanticAnalyzer::analyze(FnParamNode &astNode) {
@@ -163,6 +167,7 @@ void SemanticAnalyzer::analyze(BinExprNode &astNode) {
 void SemanticAnalyzer::analyze(PrefixExprNode &astNode) {
   astNode.expr.setScope(astNode.scope);
   astNode.expr.sema(this);
+  astNode.dataType = astNode.expr.getDataType();
 }
 
 void SemanticAnalyzer::analyze(OrExprNode &astNode) {

@@ -127,24 +127,33 @@ Value *Codegen::generate(const BinExprNode &astNode) {
     return nullptr;
   }
 
-  const auto opType = astNode.type;
   auto llvmType = toLLVMType(astNode.dataType, cc->llvmCtxt);
-  bool isFloatType = llvmType->isFloatingPointTy();
-  bool isIntegerType = llvmType->isIntegerTy();
-
-  // TODO
-
-  switch (astNode.type) {
-  case BinOpType::ADD:
-    return cc->ir.CreateAdd(l, r);
-  case BinOpType::SUB:
-    return cc->ir.CreateSub(l, r);
-  case BinOpType::MUL:
-    return cc->ir.CreateMul(l, r);
-  case BinOpType::DIV:
-    return cc->ir.CreateSDiv(l, r);
+  if (llvmType->isFloatingPointTy()) {
+    switch (astNode.type) {
+    case BinOpType::ADD:
+      return cc->ir.CreateFAdd(l, r);
+    case BinOpType::SUB:
+      return cc->ir.CreateFSub(l, r);
+    case BinOpType::MUL:
+      return cc->ir.CreateFMul(l, r);
+    case BinOpType::DIV:
+      return cc->ir.CreateFDiv(l, r);
+    }
+  } else if (llvmType->isIntegerTy()) {
+    switch (astNode.type) {
+    case BinOpType::ADD:
+      return cc->ir.CreateAdd(l, r);
+    case BinOpType::SUB:
+      return cc->ir.CreateSub(l, r);
+    case BinOpType::MUL:
+      return cc->ir.CreateMul(l, r);
+    case BinOpType::DIV:
+      return isUnsignedInteger(astNode.dataType) ? cc->ir.CreateUDiv(l, r)
+                                                 : cc->ir.CreateSDiv(l, r);
+    }
+  } else {
+    assert(false);
   }
-
   return nullptr;
 };
 
